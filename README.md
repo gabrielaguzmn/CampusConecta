@@ -187,6 +187,25 @@ En Windows es igual, con `python` en vez de `.venv/bin/python`.
 
 Todos los correos (recuperación, ocultamiento de un evento, suspensión de una cuenta) aparecen en la terminal del backend mientras `DJANGO_DEBUG=1`.
 
+### Después de la primera vez: uso diario
+
+La instalación (secciones 2 o 3) y los pasos de arriba se hacen **una sola vez**. A partir de ahí, para usar la app basta con arrancar las dos partes, cada una en su terminal, y abrir <http://localhost:5173>:
+
+```bash
+# Terminal 1 (backend)                          # Windows: activa .venv, carga el .env con la línea de la sección 3.2
+cd backend
+set -a; source .env; set +a
+.venv/bin/python manage.py runserver            # Windows: python manage.py runserver
+
+# Terminal 2 (frontend)
+cd frontend
+npm run dev
+```
+
+Después de un `git pull`, si llegaron cambios:
+- **Migraciones nuevas** (archivos en `*/migrations/`): `manage.py migrate`.
+- **Cambios en `requirements.txt` o `package.json`:** `pip install -r requirements.txt` o `npm install`.
+
 ---
 
 ## 5. Base de datos compartida del equipo (Supabase)
