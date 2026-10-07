@@ -24,7 +24,9 @@ El **contrato** entre ambas es `backend/openapi.yaml`. Lo genera el backend y el
 
 ---
 
-## 2. Cómo correr la aplicación en Linux
+## 2. Primera vez en Linux: instalar y configurar
+
+Esta sección se hace **una sola vez** por computador. Después, para usar la app, ve directamente a la [sección 4](#4-correr-la-app-cada-vez).
 
 ### 2.1 Base de datos
 
@@ -41,48 +43,80 @@ sudo -u postgres createdb -O campus campusconecta
 
 El permiso `CREATEDB` hace falta para ejecutar las pruebas, porque Django crea una base de datos temporal `test_campusconecta`.
 
-### 2.2 Backend (terminal 1)
+### 2.2 Backend
 
 ```bash
 cd backend
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
+python3 -m venv .venv                           # entorno virtual de Python
+.venv/bin/pip install -r requirements.txt       # dependencias
+cp .env.example .env                            # tu archivo de configuración (no se sube a git)
+```
 
-cp .env.example .env
-# Genera una clave secreta y pégala en DJANGO_SECRET_KEY dentro de .env:
+**Clave secreta.** Django necesita una clave aleatoria propia para firmar las sesiones y los enlaces de recuperación. Se genera **una sola vez**:
+
+```bash
 python3 -c "import secrets; print(secrets.token_urlsafe(50))"
 ```
 
-Edita `backend/.env` (para usar la base compartida del equipo, ver la sección 5):
+Copia el resultado en `backend/.env`: `DJANGO_SECRET_KEY=<lo que salió>`. No se comparte ni se sube a git. Solo habría que generar otra si pierdes el `.env` o si la clave se filtra.
 
-- Deja `DB_NAME=campusconecta`.
-- Con la opción A, deja vacíos `DB_USER`, `DB_PASSWORD` y `DB_HOST`.
-- Con la opción B, pon `DB_USER=campus`, `DB_PASSWORD=...`, `DB_HOST=localhost` y `DB_PORT=5432`.
-- Para crear la cuenta administradora inicial, rellena `ADMIN_INICIAL_NOMBRE`, `ADMIN_INICIAL_EMAIL` y `ADMIN_INICIAL_PASSWORD`.
+**Resto del `.env`:**
 
-Después:
+- `DB_NAME=campusconecta`.
+- Con la opción A, deja vacíos `DB_USER`, `DB_PASSWORD` y `DB_HOST`. Con la opción B, pon `DB_USER=campus`, `DB_PASSWORD=...`, `DB_HOST=localhost` y `DB_PORT=5432`. Para usar la base compartida del equipo, ver la sección 5.
+- `FRONTEND_URL_RECUPERACION=http://localhost:5173/recuperar/confirmar`, para que funcione el enlace de "¿Olvidaste tu contraseña?".
+
+Crea las tablas:
 
 ```bash
-set -a; source .env; set +a                     # carga las variables (en cada terminal nueva)
+set -a; source .env; set +a                     # carga el .env en la terminal (ver nota abajo)
 .venv/bin/python manage.py migrate              # crea las tablas y las 6 categorías iniciales
-.venv/bin/python manage.py crear_admin_inicial  # opcional: crea la cuenta administradora
-.venv/bin/python manage.py runserver            # API en http://localhost:8000/api/
 ```
 
-### 2.3 Frontend (terminal 2)
+> `set -a; source .env; set +a` carga las variables del `.env` en la terminal, porque Django no lee el archivo por sí mismo. Hay que repetirlo **en cada terminal nueva** antes de usar `manage.py`.
+
+### 2.3 Frontend
 
 ```bash
 cd frontend
 nvm use                                         # si usas nvm: cambia a la versión de Node de .nvmrc
-npm install
-npm run dev                                     # app en http://localhost:5173
+npm install                                     # dependencias
 ```
 
-En desarrollo, Vite reenvía `/api` y `/media` al backend en `localhost:8000` (ver `frontend/vite.config.ts`). Por eso no hace falta configurar CORS.
+### 2.4 Datos iniciales
+
+En `backend/`, con el `.env` cargado:
+
+| Paso | ¿Obligatorio? | Para qué |
+|---|---|---|
+| Ubicaciones | **Necesario para crear eventos** | La app arranca sin ellas, pero "Crear evento" no tendrá ubicaciones para elegir |
+| Cuenta administradora | **Opcional** | Solo si vas a probar el módulo de administración |
+
+**Ubicaciones.** El catálogo oficial de ubicaciones del campus aún no se ha entregado. Para poder crear eventos, crea alguna a mano (solo queda en tu base, no en el código):
+
+```bash
+.venv/bin/python manage.py shell -c "from eventos.models import Ubicacion; [Ubicacion.objects.get_or_create(nombre=n) for n in ['Edificio de prueba', 'Biblioteca']]"
+```
+
+**Cuenta administradora (opcional).** Rellena en `backend/.env` los datos que quieras (solo valen para tu base local), vuelve a cargar el `.env` y créala:
+
+```
+ADMIN_INICIAL_NOMBRE=Tu nombre
+ADMIN_INICIAL_EMAIL=admin@ejemplo.com
+ADMIN_INICIAL_PASSWORD=una-clave-de-al-menos-8-caracteres
+```
+
+```bash
+.venv/bin/python manage.py crear_admin_inicial
+```
+
+Listo: ya puedes [correr la app](#4-correr-la-app-cada-vez).
 
 ---
 
-## 3. Cómo correr la aplicación en Windows (PowerShell)
+## 3. Primera vez en Windows (PowerShell): instalar y configurar
+
+Esta sección se hace **una sola vez** por computador. Después, para usar la app, ve directamente a la [sección 4](#4-correr-la-app-cada-vez).
 
 ### 3.1 Base de datos
 
@@ -93,118 +127,111 @@ En desarrollo, Vite reenvía `/api` y `/media` al backend en `localhost:8000` (v
 psql -U postgres -c "CREATE DATABASE campusconecta;"
 ```
 
-### 3.2 Backend (terminal 1)
+### 3.2 Backend
 
 ```powershell
 cd backend
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1          # si da error de permisos: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 pip install -r requirements.txt
-
 Copy-Item .env.example .env
-python -c "import secrets; print(secrets.token_urlsafe(50))"   # pega el resultado en DJANGO_SECRET_KEY
 ```
 
-Edita `backend\.env`:
+**Clave secreta** (una sola vez; ver la explicación en 2.2):
 
-- `DB_NAME=campusconecta`, `DB_USER=postgres`, `DB_PASSWORD=<la contraseña de postgres>`, `DB_HOST=localhost`, `DB_PORT=5432`.
-- Para crear la cuenta administradora, rellena `ADMIN_INICIAL_NOMBRE`, `ADMIN_INICIAL_EMAIL` y `ADMIN_INICIAL_PASSWORD`.
+```powershell
+python -c "import secrets; print(secrets.token_urlsafe(50))"
+```
 
-PowerShell no tiene `source`. Esta línea carga el `.env` en la terminal actual; repítela en cada terminal nueva:
+Cópiala en `backend\.env`: `DJANGO_SECRET_KEY=<lo que salió>`.
+
+**Resto del `.env`:** `DB_NAME=campusconecta`, `DB_USER=postgres`, `DB_PASSWORD=<la contraseña de postgres>`, `DB_HOST=localhost`, `DB_PORT=5432` y `FRONTEND_URL_RECUPERACION=http://localhost:5173/recuperar/confirmar`.
+
+PowerShell no tiene `source`. Esta línea carga el `.env` en la terminal actual; hay que repetirla **en cada terminal nueva**:
 
 ```powershell
 Get-Content .env | Where-Object { $_ -match '^\s*[^#\s][^=]*=' } | ForEach-Object { $n, $v = $_ -split '=', 2; Set-Item "env:$($n.Trim())" $v.Trim() }
 ```
 
-Después:
+Crea las tablas:
 
 ```powershell
 python manage.py migrate
-python manage.py crear_admin_inicial   # opcional
-python manage.py runserver             # API en http://localhost:8000/api/
 ```
 
-### 3.3 Frontend (terminal 2)
+### 3.3 Frontend
 
 ```powershell
 cd frontend
 npm install
-npm run dev                            # app en http://localhost:5173
 ```
+
+### 3.4 Datos iniciales
+
+Igual que en [2.4](#24-datos-iniciales), con `python` en lugar de `.venv/bin/python`:
+
+```powershell
+python manage.py shell -c "from eventos.models import Ubicacion; [Ubicacion.objects.get_or_create(nombre=n) for n in ['Edificio de prueba', 'Biblioteca']]"
+python manage.py crear_admin_inicial   # opcional, con ADMIN_INICIAL_* rellenos en el .env
+```
+
+Listo: ya puedes [correr la app](#4-correr-la-app-cada-vez).
 
 ---
 
-## 4. Probar la app por primera vez
+## 4. Correr la app (cada vez)
 
-Esta sección es para **cualquier persona del equipo** que monte el proyecto en su computador. Con el backend y el frontend corriendo (secciones 2 o 3), haz estos pasos **una sola vez**; quedan guardados en tu base local.
+> **¿Es la primera vez en este computador?** Antes haz la [sección 2](#2-primera-vez-en-linux-instalar-y-configurar) (Linux) o la [sección 3](#3-primera-vez-en-windows-powershell-instalar-y-configurar) (Windows). Solo se hace una vez.
 
-| Paso | ¿Obligatorio? | Para qué |
-|---|---|---|
-| 1. Enlace de recuperación | Recomendado | Para que funcione "¿Olvidaste tu contraseña?" |
-| 2. Cuenta administradora | **Opcional** | Solo si vas a probar el módulo de administración |
-| 3. Ubicaciones | **Necesario para crear eventos** | La app arranca sin ellas, pero el formulario de "Crear evento" no tendrá ubicaciones para elegir |
+Arranca las dos partes, cada una en su terminal, y abre <http://localhost:5173>.
 
-**1. Enlace de recuperación.** En `backend/.env`:
-
-```
-FRONTEND_URL_RECUPERACION=http://localhost:5173/recuperar/confirmar
-```
-
-Si cambias el `.env`, vuelve a cargarlo y reinicia el backend.
-
-**2. Cuenta administradora (opcional).** Rellena en `backend/.env` los datos que quieras (solo valen para tu base local):
-
-```
-ADMIN_INICIAL_NOMBRE=Tu nombre
-ADMIN_INICIAL_EMAIL=admin@ejemplo.com
-ADMIN_INICIAL_PASSWORD=una-clave-de-al-menos-8-caracteres
-```
-
-y créala (en `backend/`, con el `.env` cargado):
+**Linux**
 
 ```bash
-.venv/bin/python manage.py crear_admin_inicial      # Windows: python manage.py crear_admin_inicial
+# Terminal 1: backend (API en http://localhost:8000/api/)
+cd backend
+set -a; source .env; set +a
+.venv/bin/python manage.py runserver
+
+# Terminal 2: frontend
+cd frontend
+npm run dev
 ```
 
-**3. Ubicaciones.** El catálogo oficial de ubicaciones del campus aún no se ha entregado, así que la base empieza sin ninguna. Para poder crear eventos, crea alguna a mano (solo queda en tu base, no en el código):
+**Windows (PowerShell)**
 
-```bash
-.venv/bin/python manage.py shell -c "from eventos.models import Ubicacion; [Ubicacion.objects.get_or_create(nombre=n) for n in ['Edificio de prueba', 'Biblioteca']]"
+```powershell
+# Terminal 1: backend
+cd backend
+.\.venv\Scripts\Activate.ps1
+Get-Content .env | Where-Object { $_ -match '^\s*[^#\s][^=]*=' } | ForEach-Object { $n, $v = $_ -split '=', 2; Set-Item "env:$($n.Trim())" $v.Trim() }
+python manage.py runserver
+
+# Terminal 2: frontend
+cd frontend
+npm run dev
 ```
 
-En Windows es igual, con `python` en vez de `.venv/bin/python`.
+Para detenerlas, pulsa `Ctrl+C` en cada terminal.
 
-**4. Recorre la app** en <http://localhost:5173>:
+En desarrollo, Vite reenvía `/api` y `/media` al backend en `localhost:8000` (ver `frontend/vite.config.ts`). Por eso no hace falta configurar CORS.
 
-| Qué probar | Cómo |
+**Después de un `git pull`**, si llegaron cambios:
+- **Migraciones nuevas** (archivos en `*/migrations/`): `manage.py migrate`.
+- **Cambios en `requirements.txt` o `package.json`:** `pip install -r requirements.txt` o `npm install`.
+
+### Qué probar
+
+| Qué | Cómo |
 |---|---|
 | Usuario normal | En **Registro** crea una cuenta con cualquier correo. No hay que confirmarlo |
 | Publicar un evento | **Mis Eventos → Crear evento**: elige categoría y ubicación y añade una o varias fechas futuras |
 | Feed, mapa y detalle | El evento aparece en **Feed** y **Mapa**; al abrirlo ves el detalle y puedes **reportarlo** |
 | Gestionar fechas | En **Mis Eventos**, el menú de cada evento permite editar, cancelar, finalizar, extender o eliminar |
-| Administración (si hiciste el paso 2) | Cierra sesión y entra con la cuenta administradora: aparece el módulo **Admin** (reportes, eventos, usuarios, categorías y registro de moderación) |
+| Administración (si creaste la cuenta administradora) | Entra con esa cuenta: aparece el módulo **Admin** (reportes, eventos, usuarios, categorías y registro de moderación) |
 | Recuperar contraseña | En **Login → ¿Olvidaste tu contraseña?**. El correo **no se envía**: aparece impreso en la terminal del backend con el enlace; ábrelo en el navegador |
 
 Todos los correos (recuperación, ocultamiento de un evento, suspensión de una cuenta) aparecen en la terminal del backend mientras `DJANGO_DEBUG=1`.
-
-### Después de la primera vez: uso diario
-
-La instalación (secciones 2 o 3) y los pasos de arriba se hacen **una sola vez**. A partir de ahí, para usar la app basta con arrancar las dos partes, cada una en su terminal, y abrir <http://localhost:5173>:
-
-```bash
-# Terminal 1 (backend)                          # Windows: activa .venv, carga el .env con la línea de la sección 3.2
-cd backend
-set -a; source .env; set +a
-.venv/bin/python manage.py runserver            # Windows: python manage.py runserver
-
-# Terminal 2 (frontend)
-cd frontend
-npm run dev
-```
-
-Después de un `git pull`, si llegaron cambios:
-- **Migraciones nuevas** (archivos en `*/migrations/`): `manage.py migrate`.
-- **Cambios en `requirements.txt` o `package.json`:** `pip install -r requirements.txt` o `npm install`.
 
 ---
 
@@ -214,7 +241,7 @@ Cada persona puede trabajar con su base local (secciones 2 y 3). Además, el equ
 
 ### 5.1 Mientras no exista
 
-Hasta que alguien cree la base en Supabase, **cada persona trabaja con su propia base local** (secciones 2 a 4). `migrate` crea en todas las bases las mismas tablas y las 6 categorías con sus colores. Los usuarios, las ubicaciones de prueba y los eventos son propios de cada base.
+Hasta que alguien cree la base en Supabase, **cada persona trabaja con su propia base local** (secciones 2 o 3). `migrate` crea en todas las bases las mismas tablas y las 6 categorías con sus colores. Los usuarios, las ubicaciones de prueba y los eventos son propios de cada base.
 
 ### 5.2 Crear la base en Supabase (una sola persona, el "administrador de la base")
 
