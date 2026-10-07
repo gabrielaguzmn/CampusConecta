@@ -2,9 +2,9 @@
 
 Plataforma web de eventos del campus de la Universidad del Valle.
 
-- `backend/`: API REST (Django + Django REST Framework, PostgreSQL).
+- `backend/`: API REST (Django + Django REST Framework, PostgreSQL). Contrato de la API: `backend/openapi.yaml`.
 - `frontend/`: aplicación web.
-- `docs/`: definición del MVP, release plan, contrato de la API (`docs/api/openapi.yaml`) y pendientes.
+- `docs/`: definición del MVP, release plan y pendientes.
 
 ## Backend en local
 

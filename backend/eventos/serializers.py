@@ -1,15 +1,30 @@
 from django.core.validators import URLValidator
 from django.db import transaction
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from eventos.models import Categoria, Evento, Fecha, Ubicacion
+from eventos.models import ESTADOS, Categoria, Evento, Fecha, Ubicacion
 
 
 class CategoriaSerializer(serializers.ModelSerializer):
+    # Al escribir debe ser un hexadecimal; no se puede quitar.
+    color = serializers.RegexField(r"^#[0-9A-Fa-f]{6}$", max_length=7, required=False, allow_null=True)
+
     class Meta:
         model = Categoria
-        fields = ["id", "nombre", "activa"]
+        fields = ["id", "nombre", "activa", "color"]
+
+    def validate_color(self, color):
+        if color is None:
+            raise serializers.ValidationError("El color no se puede quitar.")
+        return color
+
+    def validate(self, datos):
+        # G-54: el administrador elige el color al crear la categoría.
+        if self.instance is None and not datos.get("color"):
+            raise serializers.ValidationError({"color": "El color es obligatorio al crear una categoría."})
+        return datos
 
 
 class UbicacionSerializer(serializers.ModelSerializer):
@@ -25,7 +40,8 @@ class FechaSerializer(serializers.ModelSerializer):
         model = Fecha
         fields = ["id", "inicio", "fin", "finalizada_en", "estado", "oculta"]
 
-    def get_estado(self, fecha) -> str:
+    @extend_schema_field(serializers.ChoiceField(choices=ESTADOS))
+    def get_estado(self, fecha):
         return fecha.estado()
 
 
@@ -42,6 +58,47 @@ class EventoSerializer(serializers.ModelSerializer):
             "id", "nombre", "categoria", "descripcion", "responsable", "ubicacion", "detalle_ubicacion",
             "cupo", "imagen", "enlace_externo", "contacto", "oculto", "fechas",
         ]
+
+
+class FechaPublicaSerializer(FechaSerializer):
+    """Fecha tal como la ve cualquier usuario: sin marcas de moderación."""
+
+    class Meta(FechaSerializer.Meta):
+        fields = ["id", "inicio", "fin", "finalizada_en", "estado"]
+
+
+class EventoPublicoSerializer(serializers.ModelSerializer):
+    """Feed y detalle (DISPLAY-1, INTERACTIVITY-2, INTERACTIVITY-3). Las fechas ocultas no se incluyen."""
+
+    categoria = CategoriaSerializer()
+    ubicacion = UbicacionSerializer()
+    fechas = FechaPublicaSerializer(many=True)
+
+    class Meta:
+        model = Evento
+        fields = [
+            "id", "nombre", "categoria", "descripcion", "responsable", "ubicacion", "detalle_ubicacion",
+            "cupo", "imagen", "enlace_externo", "contacto", "fechas",
+        ]
+
+
+class EventoMapaSerializer(serializers.ModelSerializer):
+    """Información básica del pin (INTERACTIVITY-2 · criterio 1); el detalle completo está en GET eventos/{id}/."""
+
+    categoria = CategoriaSerializer()
+    fechas = FechaPublicaSerializer(many=True)
+
+    class Meta:
+        model = Evento
+        fields = ["id", "nombre", "categoria", "detalle_ubicacion", "fechas"]
+
+
+class UbicacionMapaSerializer(serializers.Serializer):
+    """INTERACTIVITY-1 · criterio 2: los eventos vigentes agrupados por ubicación del catálogo."""
+
+    # TODO(PENDIENTE G-01: coordenadas de la ubicación sobre el mapa del campus)
+    ubicacion = UbicacionSerializer()
+    eventos = EventoMapaSerializer(many=True)
 
 
 def validar_horario(inicio, fin):

@@ -39,7 +39,7 @@ class AccesoTests(APITestCase):
         Usuario.objects.create_user("repetido@example.com", CLAVE)
         respuesta = self.client.post("/api/auth/registro/", {"nombre": "Otra", "email": "REPETIDO@example.com", "password": CLAVE})
         self.assertEqual(respuesta.status_code, 400)
-        self.assertIn("email", respuesta.data)
+        self.assertEqual(respuesta.json()["codes"]["email"], ["email_en_uso"])
 
     def test_ACCESS_1_c1_contrasena_debil_se_rechaza(self):
         # G-35: validadores estándar de Django.
@@ -64,7 +64,7 @@ class AccesoTests(APITestCase):
         Usuario.objects.create_user("persona@example.com", CLAVE)
         respuesta = self.iniciar_sesion("persona@example.com", "otra-clave-999")
         self.assertEqual(respuesta.status_code, 401)
-        self.assertEqual(respuesta.data["detail"].code, "no_active_account")
+        self.assertEqual(respuesta.json()["code"], "no_active_account")
 
     def test_ACCESS_1_DoD_sin_sesion_no_hay_acceso(self):
         self.assertEqual(self.client.get("/api/auth/yo/").status_code, 401)
@@ -105,7 +105,7 @@ class AccesoTests(APITestCase):
         with mock.patch("django.contrib.auth.tokens.PasswordResetTokenGenerator._now", return_value=despues):
             respuesta = self.client.post("/api/auth/recuperacion/confirmar/", datos)
         self.assertEqual(respuesta.status_code, 400)
-        self.assertEqual(respuesta.data["non_field_errors"][0].code, "enlace_invalido")
+        self.assertEqual(respuesta.json()["codes"]["non_field_errors"], ["enlace_invalido"])
 
 
 class SuspensionAccesoTests(APITestCase):
@@ -117,7 +117,7 @@ class SuspensionAccesoTests(APITestCase):
         self.usuario.save()
         respuesta = self.client.post("/api/auth/token/", {"email": "suspendida@example.com", "password": CLAVE})
         self.assertEqual(respuesta.status_code, 401)
-        self.assertEqual(respuesta.data["detail"].code, "cuenta_suspendida")
+        self.assertEqual(respuesta.json()["code"], "cuenta_suspendida")
 
     def test_ADMIN_3_c1_suspension_invalida_tokens_ya_emitidos(self):
         tokens = self.client.post("/api/auth/token/", {"email": "suspendida@example.com", "password": CLAVE}).data
@@ -134,4 +134,4 @@ class SuspensionAccesoTests(APITestCase):
         self.usuario.save()
         respuesta = self.client.post("/api/auth/token/", {"email": "suspendida@example.com", "password": "mala-clave-000"})
         self.assertEqual(respuesta.status_code, 401)
-        self.assertEqual(respuesta.data["detail"].code, "no_active_account")
+        self.assertEqual(respuesta.json()["code"], "no_active_account")

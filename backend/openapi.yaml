@@ -1,0 +1,980 @@
+openapi: 3.0.3
+info:
+  title: CampusConecta API
+  version: 1.0.0
+paths:
+  /api/admin/categorias/:
+    get:
+      operationId: admin_categorias_list
+      description: CATEGORY-1 · criterio 2, RF-023.
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Categoria'
+          description: ''
+    post:
+      operationId: admin_categorias_create
+      description: CATEGORY-1 · criterio 2, RF-023.
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoriaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CategoriaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CategoriaRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Categoria'
+          description: ''
+  /api/admin/categorias/{id}/:
+    patch:
+      operationId: admin_categorias_partial_update
+      description: 'CATEGORY-1 · criterios 2 y 3: renombrar, activar o desactivar.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoriaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoriaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoriaRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Categoria'
+          description: ''
+  /api/auth/recuperacion/:
+    post:
+      operationId: auth_recuperacion_create
+      description: ACCESS-1 · criterio 3. Responde igual exista o no la cuenta, para
+        no revelar qué correos están registrados.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolicitudRecuperacionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SolicitudRecuperacionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SolicitudRecuperacionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/auth/recuperacion/confirmar/:
+    post:
+      operationId: auth_recuperacion_confirmar_create
+      description: ACCESS-1 · criterio 3 (G-17).
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmacionRecuperacionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ConfirmacionRecuperacionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ConfirmacionRecuperacionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/auth/registro/:
+    post:
+      operationId: auth_registro_create
+      description: ACCESS-1 · criterio 1.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistroRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegistroRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegistroRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Registro'
+          description: ''
+  /api/auth/token/:
+    post:
+      operationId: auth_token_create
+      description: ACCESS-1 · criterio 2; ADMIN-3 · criterio 1 (cuenta suspendida
+        → 401 `cuenta_suspendida`).
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tokens'
+          description: ''
+  /api/auth/token/refresh/:
+    post:
+      operationId: auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/auth/yo/:
+    get:
+      operationId: auth_yo_retrieve
+      description: 'RF-024: el frontend sabe si mostrar el módulo de administración.'
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioActual'
+          description: ''
+  /api/categorias/:
+    get:
+      operationId: categorias_list
+      description: 'CATEGORY-1 · criterio 1: categorías disponibles para publicar.'
+      tags:
+      - categorias
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Categoria'
+          description: ''
+  /api/eventos/:
+    post:
+      operationId: eventos_create
+      description: 'PUBLICATION-1: crear y publicar un evento con una o varias fechas.'
+      tags:
+      - eventos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventoCreacionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EventoCreacionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventoCreacionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evento'
+          description: ''
+  /api/eventos/{id}/:
+    patch:
+      operationId: eventos_partial_update
+      description: 'G-30: editar los datos del evento.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - eventos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEventoEdicionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEventoEdicionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEventoEdicionRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evento'
+          description: ''
+    delete:
+      operationId: eventos_destroy
+      description: 'PUBLICATION-8 · criterio 2: eliminar el evento completo.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - eventos
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/eventos/{id}/cancelar-todas/:
+    post:
+      operationId: eventos_cancelar_todas_create
+      description: 'PUBLICATION-5: cancelar de una vez todas las fechas próximas o
+        en vivo.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - eventos
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evento'
+          description: ''
+  /api/eventos/{id}/fechas/:
+    post:
+      operationId: eventos_fechas_create
+      description: 'G-30: añadir una fecha a un evento ya publicado.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - eventos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FechaEntradaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FechaEntradaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FechaEntradaRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evento'
+          description: ''
+  /api/eventos/{id}/imagen/:
+    put:
+      operationId: eventos_imagen_update
+      description: 'RF-010: imagen opcional del evento (JPG o PNG, 5 MB como máximo).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - eventos
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImagenRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evento'
+          description: ''
+    delete:
+      operationId: eventos_imagen_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - eventos
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/fechas/{id}/:
+    patch:
+      operationId: fechas_partial_update
+      description: 'PUBLICATION-3: editar el horario de una fecha próxima.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - fechas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFechaEdicionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFechaEdicionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFechaEdicionRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evento'
+          description: ''
+    delete:
+      operationId: fechas_destroy
+      description: 'PUBLICATION-8 · criterio 1: eliminar una fecha próxima.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - fechas
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/fechas/{id}/cancelar/:
+    post:
+      operationId: fechas_cancelar_create
+      description: 'PUBLICATION-4: cancelar una fecha próxima o en vivo (G-32: queda
+        cancelada de forma permanente).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - fechas
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evento'
+          description: ''
+  /api/fechas/{id}/extender/:
+    post:
+      operationId: fechas_extender_create
+      description: 'PUBLICATION-7: extender una fecha en vivo con un nuevo fin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - fechas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtensionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExtensionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExtensionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evento'
+          description: ''
+  /api/fechas/{id}/finalizar/:
+    post:
+      operationId: fechas_finalizar_create
+      description: 'PUBLICATION-6: finalizar antes de tiempo una fecha en vivo.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - fechas
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evento'
+          description: ''
+  /api/mis-eventos/:
+    get:
+      operationId: mis_eventos_list
+      description: 'PUBLICATION-2: eventos propios, separados en vigentes e historial.'
+      parameters:
+      - in: query
+        name: vista
+        schema:
+          type: string
+          enum:
+          - historial
+          - vigentes
+          default: vigentes
+      tags:
+      - mis-eventos
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Evento'
+          description: ''
+  /api/ubicaciones/:
+    get:
+      operationId: ubicaciones_list
+      description: 'RF-009: catálogo fijo de ubicaciones.'
+      tags:
+      - ubicaciones
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ubicacion'
+          description: ''
+components:
+  schemas:
+    Categoria:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+          maxLength: 100
+        activa:
+          type: boolean
+        color:
+          type: string
+          nullable: true
+          maxLength: 7
+          pattern: ^#[0-9A-Fa-f]{6}$
+      required:
+      - id
+      - nombre
+    CategoriaRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        activa:
+          type: boolean
+        color:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 7
+          pattern: ^#[0-9A-Fa-f]{6}$
+      required:
+      - nombre
+    ConfirmacionRecuperacionRequest:
+      type: object
+      properties:
+        uid:
+          type: string
+          minLength: 1
+        token:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - token
+      - uid
+    EstadoEnum:
+      enum:
+      - proxima
+      - en_vivo
+      - finalizada
+      - cancelada
+      type: string
+      description: |-
+        * `proxima` - Próxima
+        * `en_vivo` - En vivo
+        * `finalizada` - Finalizada
+        * `cancelada` - Cancelada
+    Evento:
+      type: object
+      description: Representación para el creador ("Mis eventos" y respuestas de sus
+        acciones).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+        categoria:
+          $ref: '#/components/schemas/Categoria'
+        descripcion:
+          type: string
+        responsable:
+          type: string
+        ubicacion:
+          $ref: '#/components/schemas/Ubicacion'
+        detalle_ubicacion:
+          type: string
+        cupo:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+          nullable: true
+        imagen:
+          type: string
+          format: uri
+          nullable: true
+          pattern: (?:jpg|jpeg|png)$
+        enlace_externo:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        contacto:
+          type: string
+        oculto:
+          type: boolean
+        fechas:
+          type: array
+          items:
+            $ref: '#/components/schemas/Fecha'
+      required:
+      - categoria
+      - descripcion
+      - fechas
+      - id
+      - nombre
+      - responsable
+      - ubicacion
+    EventoCreacionRequest:
+      type: object
+      description: 'PUBLICATION-1: RF-008 (obligatorios) y RF-010 (opcionales). La
+        imagen se sube aparte.'
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+        categoria:
+          type: integer
+        descripcion:
+          type: string
+          minLength: 1
+        responsable:
+          type: string
+          minLength: 1
+        ubicacion:
+          type: integer
+        detalle_ubicacion:
+          type: string
+        cupo:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+          nullable: true
+        enlace_externo:
+          oneOf:
+          - type: string
+            format: uri
+          - type: string
+            maxLength: 0
+        contacto:
+          type: string
+        fechas:
+          type: array
+          items:
+            $ref: '#/components/schemas/FechaEntradaRequest'
+      required:
+      - categoria
+      - descripcion
+      - fechas
+      - nombre
+      - responsable
+      - ubicacion
+    ExtensionRequest:
+      type: object
+      description: 'PUBLICATION-7, G-05: nuevo fin posterior al actual y sin solapar
+        otra fecha.'
+      properties:
+        fin:
+          type: string
+          format: date-time
+      required:
+      - fin
+    Fecha:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        inicio:
+          type: string
+          format: date-time
+        fin:
+          type: string
+          format: date-time
+        finalizada_en:
+          type: string
+          format: date-time
+          nullable: true
+        estado:
+          allOf:
+          - $ref: '#/components/schemas/EstadoEnum'
+          readOnly: true
+        oculta:
+          type: boolean
+      required:
+      - estado
+      - fin
+      - id
+      - inicio
+    FechaEntradaRequest:
+      type: object
+      properties:
+        inicio:
+          type: string
+          format: date-time
+        fin:
+          type: string
+          format: date-time
+      required:
+      - fin
+      - inicio
+    ImagenRequest:
+      type: object
+      properties:
+        imagen:
+          type: string
+          format: binary
+      required:
+      - imagen
+    PatchedCategoriaRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        activa:
+          type: boolean
+        color:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 7
+          pattern: ^#[0-9A-Fa-f]{6}$
+    PatchedEventoEdicionRequest:
+      type: object
+      description: 'G-30: los datos del evento se editan mientras no pase al historial.'
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+        categoria:
+          type: integer
+        descripcion:
+          type: string
+          minLength: 1
+        responsable:
+          type: string
+          minLength: 1
+        ubicacion:
+          type: integer
+        detalle_ubicacion:
+          type: string
+        cupo:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+          nullable: true
+        enlace_externo:
+          oneOf:
+          - type: string
+            format: uri
+          - type: string
+            maxLength: 0
+        contacto:
+          type: string
+    PatchedFechaEdicionRequest:
+      type: object
+      description: 'PUBLICATION-3, G-30: de una fecha solo se editan el día, la hora
+        de inicio y el fin.'
+      properties:
+        inicio:
+          type: string
+          format: date-time
+        fin:
+          type: string
+          format: date-time
+    Registro:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+        email:
+          type: string
+          format: email
+          maxLength: 254
+      required:
+      - email
+      - id
+      - nombre
+    RegistroRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - nombre
+      - password
+    SolicitudRecuperacionRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+      required:
+      - access
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - refresh
+    TokenRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    Tokens:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    Ubicacion:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+          maxLength: 200
+      required:
+      - id
+      - nombre
+    UsuarioActual:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        es_administrador:
+          type: boolean
+      required:
+      - email
+      - id
+      - nombre
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

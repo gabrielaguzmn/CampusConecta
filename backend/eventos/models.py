@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import FileExtensionValidator, MinValueValidator, URLValidator
+from django.core.validators import FileExtensionValidator, MinValueValidator, RegexValidator, URLValidator
 from django.db import models
 from django.db.models import Case, Exists, F, OuterRef, Q, Value, When
 from django.db.models.functions import Coalesce
@@ -24,6 +24,14 @@ class Categoria(models.Model):
     # RF-022, RF-023
     nombre = models.CharField(max_length=100, unique=True)
     activa = models.BooleanField(default=True)
+    # G-54 / CONTRATO-01 (decisión 2026-10-07): color hexadecimal elegido por el administrador; editable.
+    # Las seis iniciales reciben su color en la migración 0004 (G-02).
+    color = models.CharField(
+        max_length=7,
+        null=True,
+        blank=True,
+        validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", "El color debe ser hexadecimal, p. ej. #950000.")],
+    )
 
     class Meta:
         ordering = ["id"]
@@ -55,6 +63,15 @@ class EventoQuerySet(models.QuerySet):
     def historial(self, ahora=None):
         """RF-021: eventos sin fechas vigentes."""
         return self.exclude(pk__in=self.vigentes(ahora).values("pk"))
+
+    def visibles(self, ahora=None, estado=None):
+        """Lo que se muestra en el feed, el mapa y el detalle (RF-005, RF-020, RF-032, RF-033, G-38):
+        evento no oculto, creador no suspendido y al menos una fecha no oculta próxima o en vivo.
+        Con `estado` (G-33), la fecha debe estar en ese estado."""
+        fechas = Fecha.objects.con_estado(ahora).filter(
+            evento=OuterRef("pk"), oculta=False, estado_calculado__in=[estado] if estado else [PROXIMA, EN_VIVO]
+        )
+        return self.filter(oculto=False, creador__is_active=True).filter(Exists(fechas))
 
 
 class Evento(models.Model):

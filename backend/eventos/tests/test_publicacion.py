@@ -117,7 +117,7 @@ class ImagenTests(BaseEventosTest):
         for archivo in [imagen("PNG"), imagen("JPEG", nombre="foto.jpg")]:
             respuesta = self.client.put(self.url, {"imagen": archivo}, format="multipart")
             self.assertEqual(respuesta.status_code, 200)
-            self.assertTrue(respuesta.data["imagen"])
+            self.assertTrue(respuesta.json()["imagen"].startswith("http://testserver/media/eventos/"))
 
     def test_PUBLICATION_1_c4_rechaza_formato_no_permitido(self):
         for archivo in [imagen("GIF", nombre="foto.gif"), imagen("GIF", nombre="falsa.png"),
@@ -418,6 +418,8 @@ class EliminacionTests(BaseEventosTest):
 
     def test_PUBLICATION_8_casos_pendientes_de_G24_se_rechazan(self):
         unica = self.crear_evento((24, 26))
-        self.assertEqual(self.client.delete(f"/api/fechas/{unica.fechas.get().pk}/").status_code, 409)
+        respuesta = self.client.delete(f"/api/fechas/{unica.fechas.get().pk}/")
+        self.assertEqual(respuesta.status_code, 409)
+        self.assertEqual(respuesta.json()["code"], "pendiente_g24")
         con_fecha_en_vivo = self.crear_evento((-1, 1), (24, 26))
         self.assertEqual(self.client.delete(f"/api/eventos/{con_fecha_en_vivo.pk}/").status_code, 409)

@@ -1,5 +1,5 @@
-from drf_spectacular.utils import extend_schema
-from rest_framework import generics, status
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import generics, serializers, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -27,6 +27,12 @@ class TokenView(TokenObtainPairView):
     """ACCESS-1 · criterio 2; ADMIN-3 · criterio 1 (cuenta suspendida → 401 `cuenta_suspendida`)."""
 
     serializer_class = TokenSerializer
+
+    @extend_schema(
+        responses=inline_serializer("Tokens", {"access": serializers.CharField(), "refresh": serializers.CharField()})
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
 
 class UsuarioActualView(generics.RetrieveAPIView):
