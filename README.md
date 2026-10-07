@@ -53,7 +53,7 @@ cp .env.example .env
 python3 -c "import secrets; print(secrets.token_urlsafe(50))"
 ```
 
-Edita `backend/.env` (para usar la base compartida del equipo, ver la sección 4):
+Edita `backend/.env` (para usar la base compartida del equipo, ver la sección 5):
 
 - Deja `DB_NAME=campusconecta`.
 - Con la opción A, deja vacíos `DB_USER`, `DB_PASSWORD` y `DB_HOST`.
@@ -73,6 +73,7 @@ set -a; source .env; set +a                     # carga las variables (en cada t
 
 ```bash
 cd frontend
+nvm use                                         # si usas nvm: cambia a la versión de Node de .nvmrc
 npm install
 npm run dev                                     # app en http://localhost:5173
 ```
@@ -133,26 +134,59 @@ npm run dev                            # app en http://localhost:5173
 
 ---
 
-## 4. Base de datos compartida del equipo (Supabase)
+## 4. Probar la app por primera vez
+
+Con el backend y el frontend corriendo (secciones 2 o 3), sigue estos pasos una sola vez en tu base local.
+
+**1. Revisa tu `backend/.env`.** Además de la base de datos, rellena:
+
+```
+FRONTEND_URL_RECUPERACION=http://localhost:5173/recuperar/confirmar
+ADMIN_INICIAL_NOMBRE=Tu nombre
+ADMIN_INICIAL_EMAIL=admin@ejemplo.com
+ADMIN_INICIAL_PASSWORD=una-clave-de-al-menos-8-caracteres
+```
+
+La cuenta administradora es solo para tu base local; usa los datos que quieras. Si cambias el `.env`, vuelve a cargarlo y reinicia el backend.
+
+**2. Crea la cuenta administradora** (en `backend/`, con el `.env` cargado):
+
+```bash
+.venv/bin/python manage.py crear_admin_inicial      # Windows: python manage.py crear_admin_inicial
+```
+
+**3. Crea al menos una ubicación.** El catálogo oficial de ubicaciones del campus aún no se ha entregado, así que la base empieza sin ubicaciones, y sin ellas no se puede crear ningún evento. Para probar, crea alguna a mano (solo queda en tu base, no en el código):
+
+```bash
+.venv/bin/python manage.py shell -c "from eventos.models import Ubicacion; [Ubicacion.objects.get_or_create(nombre=n) for n in ['Edificio de prueba', 'Biblioteca']]"
+```
+
+En Windows es igual, con `python` en vez de `.venv/bin/python`.
+
+**4. Recorre la app** en <http://localhost:5173>:
+
+| Qué probar | Cómo |
+|---|---|
+| Usuario normal | En **Registro** crea una cuenta con cualquier correo. No hay que confirmarlo |
+| Publicar un evento | **Mis Eventos → Crear evento**: elige categoría y ubicación y añade una o varias fechas futuras |
+| Feed, mapa y detalle | El evento aparece en **Feed** y **Mapa**; al abrirlo ves el detalle y puedes **reportarlo** |
+| Gestionar fechas | En **Mis Eventos**, el menú de cada evento permite editar, cancelar, finalizar, extender o eliminar |
+| Administración | Cierra sesión y entra con la cuenta administradora: aparece el módulo **Admin** (reportes, eventos, usuarios, categorías y registro de moderación) |
+| Recuperar contraseña | En **Login → ¿Olvidaste tu contraseña?**. El correo **no se envía**: aparece impreso en la terminal del backend con el enlace; ábrelo en el navegador |
+
+Todos los correos (recuperación, ocultamiento de un evento, suspensión de una cuenta) aparecen en la terminal del backend mientras `DJANGO_DEBUG=1`.
+
+---
+
+## 5. Base de datos compartida del equipo (Supabase)
 
 Cada persona puede trabajar con su base local (secciones 2 y 3). Además, el equipo tendrá **una base común en Supabase**, para que todos vean los mismos datos (por ejemplo, para probar el frontend contra los mismos eventos o para una demo).
 
-### 4.1 Mientras no exista: cada persona prueba en local
+### 5.1 Mientras no exista
 
-Hasta que alguien cree la base en Supabase, **cada persona trabaja con su propia base local** (secciones 2 y 3). `migrate` deja en todas las bases las mismas tablas y las 6 categorías con sus colores. Lo que no se comparte son los datos de prueba, que cada uno crea en su equipo:
+Hasta que alguien cree la base en Supabase, **cada persona trabaja con su propia base local** (secciones 2 a 4). `migrate` crea en todas las bases las mismas tablas y las 6 categorías con sus colores. Los usuarios, las ubicaciones de prueba y los eventos son propios de cada base.
 
-- **Cuenta administradora:** `manage.py crear_admin_inicial`, con los datos `ADMIN_INICIAL_*` de tu `.env`.
-- **Usuarios normales:** desde la pantalla de registro del frontend o con `POST /api/auth/registro/`.
-- **Ubicaciones:** el catálogo oficial del campus aún no está definido (pendiente G-01), así que la base empieza sin ubicaciones y **no se pueden crear eventos** hasta tener al menos una. Para probar, crea alguna a mano en tu base local (no se guarda en el código):
-
-  ```bash
-  .venv/bin/python manage.py shell -c "from eventos.models import Ubicacion; Ubicacion.objects.create(nombre='Edificio de prueba')"
-  ```
-
-  En Windows es igual, con `python` en vez de `.venv/bin/python`. Cuando se defina el catálogo, se cargará con una migración y estas ubicaciones de prueba se podrán borrar.
-- **Eventos:** se crean desde el frontend o con `POST /api/eventos/`.
-
-### 4.2 Crear la base en Supabase (una sola persona, el "administrador de la base")
+### 5.2 Crear la base en Supabase (una sola persona, el "administrador de la base")
 
 1. Crea una cuenta en <https://supabase.com> y un proyecto nuevo. Elige la región más cercana (por ejemplo, *South America (São Paulo)*) y **guarda la contraseña de la base**: Supabase solo la muestra al crear el proyecto.
 2. **Desactiva la API pública de datos.** Supabase publica las tablas del esquema `public` a través de su propia API REST, y CampusConecta no la usa: todo pasa por el backend de Django. En *Project Settings → Data API*, desactívala o quita `public` de los esquemas expuestos. Si no lo haces, las tablas quedan accesibles fuera del backend.
@@ -162,7 +196,7 @@ Hasta que alguien cree la base en Supabase, **cada persona trabaja con su propia
    postgresql://postgres.REFERENCIA:CONTRASEÑA@aws-0-REGION.pooler.supabase.com:5432/postgres
    ```
 
-4. Pásala al `backend/.env` (o a un `.env.compartida`, ver 4.3):
+4. Pásala al `backend/.env` (o a un `.env.compartida`, ver 5.3):
 
    ```
    DB_NAME=postgres
@@ -182,7 +216,7 @@ Hasta que alguien cree la base en Supabase, **cada persona trabaja con su propia
 
 6. Comparte `DB_NAME`, `DB_USER`, `DB_PASSWORD` y `DB_HOST` con el equipo **por un canal privado**.
 
-### 4.3 Conectarse (el resto del equipo)
+### 5.3 Conectarse (el resto del equipo)
 
 Pon en tu `backend/.env` (o en `.env.compartida`) los datos que te pasaron, con `DB_PORT=5432` y `DB_SSLMODE=require`, carga el `.env` y ejecuta `runserver` como siempre. **No ejecutes `migrate` contra la base compartida**: lo hace solo quien la administra.
 
@@ -197,7 +231,7 @@ Get-Content .env.compartida | Where-Object { $_ -match '^\s*[^#\s][^=]*=' } | Fo
 
 En PowerShell las variables se quedan cargadas en la terminal. Al cambiar de archivo, abre una terminal nueva para que no se mezclen.
 
-### 4.4 Reglas de uso
+### 5.4 Reglas de uso
 
 - **Las credenciales nunca van al repositorio.** El `.gitignore` excluye `.env` y `.env.*` (salvo `.env.example`). Si se filtran, cambia la contraseña en el panel del proveedor y avisa al equipo.
 - **Solo quien administra la base ejecuta `migrate`**, cada vez que llegue al repositorio una migración nueva (archivos en `*/migrations/`). Si dos personas migran a la vez con código distinto, la base puede quedar inconsistente.
@@ -206,7 +240,7 @@ En PowerShell las variables se quedan cargadas en la terminal. Al cambiar de arc
 
 ---
 
-## 5. Comandos útiles
+## 6. Comandos útiles
 
 | Qué | Linux | Windows (con el entorno activado y el `.env` cargado) |
 |---|---|---|
@@ -223,18 +257,17 @@ Con `DJANGO_DEBUG=1`, los correos (por ejemplo, el de recuperación de contrase�
 
 ---
 
-## 6. Qué hay en cada carpeta
+## 7. Qué hay en cada carpeta
 
 ```
 CampusConecta/
 ├── README.md                este archivo
 ├── .gitignore               excluye .env, .venv e imágenes subidas (frontend/.gitignore excluye node_modules y dist)
 ├── backend/                 API REST (Django)
-├── frontend/                aplicación web (React)
-└── docs/                    documentación del proyecto (no se versiona; se comparte aparte)
+└── frontend/                aplicación web (React)
 ```
 
-### 6.1 `backend/`
+### 7.1 `backend/`
 
 ```
 backend/
@@ -271,7 +304,7 @@ backend/
 
 Cada app sigue el mismo patrón: `models.py` (datos), `serializers.py` (validación y formato JSON), `views.py` (endpoints), `urls.py` (rutas) y `tests/`.
 
-### 6.2 `frontend/`
+### 7.2 `frontend/`
 
 ```
 frontend/
@@ -290,32 +323,22 @@ frontend/
     │   └── queries.ts       consultas y mutaciones (TanStack Query)
     ├── auth/                sesión: tokens, usuario actual y guardas de rutas
     ├── components/          componentes reutilizables del diseño (botón, chip, badge, tarjeta, modal…)
-    ├── pages/               pantallas: acceso (login, registro, recuperación), feed y mapa
+    ├── pages/               pantallas
+    │   ├── acceso/          login, registro, recuperar contraseña y nueva contraseña
+    │   ├── feed/            feed de eventos con filtros
+    │   ├── mapa/            mapa del campus
+    │   ├── evento/          detalle de un evento y formulario de reporte
+    │   ├── mis-eventos/     "Mis eventos" (activos e historial), crear y gestionar eventos
+    │   └── admin/           módulo de administración: reportes, eventos, usuarios, categorías y registro
     ├── lib/                 utilidades (formato de fechas y horas en America/Bogota)
     └── test/                configuración de las pruebas
 ```
 
 Las pruebas del frontend están junto a cada archivo (`Componente.test.tsx`).
 
-### 6.3 `docs/`
-
-| Documento | Contenido |
-|---|---|
-| `definicion_mvp.md` | Definición del MVP: requisitos funcionales (RF) y no funcionales (RNF), roles, permisos y las 10 normas de uso. **Fuente principal** |
-| `release_plan.md` | Release Plan: las 20 historias de usuario (HU) con sus criterios de aceptación |
-| `modelo_bd.md` | Propuesta inicial del modelo de base de datos (de una versión anterior del MVP) |
-| `CampusConecta.fig` | Diseño de Figma exportado |
-| `referencias/` | Capturas PNG de cada pantalla del diseño |
-| `pendientes.md` | **Preguntas abiertas y decisiones (G-xx), huecos del contrato (CONTRATO-xx) y notas entre backend y frontend.** Compartido por ambos equipos |
-| `backend/00_extraccion.md` | Citas de los documentos por HU y todas las decisiones tomadas |
-| `backend/01_arquitectura.md` | Diseño del backend: modelo de datos, endpoints con permisos, decisiones técnicas (T-xx) |
-| `backend/trazabilidad.md` | Qué archivos y pruebas cubren cada HU y RF, y su estado (completo, parcial o bloqueado) |
-| `frontend/00_extraccion.md`, `01_figma_inventario.md`, `02_arquitectura.md` | Equivalentes del frontend: extracción, inventario del diseño y arquitectura |
-| `prompts/` | Instrucciones con las que se generaron el backend y el frontend |
-
 ---
 
-## 7. ¿Dónde busco…?
+## 8. ¿Dónde busco…?
 
 | Necesito… | Está en… |
 |---|---|
@@ -325,12 +348,11 @@ Las pruebas del frontend están junto a cada archivo (`Componente.test.tsx`).
 | Qué ve el creador en "Mis eventos" (vigentes e historial) | `backend/eventos/models.py` → `vigentes()`, `historial()`; vista `MisEventosView` |
 | Validaciones al crear o editar un evento (horarios, solapamientos, imagen) | `backend/eventos/serializers.py` |
 | Quién puede hacer cada acción (403) y en qué estado (409) | `backend/eventos/views.py` (`evento_propio`, `exigir_estado`) y `backend/cuentas/permissions.py` |
-| Formato de los errores y sus códigos | `backend/config/excepciones.py` y la lista de códigos en `docs/pendientes.md` |
+| Formato de los errores y sus códigos | `backend/config/excepciones.py` (los errores llevan `code`, o `codes` por campo en los 400) |
 | Moderación, reportes y suspensión | `backend/moderacion/` (`servicios.py` para la lógica, `views.py` para los endpoints) |
 | Texto de los correos | `backend/cuentas/correos.py` (recuperación) y `backend/moderacion/correos.py` (moderación) |
 | Categorías iniciales y sus colores | `backend/eventos/migrations/0002_…` y `0004_…` |
 | Variables de configuración | `backend/.env.example` y `backend/config/settings.py` |
 | Llamadas a la API desde el frontend | `frontend/src/api/` |
 | Componentes visuales y tokens de diseño | `frontend/src/components/` y `frontend/src/index.css` |
-| Por qué algo funciona de cierta manera | `docs/pendientes.md` (G-xx) y `docs/backend/00_extraccion.md` (decisiones) |
-| Qué falta por hacer | `docs/pendientes.md` (estado "Abierto") y `docs/backend/trazabilidad.md` |
+| Una pantalla concreta | `frontend/src/pages/<sección>/` y sus rutas en `frontend/src/router.tsx` |
