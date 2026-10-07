@@ -1,0 +1,8 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Entorno y datos locales
+.env
+backend/media/
