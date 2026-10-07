@@ -136,26 +136,37 @@ npm run dev                            # app en http://localhost:5173
 
 ## 4. Probar la app por primera vez
 
-Con el backend y el frontend corriendo (secciones 2 o 3), sigue estos pasos una sola vez en tu base local.
+Esta sección es para **cualquier persona del equipo** que monte el proyecto en su computador. Con el backend y el frontend corriendo (secciones 2 o 3), haz estos pasos **una sola vez**; quedan guardados en tu base local.
 
-**1. Revisa tu `backend/.env`.** Además de la base de datos, rellena:
+| Paso | ¿Obligatorio? | Para qué |
+|---|---|---|
+| 1. Enlace de recuperación | Recomendado | Para que funcione "¿Olvidaste tu contraseña?" |
+| 2. Cuenta administradora | **Opcional** | Solo si vas a probar el módulo de administración |
+| 3. Ubicaciones | **Necesario para crear eventos** | La app arranca sin ellas, pero el formulario de "Crear evento" no tendrá ubicaciones para elegir |
+
+**1. Enlace de recuperación.** En `backend/.env`:
 
 ```
 FRONTEND_URL_RECUPERACION=http://localhost:5173/recuperar/confirmar
+```
+
+Si cambias el `.env`, vuelve a cargarlo y reinicia el backend.
+
+**2. Cuenta administradora (opcional).** Rellena en `backend/.env` los datos que quieras (solo valen para tu base local):
+
+```
 ADMIN_INICIAL_NOMBRE=Tu nombre
 ADMIN_INICIAL_EMAIL=admin@ejemplo.com
 ADMIN_INICIAL_PASSWORD=una-clave-de-al-menos-8-caracteres
 ```
 
-La cuenta administradora es solo para tu base local; usa los datos que quieras. Si cambias el `.env`, vuelve a cargarlo y reinicia el backend.
-
-**2. Crea la cuenta administradora** (en `backend/`, con el `.env` cargado):
+y créala (en `backend/`, con el `.env` cargado):
 
 ```bash
 .venv/bin/python manage.py crear_admin_inicial      # Windows: python manage.py crear_admin_inicial
 ```
 
-**3. Crea al menos una ubicación.** El catálogo oficial de ubicaciones del campus aún no se ha entregado, así que la base empieza sin ubicaciones, y sin ellas no se puede crear ningún evento. Para probar, crea alguna a mano (solo queda en tu base, no en el código):
+**3. Ubicaciones.** El catálogo oficial de ubicaciones del campus aún no se ha entregado, así que la base empieza sin ninguna. Para poder crear eventos, crea alguna a mano (solo queda en tu base, no en el código):
 
 ```bash
 .venv/bin/python manage.py shell -c "from eventos.models import Ubicacion; [Ubicacion.objects.get_or_create(nombre=n) for n in ['Edificio de prueba', 'Biblioteca']]"
@@ -171,7 +182,7 @@ En Windows es igual, con `python` en vez de `.venv/bin/python`.
 | Publicar un evento | **Mis Eventos → Crear evento**: elige categoría y ubicación y añade una o varias fechas futuras |
 | Feed, mapa y detalle | El evento aparece en **Feed** y **Mapa**; al abrirlo ves el detalle y puedes **reportarlo** |
 | Gestionar fechas | En **Mis Eventos**, el menú de cada evento permite editar, cancelar, finalizar, extender o eliminar |
-| Administración | Cierra sesión y entra con la cuenta administradora: aparece el módulo **Admin** (reportes, eventos, usuarios, categorías y registro de moderación) |
+| Administración (si hiciste el paso 2) | Cierra sesión y entra con la cuenta administradora: aparece el módulo **Admin** (reportes, eventos, usuarios, categorías y registro de moderación) |
 | Recuperar contraseña | En **Login → ¿Olvidaste tu contraseña?**. El correo **no se envía**: aparece impreso en la terminal del backend con el enlace; ábrelo en el navegador |
 
 Todos los correos (recuperación, ocultamiento de un evento, suspensión de una cuenta) aparecen en la terminal del backend mientras `DJANGO_DEBUG=1`.
