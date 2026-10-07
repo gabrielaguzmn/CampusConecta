@@ -10,7 +10,7 @@ export function Tabs({ pestanas }: { pestanas: { etiqueta: string; a: string }[]
           to={a}
           end
           className={({ isActive }) =>
-            `flex items-center border-b-3 text-sm ${isActive ? 'border-accion font-semibold text-primario' : 'border-transparent text-metadatos'}`
+            `flex shrink-0 items-center border-b-3 text-sm whitespace-nowrap ${isActive ? 'border-accion font-semibold text-primario' : 'border-transparent text-metadatos'}`
           }
         >
           {etiqueta}

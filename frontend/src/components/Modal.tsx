@@ -40,7 +40,7 @@ export function Modal({
   }
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-start justify-center overflow-y-auto bg-texto/50 px-4 py-3 md:items-center md:py-9">
+    <div className="fixed inset-0 z-[1000] flex flex-col overflow-y-auto bg-texto/50 px-4 py-3 md:py-9">
       <div
         ref={dialogo}
         role="dialog"
@@ -48,14 +48,14 @@ export function Modal({
         aria-labelledby={idTitulo}
         tabIndex={-1}
         onKeyDown={alPulsarTecla}
-        className={`flex w-full max-w-[500px] flex-col gap-6 rounded-tarjeta bg-superficie shadow-elevada outline-none ${className}`}
+        className={`mx-auto my-auto flex w-full max-w-[500px] flex-col gap-6 rounded-tarjeta bg-superficie shadow-elevada outline-none ${className}`}
       >
         <div className="flex items-center justify-between">
           <h2 id={idTitulo} className="text-2xl font-bold text-texto">
             {titulo}
           </h2>
           {/* La capa de Figma se llama "Cerrar" (4:30408) */}
-          <button type="button" onClick={onCerrar} aria-label="Cerrar" className="flex size-11 items-center justify-center text-texto">
+          <button type="button" onClick={onCerrar} aria-label="Cerrar" className="flex size-11 items-center justify-center text-texto-secundario">
             <X size={24} aria-hidden />
           </button>
         </div>

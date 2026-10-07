@@ -64,7 +64,18 @@ class AccesoTests(APITestCase):
         Usuario.objects.create_user("persona@example.com", CLAVE)
         respuesta = self.iniciar_sesion("persona@example.com", "otra-clave-999")
         self.assertEqual(respuesta.status_code, 401)
-        self.assertEqual(respuesta.json()["code"], "no_active_account")
+        self.assertEqual(respuesta.json(), {"detail": "Correo o contraseña incorrectos.", "code": "no_active_account"})
+
+    def test_ACCESS_1_DoD_errores_de_sesion_en_espanol(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer token-falso")
+        self.assertEqual(
+            self.client.get("/api/auth/yo/").json(),
+            {"detail": "La sesión no es válida o ha caducado. Inicia sesión de nuevo.", "code": "token_not_valid"},
+        )
+        self.client.credentials()
+        refresco = self.client.post("/api/auth/token/refresh/", {"refresh": "token-falso"}).json()
+        self.assertEqual(refresco["code"], "token_not_valid")
+        self.assertEqual(refresco["detail"], "La sesión no es válida o ha caducado. Inicia sesión de nuevo.")
 
     def test_ACCESS_1_DoD_sin_sesion_no_hay_acceso(self):
         self.assertEqual(self.client.get("/api/auth/yo/").status_code, 401)
@@ -124,7 +135,9 @@ class SuspensionAccesoTests(APITestCase):
         self.usuario.is_active = False
         self.usuario.save()
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {tokens['access']}")
-        self.assertEqual(self.client.get("/api/auth/yo/").status_code, 401)
+        respuesta = self.client.get("/api/auth/yo/")
+        self.assertEqual(respuesta.status_code, 401)
+        self.assertEqual(respuesta.json(), {"detail": "La cuenta está suspendida.", "code": "user_inactive"})
         self.client.credentials()
         refresco = self.client.post("/api/auth/token/refresh/", {"refresh": tokens["refresh"]})
         self.assertEqual(refresco.status_code, 401)

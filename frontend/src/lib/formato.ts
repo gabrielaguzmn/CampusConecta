@@ -30,3 +30,22 @@ export function formatoHorario(inicio: string, fin: string): string {
 export function formatoDiaYHorario(inicio: string, fin: string): string {
   return `${formatoDia(inicio)} · ${formatoHorario(inicio, fin)}`
 }
+
+const MESES_LARGOS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+
+/** "Octubre 2026": mes actual en America/Bogota (Figma 4:28896, decisión G-58). */
+export function formatoMesActual(ahora: Date = new Date()): string {
+  const valores = new Intl.DateTimeFormat('es-CO', { timeZone: ZONA, month: 'numeric', year: 'numeric' }).formatToParts(ahora)
+  const de = (tipo: Intl.DateTimeFormatPartTypes) => valores.find((p) => p.type === tipo)!.value
+  return `${MESES_LARGOS[Number(de('month')) - 1]} ${de('year')}`
+}
+
+// Formularios: <input type="datetime-local"> trabaja en "AAAA-MM-DDTHH:mm" sin zona; se interpreta en Bogotá (UTC−5, G-15).
+export function localAIso(local: string): string {
+  return `${local}:00-05:00`
+}
+
+export function isoALocal(iso: string): string {
+  const bogota = new Date(new Date(iso).getTime() - 5 * 60 * 60 * 1000)
+  return bogota.toISOString().slice(0, 16)
+}

@@ -78,3 +78,16 @@ class ConfirmacionRecuperacionSerializer(serializers.Serializer):
         validar_password(datos["password"], usuario)
         datos["usuario"] = usuario
         return datos
+
+
+class UsuarioAdminSerializer(serializers.ModelSerializer):
+    """ADMIN-3, ADMIN-4: cuentas para que el administrador suspenda, reactive o asigne roles."""
+
+    suspendida = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Usuario
+        fields = ["id", "nombre", "email", "es_administrador", "suspendida"]
+
+    def get_suspendida(self, usuario) -> bool:
+        return not usuario.is_active

@@ -19,6 +19,8 @@ describe('ACCESS-1 · criterio 2: inicio de sesión', () => {
     const peticiones = simularApi({
       'POST /api/auth/token/': () => json({ access: 'acceso-1', refresh: 'refresco-1' }),
       'GET /api/auth/yo/': () => json(usuario),
+      'GET /api/categorias/': () => json([]),
+      'GET /api/eventos/': () => json([]),
     })
     const router = renderizarApp('/feed')
     await userEvent.type(await screen.findByLabelText('Correo electrónico'), 'persona@cualquierdominio.test')
@@ -26,10 +28,11 @@ describe('ACCESS-1 · criterio 2: inicio de sesión', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/feed'))
-    expect(screen.getByRole('link', { name: 'Feed' })).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: 'Feed' })).toBeInTheDocument()
     expect(screen.getByText('PD')).toBeInTheDocument()
     expect(await peticiones[0].json()).toEqual({ email: 'persona@cualquierdominio.test', password: 'clave' })
-    expect(peticiones[1].headers.get('Authorization')).toBe('Bearer acceso-1')
+    const yo = peticiones.find((p) => p.url.endsWith('/api/auth/yo/'))!
+    expect(yo.headers.get('Authorization')).toBe('Bearer acceso-1')
     // Sesión: access en memoria, refresh en localStorage (02_arquitectura.md §3)
     expect(tokens.access()).toBe('acceso-1')
     expect(localStorage.getItem('campusconecta.refresh')).toBe('refresco-1')
@@ -134,5 +137,40 @@ describe('ACCESS-1 · criterio 3: recuperación de contraseña', () => {
     simularApi({})
     renderizarApp('/recuperar')
     expect(await screen.findByRole('link', { name: 'Volver a Login' })).toHaveAttribute('href', '/login')
+  })
+})
+
+describe('G-49: nueva contraseña desde el enlace del correo (pantalla creada el 2026-10-07)', () => {
+  async function completar(password = 'nueva-clave', confirmar = 'nueva-clave') {
+    await userEvent.type(await screen.findByLabelText('Nueva contraseña'), password)
+    await userEvent.type(screen.getByLabelText('Confirmar Contraseña'), confirmar)
+  }
+
+  it('envía uid, token y la nueva contraseña, y luego ofrece iniciar sesión', async () => {
+    const peticiones = simularApi({ 'POST /api/auth/recuperacion/confirmar/': () => new Response(null, { status: 204 }) })
+    renderizarApp('/recuperar/confirmar?uid=MQ&token=abc-123')
+    await completar()
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar contraseña' }))
+    expect(await screen.findByRole('heading', { name: 'Contraseña actualizada' })).toBeInTheDocument()
+    expect(await peticiones[0].json()).toEqual({ uid: 'MQ', token: 'abc-123', password: 'nueva-clave' })
+    expect(screen.getByRole('link', { name: 'Iniciar Sesión' })).toHaveAttribute('href', '/login')
+  })
+
+  it('si el enlace caducó muestra el mensaje de la API y permite pedir otro', async () => {
+    simularApi({
+      'POST /api/auth/recuperacion/confirmar/': () => json({ non_field_errors: ['El enlace no es válido o ha caducado.'] }, 400),
+    })
+    renderizarApp('/recuperar/confirmar?uid=MQ&token=viejo')
+    await completar()
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar contraseña' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('El enlace no es válido o ha caducado.')
+    expect(screen.getByRole('link', { name: 'Pedir un enlace nuevo' })).toHaveAttribute('href', '/recuperar')
+  })
+
+  it('sin uid y token, o si las contraseñas no coinciden, no se puede enviar', async () => {
+    simularApi({})
+    renderizarApp('/recuperar/confirmar')
+    await completar()
+    expect(screen.getByRole('button', { name: 'Guardar contraseña' })).toBeDisabled()
   })
 })

@@ -1,3 +1,4 @@
+from django.utils.dateparse import parse_datetime
 from rest_framework.test import APIClient
 
 from eventos.models import CANCELADA, EN_VIVO, FINALIZADA, PROXIMA, Categoria, Fecha, Ubicacion
@@ -49,8 +50,7 @@ class FeedTests(BaseEventosTest):
         fecha = self.crear_evento((24, 26)).fechas.get()
         nuevo_fin = en(30)
         self.client.patch(f"/api/fechas/{fecha.pk}/", {"fin": nuevo_fin.isoformat()}, format="json")
-        fecha.refresh_from_db()
-        self.assertEqual(self.client.get("/api/eventos/").data[0]["fechas"][0]["fin"], fecha.fin.astimezone().isoformat())
+        self.assertEqual(parse_datetime(self.client.get("/api/eventos/").data[0]["fechas"][0]["fin"]), nuevo_fin)
 
     def test_PUBLICATION_5_c3_cancelar_todas_retira_del_feed(self):
         evento = self.crear_evento((-1, 1), (24, 26))
@@ -151,9 +151,7 @@ class MapaTests(BaseEventosTest):
 
     def test_INTERACTIVITY_1_c2_varios_eventos_en_una_misma_ubicacion(self):
         otra = Ubicacion.objects.create(nombre="Biblioteca")
-        a, b = self.crear_evento(), self.crear_evento()
-        c = self.crear_evento(ubicacion=otra) if False else None
-        c = self.crear_evento()
+        a, b, c = self.crear_evento(), self.crear_evento(), self.crear_evento()
         c.ubicacion = otra
         c.save()
         grupos = {g["ubicacion"]["nombre"]: [e["id"] for e in g["eventos"]] for g in self.mapa()}

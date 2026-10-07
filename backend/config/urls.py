@@ -4,9 +4,13 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView
 from rest_framework.permissions import AllowAny
 
+from cuentas.urls import urlpatterns_admin
+
 urlpatterns = [
     path("api/auth/", include("cuentas.urls")),
     path("api/", include("eventos.urls")),
+    path("api/", include("moderacion.urls")),
+    path("api/admin/usuarios/", include(urlpatterns_admin)),
     path("api/schema/", SpectacularAPIView.as_view(permission_classes=[AllowAny]), name="schema"),
 ]
 

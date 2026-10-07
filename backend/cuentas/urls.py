@@ -11,3 +11,10 @@ urlpatterns = [
     path("recuperacion/", views.SolicitudRecuperacionView.as_view(), name="recuperacion"),
     path("recuperacion/confirmar/", views.ConfirmacionRecuperacionView.as_view(), name="recuperacion-confirmar"),
 ]
+
+# ADMIN-3 y ADMIN-4: gestión de cuentas y roles (bajo /api/admin/usuarios/).
+urlpatterns_admin = [
+    path("", views.AdminUsuariosView.as_view(), name="admin-usuarios"),
+    path("<int:pk>/asignar-admin/", views.CambioRolView.as_view(es_administrador=True), name="admin-asignar-admin"),
+    path("<int:pk>/revocar-admin/", views.CambioRolView.as_view(es_administrador=False), name="admin-revocar-admin"),
+]

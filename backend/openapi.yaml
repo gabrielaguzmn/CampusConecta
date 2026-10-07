@@ -3,6 +3,84 @@ info:
   title: CampusConecta API
   version: 1.0.0
 paths:
+  /api/admin/casos/:
+    get:
+      operationId: admin_casos_list
+      description: 'ADMIN-2 · criterio 1: reportes agrupados por evento.'
+      parameters:
+      - in: query
+        name: estado
+        schema:
+          type: string
+          enum:
+          - en_revision
+          - pendiente
+          - revisado
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Caso'
+          description: ''
+  /api/admin/casos/{id}/:
+    get:
+      operationId: admin_casos_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Caso'
+          description: ''
+    patch:
+      operationId: admin_casos_partial_update
+      description: 'ADMIN-2 · criterios 2 y 3: cambiar el estado del caso y, al revisarlo,
+        decidir si el evento se oculta.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCasoActualizacionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCasoActualizacionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCasoActualizacionRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Caso'
+          description: ''
   /api/admin/categorias/:
     get:
       operationId: admin_categorias_list
@@ -77,6 +155,291 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Categoria'
+          description: ''
+  /api/admin/eventos/:
+    get:
+      operationId: admin_eventos_list
+      description: 'ADMIN-1: "revisar" (RF-025). Lista todos los eventos, incluidos
+        los ocultos.'
+      parameters:
+      - in: query
+        name: oculto
+        schema:
+          type: boolean
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Evento'
+          description: ''
+  /api/admin/eventos/{id}/ocultar/:
+    post:
+      operationId: admin_eventos_ocultar_create
+      description: 'ADMIN-1 · criterios 1 y 4: ocultar el evento completo; se avisa
+        al creador por correo.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MotivoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MotivoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MotivoRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evento'
+          description: ''
+  /api/admin/eventos/{id}/restaurar/:
+    post:
+      operationId: admin_eventos_restaurar_create
+      description: 'ADMIN-1 · criterio 2: restaurar el evento.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evento'
+          description: ''
+  /api/admin/fechas/{id}/ocultar/:
+    post:
+      operationId: admin_fechas_ocultar_create
+      description: 'ADMIN-1 · criterios 1 y 4: ocultar una fecha; se avisa al creador
+        por correo.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MotivoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MotivoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MotivoRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evento'
+          description: ''
+  /api/admin/fechas/{id}/restaurar/:
+    post:
+      operationId: admin_fechas_restaurar_create
+      description: 'ADMIN-1 · criterio 2: restaurar una fecha.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evento'
+          description: ''
+  /api/admin/registro/:
+    get:
+      operationId: admin_registro_list
+      description: 'ADMIN-4 · criterios 3 y 4: consulta de solo lectura.'
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RegistroModeracion'
+          description: ''
+  /api/admin/registro/{id}/:
+    get:
+      operationId: admin_registro_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistroModeracion'
+          description: ''
+  /api/admin/usuarios/:
+    get:
+      operationId: admin_usuarios_list
+      description: 'ADMIN-3, ADMIN-4: listado de cuentas para el administrador.'
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsuarioAdmin'
+          description: ''
+  /api/admin/usuarios/{id}/asignar-admin/:
+    post:
+      operationId: admin_usuarios_asignar_admin_create
+      description: 'ADMIN-4 · criterio 2, RF-028: asignar o revocar el rol administrador
+        a otros usuarios.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioAdmin'
+          description: ''
+  /api/admin/usuarios/{id}/reactivar/:
+    post:
+      operationId: admin_usuarios_reactivar_create
+      description: ADMIN-3 · criterio 3.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstadoCuenta'
+          description: ''
+  /api/admin/usuarios/{id}/revocar-admin/:
+    post:
+      operationId: admin_usuarios_revocar_admin_create
+      description: 'ADMIN-4 · criterio 2, RF-028: asignar o revocar el rol administrador
+        a otros usuarios.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioAdmin'
+          description: ''
+  /api/admin/usuarios/{id}/suspender/:
+    post:
+      operationId: admin_usuarios_suspender_create
+      description: ADMIN-3 · criterios 1, 2 y 4.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MotivoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MotivoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MotivoRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstadoCuenta'
           description: ''
   /api/auth/recuperacion/:
     post:
@@ -241,6 +604,38 @@ paths:
                   $ref: '#/components/schemas/Categoria'
           description: ''
   /api/eventos/:
+    get:
+      operationId: eventos_list
+      description: |-
+        DISPLAY-1, DISPLAY-2: feed de eventos vigentes, del más reciente al más antiguo (G-37).
+        No hay filtro por fecha (G-19, decisión 2026-10-07).
+      parameters:
+      - in: query
+        name: categoria
+        schema:
+          type: integer
+        description: Id de la categoría (DISPLAY-2 · criterio 1)
+      - in: query
+        name: estado
+        schema:
+          type: string
+          enum:
+          - en_vivo
+          - proxima
+        description: DISPLAY-2 · criterio 3, G-33
+      tags:
+      - eventos
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventoPublico'
+          description: ''
     post:
       operationId: eventos_create
       description: 'PUBLICATION-1: crear y publicar un evento con una o varias fechas.'
@@ -268,6 +663,27 @@ paths:
                 $ref: '#/components/schemas/Evento'
           description: ''
   /api/eventos/{id}/:
+    get:
+      operationId: eventos_retrieve
+      description: 'INTERACTIVITY-2 · criterio 2, INTERACTIVITY-3: detalle completo.
+        G-38: misma regla que el feed; si no, 404.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - eventos
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventoPublico'
+          description: ''
     patch:
       operationId: eventos_partial_update
       description: 'G-30: editar los datos del evento.'
@@ -412,6 +828,40 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/eventos/{id}/reportes/:
+    post:
+      operationId: eventos_reportes_create
+      description: 'DISPLAY-3, RF-007, RF-030: reportar un evento desde su detalle;
+        solo se confirma el envío.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - eventos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReporteEntradaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReporteEntradaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReporteEntradaRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmacionReporte'
+          description: ''
   /api/fechas/{id}/:
     patch:
       operationId: fechas_partial_update
@@ -536,6 +986,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/Evento'
           description: ''
+  /api/mapa/:
+    get:
+      operationId: mapa_list
+      description: 'INTERACTIVITY-1, INTERACTIVITY-2 · criterio 1: eventos vigentes
+        agrupados por ubicación del catálogo.'
+      tags:
+      - mapa
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UbicacionMapa'
+          description: ''
   /api/mis-eventos/:
     get:
       operationId: mis_eventos_list
@@ -562,6 +1030,24 @@ paths:
                 items:
                   $ref: '#/components/schemas/Evento'
           description: ''
+  /api/normas/:
+    get:
+      operationId: normas_list
+      description: 'Las 10 normas de uso: causas de reporte (G-20) y motivos de moderación
+        (G-21).'
+      tags:
+      - normas
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Norma'
+          description: ''
   /api/ubicaciones/:
     get:
       operationId: ubicaciones_list
@@ -581,6 +1067,28 @@ paths:
           description: ''
 components:
   schemas:
+    Caso:
+      type: object
+      description: 'ADMIN-2 · criterio 1: un caso por evento con todos sus reportes.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        evento:
+          $ref: '#/components/schemas/EventoBreve'
+        estado:
+          $ref: '#/components/schemas/EstadoCasoEnum'
+        decision_ocultar:
+          type: boolean
+          nullable: true
+        reportes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reporte'
+      required:
+      - evento
+      - id
+      - reportes
     Categoria:
       type: object
       properties:
@@ -634,7 +1142,38 @@ components:
       - password
       - token
       - uid
-    EstadoEnum:
+    ConfirmacionReporte:
+      type: object
+      properties:
+        detail:
+          type: string
+      required:
+      - detail
+    EstadoCasoEnum:
+      enum:
+      - pendiente
+      - en_revision
+      - revisado
+      type: string
+      description: |-
+        * `pendiente` - Pendiente por revisión
+        * `en_revision` - En revisión
+        * `revisado` - Revisado
+    EstadoCuenta:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        suspendida:
+          type: boolean
+      required:
+      - email
+      - id
+      - suspendida
+    EstadoFechaEnum:
       enum:
       - proxima
       - en_vivo
@@ -687,6 +1226,15 @@ components:
           type: string
         oculto:
           type: boolean
+        norma_ocultamiento:
+          nullable: true
+          minimum: 0
+          maximum: 32767
+          oneOf:
+          - $ref: '#/components/schemas/NormaEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        explicacion_ocultamiento:
+          type: string
         fechas:
           type: array
           items:
@@ -699,6 +1247,22 @@ components:
       - nombre
       - responsable
       - ubicacion
+    EventoBreve:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string
+        oculto:
+          type: boolean
+        creador:
+          $ref: '#/components/schemas/UsuarioBreve'
+      required:
+      - creador
+      - id
+      - nombre
+      - oculto
     EventoCreacionRequest:
       type: object
       description: 'PUBLICATION-1: RF-008 (obligatorios) y RF-010 (opcionales). La
@@ -743,6 +1307,80 @@ components:
       - nombre
       - responsable
       - ubicacion
+    EventoMapa:
+      type: object
+      description: Información básica del pin (INTERACTIVITY-2 · criterio 1); el detalle
+        completo está en GET eventos/{id}/.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+        categoria:
+          $ref: '#/components/schemas/Categoria'
+        detalle_ubicacion:
+          type: string
+        fechas:
+          type: array
+          items:
+            $ref: '#/components/schemas/FechaPublica'
+      required:
+      - categoria
+      - fechas
+      - id
+      - nombre
+    EventoPublico:
+      type: object
+      description: Feed y detalle (DISPLAY-1, INTERACTIVITY-2, INTERACTIVITY-3). Las
+        fechas ocultas no se incluyen.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+        categoria:
+          $ref: '#/components/schemas/Categoria'
+        descripcion:
+          type: string
+        responsable:
+          type: string
+        ubicacion:
+          $ref: '#/components/schemas/Ubicacion'
+        detalle_ubicacion:
+          type: string
+        cupo:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+          nullable: true
+        imagen:
+          type: string
+          format: uri
+          nullable: true
+          pattern: (?:jpg|jpeg|png)$
+        enlace_externo:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        contacto:
+          type: string
+        fechas:
+          type: array
+          items:
+            $ref: '#/components/schemas/FechaPublica'
+      required:
+      - categoria
+      - descripcion
+      - fechas
+      - id
+      - nombre
+      - responsable
+      - ubicacion
     ExtensionRequest:
       type: object
       description: 'PUBLICATION-7, G-05: nuevo fin posterior al actual y sin solapar
@@ -771,10 +1409,19 @@ components:
           nullable: true
         estado:
           allOf:
-          - $ref: '#/components/schemas/EstadoEnum'
+          - $ref: '#/components/schemas/EstadoFechaEnum'
           readOnly: true
         oculta:
           type: boolean
+        norma_ocultamiento:
+          nullable: true
+          minimum: 0
+          maximum: 32767
+          oneOf:
+          - $ref: '#/components/schemas/NormaEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        explicacion_ocultamiento:
+          type: string
       required:
       - estado
       - fin
@@ -792,6 +1439,32 @@ components:
       required:
       - fin
       - inicio
+    FechaPublica:
+      type: object
+      description: 'Fecha tal como la ve cualquier usuario: sin marcas de moderación.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        inicio:
+          type: string
+          format: date-time
+        fin:
+          type: string
+          format: date-time
+        finalizada_en:
+          type: string
+          format: date-time
+          nullable: true
+        estado:
+          allOf:
+          - $ref: '#/components/schemas/EstadoFechaEnum'
+          readOnly: true
+      required:
+      - estado
+      - fin
+      - id
+      - inicio
     ImagenRequest:
       type: object
       properties:
@@ -800,6 +1473,69 @@ components:
           format: binary
       required:
       - imagen
+    MotivoRequest:
+      type: object
+      description: 'RF-034, G-21: norma incumplida y explicación opcional.'
+      properties:
+        norma:
+          $ref: '#/components/schemas/NormaEnum'
+        explicacion:
+          type: string
+          default: ''
+      required:
+      - norma
+    Norma:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string
+      required:
+      - id
+      - nombre
+    NormaEnum:
+      enum:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      type: integer
+      description: |-
+        * `1` - Ámbito de los eventos
+        * `2` - Información veraz y completa
+        * `3` - Respeto y convivencia
+        * `4` - Actividades y ventas lícitas
+        * `5` - Sin spam, duplicados ni publicidad ajena
+        * `6` - Privacidad
+        * `7` - Propiedad intelectual
+        * `8` - Uso de los espacios del campus
+        * `9` - Responsabilidad sobre el evento
+        * `10` - Cuenta personal y reportes de buena fe
+    NullEnum:
+      enum:
+      - null
+    PatchedCasoActualizacionRequest:
+      type: object
+      description: ADMIN-2 · criterios 2 y 3. Al pasar a "revisado" se decide si el
+        evento se oculta; si se oculta, con su motivo.
+      properties:
+        estado:
+          $ref: '#/components/schemas/EstadoCasoEnum'
+        decision_ocultar:
+          type: boolean
+          nullable: true
+        norma:
+          $ref: '#/components/schemas/NormaEnum'
+        explicacion:
+          type: string
+          default: ''
     PatchedCategoriaRequest:
       type: object
       properties:
@@ -874,6 +1610,56 @@ components:
       - email
       - id
       - nombre
+    RegistroModeracion:
+      type: object
+      description: 'ADMIN-4 · criterio 3: datos completos de cada acción.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        fecha_hora:
+          type: string
+          format: date-time
+          readOnly: true
+        administrador:
+          $ref: '#/components/schemas/UsuarioBreve'
+        tipo_accion:
+          $ref: '#/components/schemas/TipoAccionEnum'
+        evento:
+          type: integer
+          nullable: true
+        fecha:
+          type: integer
+          nullable: true
+        cuenta_afectada:
+          $ref: '#/components/schemas/UsuarioBreve'
+        norma:
+          nullable: true
+          minimum: 0
+          maximum: 32767
+          oneOf:
+          - $ref: '#/components/schemas/NormaEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        explicacion:
+          type: string
+        reportes:
+          type: array
+          items:
+            type: integer
+        estado_anterior:
+          type: string
+          maxLength: 50
+        estado_posterior:
+          type: string
+          maxLength: 50
+      required:
+      - administrador
+      - cuenta_afectada
+      - estado_anterior
+      - estado_posterior
+      - fecha_hora
+      - id
+      - tipo_accion
     RegistroRequest:
       type: object
       properties:
@@ -893,6 +1679,39 @@ components:
       - email
       - nombre
       - password
+    Reporte:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        usuario:
+          $ref: '#/components/schemas/UsuarioBreve'
+        causa:
+          allOf:
+          - $ref: '#/components/schemas/NormaEnum'
+          minimum: 0
+          maximum: 32767
+        detalles:
+          type: string
+      required:
+      - causa
+      - id
+      - usuario
+    ReporteEntradaRequest:
+      type: object
+      description: 'DISPLAY-3: causa obligatoria (una norma de uso, G-20) y detalles
+        opcionales.'
+      properties:
+        causa:
+          allOf:
+          - $ref: '#/components/schemas/NormaEnum'
+          minimum: 0
+          maximum: 32767
+        detalles:
+          type: string
+      required:
+      - causa
     SolicitudRecuperacionRequest:
       type: object
       properties:
@@ -902,6 +1721,18 @@ components:
           minLength: 1
       required:
       - email
+    TipoAccionEnum:
+      enum:
+      - ocultar
+      - restaurar
+      - suspender
+      - reactivar
+      type: string
+      description: |-
+        * `ocultar` - Ocultar
+        * `restaurar` - Restaurar
+        * `suspender` - Suspender
+        * `reactivar` - Reactivar
     TokenRefresh:
       type: object
       properties:
@@ -955,6 +1786,20 @@ components:
       required:
       - id
       - nombre
+    UbicacionMapa:
+      type: object
+      description: 'INTERACTIVITY-1 · criterio 2: los eventos vigentes agrupados por
+        ubicación del catálogo.'
+      properties:
+        ubicacion:
+          $ref: '#/components/schemas/Ubicacion'
+        eventos:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventoMapa'
+      required:
+      - eventos
+      - ubicacion
     UsuarioActual:
       type: object
       properties:
@@ -969,6 +1814,46 @@ components:
           maxLength: 254
         es_administrador:
           type: boolean
+      required:
+      - email
+      - id
+      - nombre
+    UsuarioAdmin:
+      type: object
+      description: 'ADMIN-3, ADMIN-4: cuentas para que el administrador suspenda,
+        reactive o asigne roles.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        es_administrador:
+          type: boolean
+        suspendida:
+          type: boolean
+          readOnly: true
+      required:
+      - email
+      - id
+      - nombre
+      - suspendida
+    UsuarioBreve:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+        email:
+          type: string
+          format: email
+          maxLength: 254
       required:
       - email
       - id

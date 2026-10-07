@@ -6,6 +6,8 @@ from django.db.models import Case, Exists, F, OuterRef, Q, Value, When
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
+from moderacion.normas import Norma
+
 PROXIMA = "proxima"
 EN_VIVO = "en_vivo"
 FINALIZADA = "finalizada"
@@ -94,9 +96,10 @@ class Evento(models.Model):
     )
     enlace_externo = models.URLField(blank=True, validators=[URLValidator(schemes=["http", "https"])])
     contacto = models.TextField(blank=True)
-    # RF-032: ocultamiento por moderación.
+    # RF-032: ocultamiento por moderación, con su motivo (G-21: una norma más un texto opcional).
     oculto = models.BooleanField(default=False)
-    # TODO(PENDIENTE G-21: motivo de ocultamiento — una norma, varias o norma con texto)
+    norma_ocultamiento = models.PositiveSmallIntegerField(choices=Norma.choices, null=True, blank=True)
+    explicacion_ocultamiento = models.TextField(blank=True)
 
     objects = EventoQuerySet.as_manager()
 
@@ -130,9 +133,10 @@ class Fecha(models.Model):
     # RF-019: acciones manuales del creador.
     cancelada = models.BooleanField(default=False)
     finalizada_en = models.DateTimeField(null=True, blank=True)
-    # RF-032: ocultamiento por moderación.
+    # RF-032: ocultamiento por moderación, con su motivo (G-21).
     oculta = models.BooleanField(default=False)
-    # TODO(PENDIENTE G-21: motivo de ocultamiento)
+    norma_ocultamiento = models.PositiveSmallIntegerField(choices=Norma.choices, null=True, blank=True)
+    explicacion_ocultamiento = models.TextField(blank=True)
 
     objects = FechaQuerySet.as_manager()
 

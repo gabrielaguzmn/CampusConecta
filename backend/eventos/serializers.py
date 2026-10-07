@@ -38,7 +38,7 @@ class FechaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Fecha
-        fields = ["id", "inicio", "fin", "finalizada_en", "estado", "oculta"]
+        fields = ["id", "inicio", "fin", "finalizada_en", "estado", "oculta", "norma_ocultamiento", "explicacion_ocultamiento"]
 
     @extend_schema_field(serializers.ChoiceField(choices=ESTADOS))
     def get_estado(self, fecha):
@@ -56,7 +56,8 @@ class EventoSerializer(serializers.ModelSerializer):
         model = Evento
         fields = [
             "id", "nombre", "categoria", "descripcion", "responsable", "ubicacion", "detalle_ubicacion",
-            "cupo", "imagen", "enlace_externo", "contacto", "oculto", "fechas",
+            "cupo", "imagen", "enlace_externo", "contacto", "oculto", "norma_ocultamiento", "explicacion_ocultamiento",
+            "fechas",
         ]
 
 

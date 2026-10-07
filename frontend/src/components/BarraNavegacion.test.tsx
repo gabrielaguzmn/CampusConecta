@@ -25,8 +25,9 @@ describe('BarraNavegacion (Figma 4:30135 · 5:25–5:26)', () => {
     expect(screen.getByRole('link', { name: 'Mapa' })).toHaveAttribute('aria-current', 'page')
   })
 
-  it('G-40: no incluye buscador ni campana', () => {
+  it('decisión 2026-10-07: tiene buscador y no tiene campana', () => {
     renderizar('/feed')
-    expect(screen.queryByPlaceholderText('Buscar eventos...')).not.toBeInTheDocument()
+    expect(screen.getByRole('searchbox', { name: 'Buscar eventos' })).toHaveAttribute('placeholder', 'Buscar eventos...')
+    expect(screen.queryByRole('button', { name: /notificaciones/i })).not.toBeInTheDocument()
   })
 })

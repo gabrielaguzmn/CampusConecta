@@ -54,6 +54,9 @@ DATABASES = {
         "PORT": os.environ.get("DB_PORT", ""),
     }
 }
+# Las bases en la nube (Neon, Supabase, Render…) exigen conexión cifrada: DB_SSLMODE=require.
+if os.environ.get("DB_SSLMODE"):
+    DATABASES["default"]["OPTIONS"] = {"sslmode": os.environ["DB_SSLMODE"]}
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -100,6 +103,11 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
+    "ENUM_NAME_OVERRIDES": {
+        "EstadoFechaEnum": "eventos.models.ESTADOS",
+        "EstadoCasoEnum": "moderacion.models.CasoReporte.ESTADOS",
+        "NormaEnum": "moderacion.normas.Norma",
+    },
 }
 
 # T-9: correo por consola en desarrollo; SMTP configurado por entorno en producción.

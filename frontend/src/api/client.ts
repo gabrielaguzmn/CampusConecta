@@ -64,3 +64,15 @@ export function erroresDeCampo(error: unknown): Record<string, string> {
   }
   return resultado
 }
+
+/** Todos los mensajes de un error de la API, incluidos los anidados (p. ej. { fechas: [{ fin: ["…"] }] }). */
+export function todosLosMensajes(error: unknown): string[] {
+  if (typeof error === 'string') return [error]
+  if (Array.isArray(error)) return error.flatMap(todosLosMensajes)
+  if (error && typeof error === 'object') {
+    return Object.entries(error)
+      .filter(([clave]) => clave !== 'code')
+      .flatMap(([, valor]) => todosLosMensajes(valor))
+  }
+  return []
+}

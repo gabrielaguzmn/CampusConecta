@@ -1,6 +1,6 @@
 import type { components } from '../api/schema'
 
-type Estado = Exclude<components['schemas']['EstadoEnum'], 'finalizada'>
+type Estado = Exclude<components['schemas']['FechaPublica']['estado'], 'finalizada'>
 
 // Figma 4:30135: "Solo tres estados oficiales. Finalizada se usa únicamente como anotación de una fecha pasada."
 // El símbolo y la etiqueta acompañan siempre al color (regla 7). El estado llega de la API (RF-019); aquí no se calcula.

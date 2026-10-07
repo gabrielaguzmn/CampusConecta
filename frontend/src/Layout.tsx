@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router'
+import { Outlet, useNavigate } from 'react-router'
 import { useSesion } from './auth/AuthProvider'
 import { BarraNavegacion } from './components/BarraNavegacion'
 
@@ -13,10 +13,26 @@ export function iniciales(nombre: string): string {
 }
 
 export function Layout() {
-  const { usuario } = useSesion()
+  const { usuario, cerrarSesion } = useSesion()
+  const navegar = useNavigate()
   return (
     <>
-      <BarraNavegacion iniciales={usuario ? iniciales(usuario.nombre) : ''} />
+      <BarraNavegacion
+        iniciales={usuario ? iniciales(usuario.nombre) : ''}
+        esAdministrador={usuario?.es_administrador}
+        cuenta={
+          usuario
+            ? {
+            nombre: usuario.nombre,
+            email: usuario.email,
+            onCerrarSesion: () => {
+              cerrarSesion()
+              navegar('/login', { replace: true })
+            },
+              }
+            : undefined
+        }
+      />
       <Outlet />
     </>
   )

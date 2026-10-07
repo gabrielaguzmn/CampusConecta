@@ -32,3 +32,11 @@
 body {
   @apply bg-fondo font-sans text-texto;
 }
+
+/* Figma dibuja los íconos con trazo de 1 px (p. ej. 4:30622 «x», 4:30529 «map-pin»); Lucide trae 2. */
+svg.lucide {
+  stroke-width: 1px;
+}
+svg.lucide * {
+  vector-effect: non-scaling-stroke;
+}

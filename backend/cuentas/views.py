@@ -1,3 +1,5 @@
+from django.db import transaction
+from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import generics, serializers, status
 from rest_framework.permissions import AllowAny
@@ -5,14 +7,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from config.excepciones import Conflicto
 from cuentas.correos import enviar_recuperacion
 from cuentas.models import Usuario
+from cuentas.permissions import EsAdministrador
 from cuentas.serializers import (
     ConfirmacionRecuperacionSerializer,
     RegistroSerializer,
     SolicitudRecuperacionSerializer,
     TokenSerializer,
     UsuarioActualSerializer,
+    UsuarioAdminSerializer,
 )
 
 
@@ -72,3 +77,34 @@ class ConfirmacionRecuperacionView(APIView):
         usuario.set_password(serializer.validated_data["password"])
         usuario.save(update_fields=["password"])
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AdminUsuariosView(generics.ListAPIView):
+    """ADMIN-3, ADMIN-4: listado de cuentas para el administrador."""
+
+    serializer_class = UsuarioAdminSerializer
+    permission_classes = [EsAdministrador]
+    pagination_class = None
+    queryset = Usuario.objects.order_by("pk")
+
+
+class CambioRolView(APIView):
+    """ADMIN-4 · criterio 2, RF-028: asignar o revocar el rol administrador a otros usuarios."""
+
+    permission_classes = [EsAdministrador]
+    es_administrador = None
+
+    @extend_schema(request=None, responses=UsuarioAdminSerializer)
+    @transaction.atomic
+    def post(self, request, pk):
+        usuario = get_object_or_404(Usuario.objects.select_for_update(), pk=pk)
+        # RF-028: "a otros usuarios".
+        if usuario.pk == request.user.pk:
+            raise Conflicto("No puedes cambiar tu propio rol.", code="rol_propio")
+        if usuario.es_administrador == self.es_administrador:
+            raise Conflicto("La cuenta ya tiene ese rol.")
+        # TODO(PENDIENTE G-28: revocar al administrador inicial o dejar la plataforma sin administradores)
+        # TODO(PENDIENTE G-34: si el cambio de rol se guarda en el registro de moderación)
+        usuario.es_administrador = self.es_administrador
+        usuario.save(update_fields=["es_administrador"])
+        return Response(UsuarioAdminSerializer(usuario).data)

@@ -1,6 +1,10 @@
-import { render, screen } from '@testing-library/react'
+import { render as renderBase, screen } from '@testing-library/react'
+import type { ReactElement } from 'react'
+import { MemoryRouter } from 'react-router'
 import { evento, fecha } from '../test/datos'
 import { TarjetaEvento } from './TarjetaEvento'
+
+const render = (ui: ReactElement) => renderBase(<MemoryRouter>{ui}</MemoryRouter>)
 
 describe('TarjetaEvento (Figma 4:30135 · 5:17–5:18)', () => {
   it('muestra imagen, categoría sobre la imagen, título y descripción', () => {
@@ -44,5 +48,12 @@ describe('TarjetaEvento sin imagen (G-55)', () => {
     expect(container.querySelector('img')).toBeNull()
     expect(container.querySelector('.bg-primario')).toBeInTheDocument()
     expect(screen.getByText('Categoría de prueba')).toBeInTheDocument()
+  })
+})
+
+describe('TarjetaEvento enlaza al detalle (INTERACTIVITY-2 · criterio 2)', () => {
+  it('el título es un enlace a /eventos/:id', () => {
+    render(<TarjetaEvento evento={evento({ id: 42 })} />)
+    expect(screen.getByRole('link', { name: 'Evento de prueba' })).toHaveAttribute('href', '/eventos/42')
   })
 })
