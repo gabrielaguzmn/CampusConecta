@@ -30,18 +30,16 @@ Esta sección se hace **una sola vez** por computador. Después, para usar la ap
 
 ### 2.1 Base de datos
 
-Crea la base de datos `campusconecta`. Elige una de estas dos opciones:
+Agrega las credenciales de la base de datos `campusconecta`:
 
 ```bash
-# Opción A: tu usuario de Linux ya tiene rol en PostgreSQL (autenticación por socket)
-createdb campusconecta
-
-# Opción B: crear un usuario con contraseña
-sudo -u postgres psql -c "CREATE USER campus WITH PASSWORD 'cambia-esta-clave' CREATEDB;"
-sudo -u postgres createdb -O campus campusconecta
+DB_NAME=campusconectadb
+DB_USER=
+DB_PASSWORD=
+DB_HOST=
+DB_PORT=
+DB_SSLMODE=
 ```
-
-El permiso `CREATEDB` hace falta para ejecutar las pruebas, porque Django crea una base de datos temporal `test_campusconecta`.
 
 ### 2.2 Backend
 
