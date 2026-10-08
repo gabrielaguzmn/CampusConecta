@@ -54,7 +54,7 @@ DATABASES = {
         "PORT": os.environ.get("DB_PORT", ""),
     }
 }
-# Las bases en la nube (Neon, Supabase, Render…) exigen conexión cifrada: DB_SSLMODE=require.
+# Las bases en la nube
 if os.environ.get("DB_SSLMODE"):
     DATABASES["default"]["OPTIONS"] = {"sslmode": os.environ["DB_SSLMODE"]}
 
