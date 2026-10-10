@@ -9,6 +9,7 @@ venv/
 .env.*
 !.env.example
 backend/media/
+docs/
 
 # Caché de compilación de TypeScript
 *.tsbuildinfo
