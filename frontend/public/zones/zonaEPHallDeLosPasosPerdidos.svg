@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="1121"
+   height="916"
+   viewBox="0 0 1121 916"
+   xml:space="preserve"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1" /><g
+     id="g1"><image
+       width="1121"
+       height="916"
+       preserveAspectRatio="none"
+       xlink:href="zonaEHall.png"
+       id="image1"
+       x="0"
+       y="0" /><g
+       id="g101"><path
+         style="fill:#fad841"
+         d="m 476,621 v -8 h -4.5 c -4.47619,0 -4.5,-0.0185 -4.5,-3.5 V 606 h 21 21 V 617.5 629 H 492.5 476 Z"
+         id="path104" /><path
+         style="fill:#f8d641"
+         d="m 476,621 v -8 h -4.5 c -4.47619,0 -4.5,-0.0185 -4.5,-3.5 V 606 h 21 21 V 617.5 629 H 492.5 476 Z m 32,6.1834 c 0,-1.02211 -26.55913,-0.95798 -27.58349,0.0666 -0.41242,0.4125 5.62516,0.75 13.41682,0.75 C 501.625,628 508,627.63253 508,627.1834 Z m -30.29274,-12.42174 c -0.23919,-1.24391 -0.44398,-0.46166 -0.45508,1.73834 -0.0111,2.2 0.18461,3.21775 0.4349,2.26166 0.25029,-0.95609 0.25937,-2.75609 0.0202,-4 z"
+         id="path103" /><path
+         style="fill:#efd03f"
+         d="m 476,621 v -8 h -4.5 c -4.47619,0 -4.5,-0.0185 -4.5,-3.5 V 606 h 21 21 V 617.5 629 H 492.5 476 Z m 32,-3.5 V 607 h -20 c -20,0 -20,0 -20,2.5 0,2.2963 0.36667,2.5 4.5,2.5 h 4.5 v 8 8 h 15.5 15.5 z"
+         id="path102" /><path
+         style="fill:#000000"
+         d="m 476,621 v -8 h -4.5 c -4.47619,0 -4.5,-0.0185 -4.5,-3.5 V 606 h 21 21 V 617.5 629 H 492.5 476 Z m 32,-3.5 V 607 h -20 c -20,0 -20,0 -20,2.5 0,2.2963 0.36667,2.5 4.5,2.5 h 4.5 v 8 8 h 15.5 15.5 z"
+         id="path101" /></g></g>
+<text x="488" y="617" text-anchor="middle" dominant-baseline="central" fill="#ffffff" stroke="#263550" stroke-width="1.08" paint-order="stroke" stroke-linejoin="round" font-family="Arial, sans-serif" font-size="7.2" font-weight="700"><tspan x="488" y="609">Hall de</tspan><tspan x="488" y="617">los Pasos</tspan><tspan x="488" y="625">Perdidos</tspan></text>
+</svg>

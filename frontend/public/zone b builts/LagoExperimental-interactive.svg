@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1121" height="916" viewBox="0 0 1121 916">
+  <!-- Silueta vectorial alineada con el plano de Zona B -->
+  <path d="M 633 200 C 613.14 197.83 607.60 220.99 603.93 235.93 C 600.25 250.86 602.80 274.07 621.99 279.01 C 641.18 283.95 651.60 260.45 652 246 C 652.40 231.55 651.41 202.01 633 200 Z" fill="#018BD1" stroke="#fff" stroke-width="1.2"/>
+  <text x="628" y="238" text-anchor="middle" dominant-baseline="central" fill="#ffffff" stroke="#263550" stroke-width="1.08" paint-order="stroke" stroke-linejoin="round" font-family="Arial, sans-serif" font-size="7.2" font-weight="700">Lago Experimental</text>
+</svg>

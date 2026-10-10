@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="1121"
+   height="916"
+   viewBox="0 0 1121 916"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <g
+     id="g1">
+    <image
+       width="1121"
+       height="916"
+       preserveAspectRatio="none"
+       xlink:href="B1.png"
+       id="image1" />
+    <g
+       id="g2">
+      <path
+         style="fill:#fafcf6"
+         d="m 280.71216,572.5 0.56765,-5.5 H 278.6399 276 v -3.5 -3.5 h 2.5 2.5 V 548.5 537 l 2.25,-0.011 2.25,-0.011 3.75,-0.61984 3.75,-0.61983 V 556.86916 578 h -6.42775 -6.42774 z"
+         id="path7" />
+      <path
+         style="fill:#edf4da"
+         d="m 280.71216,572.5 0.56765,-5.5 H 278.6399 276 v -3.5 -3.5 h 2.5 2.5 V 548.5 537 h 6 6 v 20.5 20.5 h -6.42775 -6.42774 z"
+         id="path6" />
+      <path
+         style="fill:#70942c"
+         d="M 281,572.5 V 567 h -2.5 -2.5 v -3.5 -3.5 h 2.5 2.5 V 548.5 537 h 6 6 v 20.5 20.5 h -6 -6 z"
+         id="path5" />
+      <path
+         style="fill:#70932c"
+         d="M 281,572.5 V 567 h -2.5 -2.5 v -3.5 -3.5 h 2.5 2.5 V 548.5 537 h 6 6 v 20.5 20.5 h -6 -6 z m 10.72847,-6.25 -0.39226,-3.75 v 7.5 7.5 l 0.39226,-3.75 0.39226,-3.75 z m -14.06619,-3.5 -0.50439,-1.25 v 2.5 2.5 l 0.50439,-1.25 0.50439,-1.25 z m 14.06993,-20 -0.3828,-4.25 v 8.5 8.5 l 0.3828,-4.25 0.38279,-4.25 z"
+         id="path4" />
+      <path
+         style="fill:#6e912c"
+         d="M 281,572.5 V 567 h -2.5 -2.5 v -3.5 -3.5 h 2.5 2.5 V 548.5 537 h 6 6 v 20.5 20.5 h -6 -6 z m 10.8013,-3.25 -0.19869,-7.75 -0.344,7.19459 -0.34399,7.19459 -4.20731,0.3807 -4.20731,0.38071 4.75,0.1747 L 292,577 Z M 279.75,565.31067 278,564.85335 V 564 563.14665 l 1.75,-0.45732 1.75,-0.45733 -2.25,-0.116 L 277,562 v 2 2 l 2.25,-0.116 2.25,-0.116 z m 11.98221,-22.56067 -0.3828,-4.25 v 8.5 8.5 l 0.3828,-4.25 0.38279,-4.25 z"
+         id="path3" />
+      <path
+         style="fill:#6d902a"
+         d="m 284.26375,538.28242 2.76375,-0.41792 2.23625,0.43157 2.23625,0.43157 -5,-0.0136 -5,-0.0136 z"
+         id="path2" />
+    </g>
+  </g>
+
+<text x="284" y="557" text-anchor="middle" dominant-baseline="central" fill="#ffffff" stroke="#263550" stroke-width="1.08" paint-order="stroke" stroke-linejoin="round" font-family="Arial, sans-serif" font-size="7.2" font-weight="700">B1</text>
+</svg>

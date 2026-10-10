@@ -3,6 +3,7 @@ import { useCategorias, useMapa } from '../../api/queries'
 import { LeyendaCategorias } from './LeyendaCategorias'
 import { MapaCampus } from './MapaCampus'
 import { TarjetaEventoMapa } from './TarjetaEventoMapa'
+import './mapa.css'
 
 // INTERACTIVITY-1 e INTERACTIVITY-2 · Figma 4:29322 (Desktop), 4:29909 (Mobile)
 export function MapaPage() {

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="1121"
+   height="916"
+   viewBox="0 0 1121 916"
+   xml:space="preserve"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1" /><g
+     id="g1"><image
+       width="1121"
+       height="916"
+       preserveAspectRatio="none"
+       xlink:href="A7.png"
+       id="image1"
+       x="0"
+       y="0" /><g
+       id="g12"><path
+         style="fill:#78358e"
+         d="M 114,800.5 V 794 h -2 -2 v -12.86916 -12.86916 l 3.64612,-0.59168 3.64612,-0.59168 4.35388,0.59676 L 126,768.27185 V 787.63592 807 h -6 -6 z"
+         id="path15" /><path
+         style="fill:#78358d"
+         d="m 114,800.61663 v -6.38337 l -2,-0.52301 -2,-0.52301 v -12.46278 -12.46278 l 3.64612,-0.59168 3.64612,-0.59168 4.35388,0.59676 L 126,768.27185 V 787.63592 807 h -6 -6 z m 8.75,4.66712 -2.75,-0.41659 -2.75,0.41659 -2.75,0.41659 h 5.5 5.5 z"
+         id="path14" /><path
+         style="fill:#77348c"
+         d="m 114,800.11111 v -6.88889 l -1.75,0.13889 -1.75,0.13889 -0.27887,-12.61447 -0.27886,-12.61448 3.67499,-0.59637 3.67498,-0.59636 4.35388,0.59676 L 126,768.27185 V 787.63592 807 h -6 -6 z m 6.79833,5.15582 -4.70167,-0.37256 -0.35925,-5.69719 -0.35924,-5.69718 -0.18909,6.25 L 115,806 l 5.25,-0.18025 5.25,-0.18025 z"
+         id="path13" /><path
+         style="fill:#75348a"
+         d="m 113.34508,786.45687 -0.59216,-1.54313 0.49654,-0.49653 0.49653,-0.49654 0.53339,2.03967 0.53338,2.03966 h -0.43776 -0.43777 z m 0.99558,-18.68857 1.15934,-0.73767 h 2 2 l 1.44785,0.91598 1.44785,0.91598 -4.6072,-0.17831 -4.60719,-0.1783 z"
+         id="path12" /></g></g>
+<text x="118" y="787" text-anchor="middle" dominant-baseline="central" fill="#ffffff" stroke="#263550" stroke-width="1.08" paint-order="stroke" stroke-linejoin="round" font-family="Arial, sans-serif" font-size="7.2" font-weight="700">A7</text>
+</svg>

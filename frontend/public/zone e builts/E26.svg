@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="1121"
+   height="916"
+   viewBox="0 0 1121 916"
+   xml:space="preserve"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1" /><g
+     id="g1"><image
+       width="1121"
+       height="916"
+       preserveAspectRatio="none"
+       xlink:href="E26.png"
+       id="image1"
+       x="0"
+       y="0" /><g
+       id="g131"><path
+         style="fill:#f7d541"
+         d="m 373,434 v -3 h -3.5 -3.5 v -20 -20 h 11.5 11.5 v 20 20 h -4 -4 v 3 3 h -4 -4 z"
+         id="path136" /><path
+         style="fill:#fef000"
+         d="m 373,434 v -3 h -3.5 -3.5 v -20 -20 h 11.5 11.5 v 20 20 h -4 -4 v 3 3 h -4 -4 z m 8,-21.5 V 400 h -3.5 -3.5 v 12.5 12.5 h 3.5 3.5 z"
+         id="path135" /><path
+         style="fill:#fdec00"
+         d="m 373,434 v -3 h -3.5 -3.5 v -20 -20 h 11.5 11.5 v 20 20 h -4 -4 v 3 3 h -4 -4 z m 6.75,-6.71625 -2.75,-0.41659 -2.75,0.41659 -2.75,0.41659 h 5.5 5.5 z M 371.74251,404.75 371.39739,397.5 v 14.5 14.5 l 0.34512,-7.25 0.34511,-7.25 z m 12,0 -0.34512,-7.25 v 14.5 14.5 l 0.34512,-7.25 0.34511,-7.25 z M 381,412.5 V 400 h -3.5 -3.5 v 12.5 12.5 h 3.5 3.5 z"
+         id="path134" /><path
+         style="fill:#d6ba36"
+         d="m 372,412 v -14 h 5.5 5.5 v 14 14 h -5.5 -5.5 z m 9,0.5 V 400 h -3.5 -3.5 v 12.5 12.5 h 3.5 3.5 z"
+         id="path133" /><path
+         style="fill:#bda730"
+         d="m 372,412 v -14 h 5.5 5.5 v 14 14 h -5.5 -5.5 z m 9.77988,0.25 L 381.5,399.5 h -4 -4 l -0.27988,12.75 -0.27987,12.75 h 4.55975 4.55975 z"
+         id="path132" /><path
+         style="fill:#b87956"
+         d="m 372,412 v -14 h 5.5 5.5 v 14 14 h -5.5 -5.5 z m 10,0 v -13 h -4.5 -4.5 v 13 13 h 4.5 4.5 z"
+         id="path131" /></g></g>
+<text x="377.5" y="414" text-anchor="middle" dominant-baseline="central" fill="#ffffff" stroke="#263550" stroke-width="1.08" paint-order="stroke" stroke-linejoin="round" font-family="Arial, sans-serif" font-size="7.2" font-weight="700">E26</text>
+</svg>

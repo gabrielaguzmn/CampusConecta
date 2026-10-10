@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="1121"
+   height="916"
+   viewBox="0 0 1121 916"
+   xml:space="preserve"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1" /><g
+     id="g1"><image
+       width="1121"
+       height="916"
+       preserveAspectRatio="none"
+       xlink:href="E43.png"
+       id="image1"
+       x="0"
+       y="0" /><g
+       id="g177"><path
+         style="fill:#f5d441"
+         d="M 510,361.5 V 354 h 10 10 v 7.5 7.5 h -10 -10 z"
+         id="path181" /><path
+         style="fill:#fdec00"
+         d="M 510,361.5 V 354 h 10 10 v 7.5 7.5 h -10 -10 z m 12,1 V 361 h -1.5 -1.5 v 1.5 1.5 h 1.5 1.5 z"
+         id="path180" /><path
+         style="fill:#a79527"
+         d="M 518,362.5 V 360 h 2.5 2.5 v 2.5 2.5 h -2.5 -2.5 z m 4,0 V 361 h -1.5 -1.5 v 1.5 1.5 h 1.5 1.5 z"
+         id="path179" /><path
+         style="fill:#a99c13"
+         d="m 519.68851,364.30233 2.1885,-0.42532 0.42532,-2.1885 0.42531,-2.18851 0.13618,2.75 L 523,365 l -2.75,-0.13618 -2.75,-0.13618 z"
+         id="path178" /><path
+         style="fill:#94861b"
+         d="m 518.75,364.33772 1.25,-0.50439 1.25,0.50439 1.25,0.50439 h -2.5 -2.5 z"
+         id="path177" /></g></g>
+<text x="520" y="361.5" text-anchor="middle" dominant-baseline="central" fill="#ffffff" stroke="#263550" stroke-width="1.08" paint-order="stroke" stroke-linejoin="round" font-family="Arial, sans-serif" font-size="7.2" font-weight="700">E43</text>
+</svg>

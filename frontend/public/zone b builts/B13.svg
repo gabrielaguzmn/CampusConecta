@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="1121"
+   height="916"
+   viewBox="0 0 1121 916"
+   xml:space="preserve"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1" /><g
+     id="g1"><image
+       width="1121"
+       height="916"
+       preserveAspectRatio="none"
+       xlink:href="B13.png"
+       id="image1"
+       x="0"
+       y="0" /><g
+       id="g17"><path
+         style="fill:#f1f5ea"
+         d="M 452.75425,172.75 453.27778,167 H 451.63889 450 V 152.5 138 h 8.92668 8.92667 l 0.32333,1.62925 0.32332,1.62924 -0.30559,12.87076 L 467.88881,167 H 465.94441 464 v 5.41118 5.41118 l -5.88464,0.33882 -5.88464,0.33882 z"
+         id="path22" /><path
+         style="fill:#e8efd7"
+         d="m 452.79156,172.5 0.4561,-5.5 H 451.62383 450 V 152.5 138 h 8.92668 8.92667 l 0.32333,1.62925 0.32332,1.62924 -0.30559,12.87076 L 467.88881,167 H 465.94441 464 v 5.5 5.5 h -5.83227 -5.83228 z"
+         id="path21" /><path
+         style="fill:#d7e1c1"
+         d="m 452.79156,172.5 0.4561,-5.5 H 451.62383 450 V 152.5 138 h 9 9 v 14.5 14.5 h -2 -2 v 5.5 5.5 h -5.83227 -5.83228 z"
+         id="path20" /><path
+         style="fill:#70942c"
+         d="M 453,172.5 V 167 H 451.5 450 V 152.5 138 h 9 9 v 14.5 14.5 h -2 -2 v 5.5 5.5 h -5.5 -5.5 z"
+         id="path19" /><path
+         style="fill:#70922c"
+         d="M 453,172.5 V 167 H 451.5 450 V 152.5 138 h 9 9 v 14.5 14.5 h -2 -2 v 5.5 5.5 h -5.5 -5.5 z m -1.25661,-26.70625 -0.346,-7.29375 -0.003,14 -0.003,14 0.34883,-6.70625 0.34884,-6.70625 z m 15,0 -0.346,-7.29375 -0.003,14 -0.003,14 0.34883,-6.70625 0.34884,-6.70625 z"
+         id="path18" /><path
+         style="fill:#6e922b"
+         d="m 464.8245,152.67418 -0.57615,-2.82583 0.96961,0.96961 0.9696,0.9696 -0.39345,1.85622 -0.39346,1.85622 z"
+         id="path17" /></g></g>
+<text x="460" y="158" text-anchor="middle" dominant-baseline="central" fill="#ffffff" stroke="#263550" stroke-width="1.08" paint-order="stroke" stroke-linejoin="round" font-family="Arial, sans-serif" font-size="7.2" font-weight="700">B13</text>
+</svg>
