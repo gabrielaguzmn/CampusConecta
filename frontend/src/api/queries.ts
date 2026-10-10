@@ -16,6 +16,7 @@ export function useCategorias() {
 export function useEventos(filtros: FiltrosFeed) {
   return useQuery({
     queryKey: ['eventos', filtros],
+    refetchInterval: 60_000,
     queryFn: async () => {
       const { data, error } = await api.GET('/api/eventos/', { params: { query: filtros } })
       if (error || !data) throw error
@@ -28,6 +29,7 @@ export function useEventos(filtros: FiltrosFeed) {
 export function useMapa() {
   return useQuery({
     queryKey: ['mapa'],
+    refetchInterval: 60_000,
     queryFn: async () => {
       const { data, error } = await api.GET('/api/mapa/')
       if (error || !data) throw error
@@ -64,6 +66,7 @@ export function useNormas() {
 export function useMisEventos(vista: 'vigentes' | 'historial') {
   return useQuery({
     queryKey: ['mis-eventos', vista],
+    refetchInterval: 60_000,
     queryFn: async () => {
       const { data, error } = await api.GET('/api/mis-eventos/', { params: { query: { vista } } })
       if (error || !data) throw error

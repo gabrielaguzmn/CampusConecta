@@ -6,7 +6,6 @@ import type { components } from '../../api/schema'
 import { AccionModal } from '../../components/AccionModal'
 import { CampoTexto } from '../../components/CampoTexto'
 import { Modal } from '../../components/Modal'
-import { Sesiones } from '../../components/Sesiones'
 import { formatoDiaYHorario, isoALocal, localAIso } from '../../lib/formato'
 
 type Evento = components['schemas']['Evento']
@@ -74,7 +73,23 @@ export function GestionarEvento({ evento, onEditar, onCerrar }: { evento: Evento
           <p className="text-lg font-bold">{evento.nombre}</p>
           <p className="text-sm text-texto-secundario">{lugar}</p>
         </div>
-        <Sesiones fechas={evento.fechas} className="gap-2" />
+        <div className="flex flex-col gap-2">
+          <p className="text-[13px] font-semibold text-texto">Sesiones</p>
+          <ul className="flex flex-col gap-2">
+            {evento.fechas.map((fecha) => (
+              <li key={fecha.id} className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
+                <span className={fecha.estado === 'en_vivo' ? 'text-accion' : fecha.estado === 'cancelada' ? 'text-destructivo' : 'text-texto-secundario'}>
+                  {formatoDiaYHorario(fecha.inicio, fecha.fin)} — {{ en_vivo: 'En vivo', proxima: 'Próxima', finalizada: 'Finalizada', cancelada: 'Cancelada' }[fecha.estado]}
+                </span>
+                {fecha.estado === 'en_vivo' && (
+                  <button type="button" onClick={() => ir('finalizar', [fecha])} className="inline-flex h-9 items-center gap-2 rounded-control border border-borde px-3 text-[12px] font-semibold text-accion hover:bg-fondo" aria-label={`Finalizar ahora ${formatoDiaYHorario(fecha.inicio, fecha.fin)}`}>
+                    <CircleStop size={16} aria-hidden /> Finalizar ahora
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
         <hr className="border-borde" />
         <div className="flex flex-col gap-2">
           <AccionModal icono={<Pencil size={20} />} onClick={onEditar}>
