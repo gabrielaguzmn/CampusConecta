@@ -1,15 +1,16 @@
-import { MapPin } from 'lucide-react'
+import { ContactRound, MapPin, UserRound } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import type { components } from '../../api/schema'
 import { Boton } from '../../components/Boton'
 import { Sesiones } from '../../components/Sesiones'
 
 type EventoMapa = components['schemas']['EventoMapa']
+type EventoMapaConDetalle = EventoMapa & Partial<Pick<components['schemas']['EventoPublico'], 'descripcion' | 'responsable' | 'contacto'>>
 
 // INTERACTIVITY-2 · criterio 1 · Figma 4:29322 / 4:29909 · "Tarjeta de evento seleccionado".
 // Figma muestra "16:00–18:00 · Sala de arte" con reloj; por la decisión G-45 cada sesión ya lleva su horario,
 // así que aquí queda solo el detalle de ubicación, y únicamente si el organizador lo indicó (INTERACTIVITY-3 · criterio 2).
-export function TarjetaEventoMapa({ evento, className = '' }: { evento: EventoMapa; className?: string }) {
+export function TarjetaEventoMapa({ evento, className = '' }: { evento: EventoMapaConDetalle; className?: string }) {
   const navegar = useNavigate()
   return (
     <article aria-label={evento.nombre} className={`flex flex-col gap-4 rounded-tarjeta bg-superficie p-5 shadow-elevada ${className}`}>
@@ -17,12 +18,15 @@ export function TarjetaEventoMapa({ evento, className = '' }: { evento: EventoMa
         <p className="text-[13px] font-semibold text-primario">{evento.categoria.nombre}</p>
         <h2 className="text-lg font-bold">{evento.nombre}</h2>
       </div>
+      {evento.descripcion && <p className="text-[13px] leading-relaxed text-texto-secundario">{evento.descripcion}</p>}
       {evento.detalle_ubicacion && (
-        <p className="flex items-center gap-2 text-[13px] text-texto-secundario">
+        <p className="flex items-start gap-2 text-[13px] text-texto-secundario">
           <MapPin size={16} aria-hidden className="text-metadatos" />
-          {evento.detalle_ubicacion}
+          <span><strong className="font-semibold text-texto">Ubicación</strong><br />{evento.detalle_ubicacion}</span>
         </p>
       )}
+      {evento.responsable && <p className="flex items-start gap-2 text-[13px] text-texto-secundario"><UserRound size={16} aria-hidden className="shrink-0 text-metadatos" /><span><strong className="font-semibold text-texto">Responsable</strong><br />{evento.responsable}</span></p>}
+      {evento.contacto && <p className="flex items-start gap-2 text-[13px] text-texto-secundario"><ContactRound size={16} aria-hidden className="shrink-0 text-metadatos" /><span><strong className="font-semibold text-texto">Contacto</strong><br />{evento.contacto}</span></p>}
       <Sesiones fechas={evento.fechas} />
       {/* INTERACTIVITY-2 · criterio 2: detalle completo (pantalla creada el 2026-10-07, G-12) */}
       <Boton onClick={() => navegar(`/eventos/${evento.id}`)}>Ver más</Boton>

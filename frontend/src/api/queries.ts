@@ -37,10 +37,12 @@ export function useMapa() {
 }
 
 // INTERACTIVITY-2 · criterio 2: detalle completo. 404 si el evento ya no es vigente o está oculto (G-38).
-export function useEvento(id: number) {
+export function useEvento(id?: number) {
   return useQuery({
     queryKey: ['evento', id],
+    enabled: id !== undefined,
     queryFn: async () => {
+      if (id === undefined) return null
       const { data, error, response } = await api.GET('/api/eventos/{id}/', { params: { path: { id } } })
       if (response.status === 404) return null
       if (error || !data) throw error

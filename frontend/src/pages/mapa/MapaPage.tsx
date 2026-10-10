@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useCategorias, useMapa } from '../../api/queries'
+import { useCategorias, useEvento, useMapa } from '../../api/queries'
 import { LeyendaCategorias } from './LeyendaCategorias'
 import { MapaCampus } from './MapaCampus'
 import { TarjetaEventoMapa } from './TarjetaEventoMapa'
@@ -11,6 +11,7 @@ export function MapaPage() {
   const categorias = useCategorias()
   const [seleccionado, setSeleccionado] = useState<number>()
   const evento = mapa.data?.flatMap((u) => u.eventos).find((e) => e.id === seleccionado)
+  const detalleEvento = useEvento(seleccionado)
 
   return (
     <main className="flex flex-col gap-6 px-4 py-8 md:px-8 xl:px-20">
@@ -35,7 +36,7 @@ export function MapaPage() {
         )}
         {evento && (
           // La integración puede ubicarla junto al pin, como en Desktop (Figma 4:29322); en Mobile va abajo (4:29909).
-          <TarjetaEventoMapa evento={evento} className="absolute inset-x-4 bottom-12 md:inset-x-auto md:right-16 md:bottom-auto md:top-16 md:w-[348px]" />
+          <TarjetaEventoMapa evento={detalleEvento.data ?? evento} className="absolute inset-x-4 bottom-12 md:inset-x-auto md:right-16 md:bottom-auto md:top-16 md:w-[348px]" />
         )}
       </section>
     </main>
