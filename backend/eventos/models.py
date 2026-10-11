@@ -44,11 +44,17 @@ class Categoria(models.Model):
 
 class Ubicacion(models.Model):
     # RF-009: catálogo fijo, no gestionable desde la plataforma.
+    EDIFICIO, CANCHA, PLAZOLETA, OTRO = "edificio", "cancha", "plazoleta", "otro"
+    TIPOS = [(EDIFICIO, "Edificio"), (CANCHA, "Cancha"), (PLAZOLETA, "Plazoleta"), (OTRO, "Otro")]
+
     nombre = models.CharField(max_length=200, unique=True)
-    # TODO(PENDIENTE G-01: coordenadas y sistema de coordenadas del mapa)
+    tipo = models.CharField(max_length=10, choices=TIPOS, default=EDIFICIO)
+    zona = models.CharField(max_length=1, blank=True)  # A-E, la del plano del mapa
+    # Enlaza con el plano del front: "<zona>:<archivo>", p. ej. "E:E1". La posición del pin sale del propio plano.
+    codigo = models.CharField(max_length=60, unique=True, null=True, blank=True)
 
     class Meta:
-        ordering = ["nombre"]
+        ordering = ["zona", "nombre"]
 
     def __str__(self):
         return self.nombre

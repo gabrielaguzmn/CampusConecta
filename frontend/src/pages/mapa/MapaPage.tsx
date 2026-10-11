@@ -20,9 +20,9 @@ export function MapaPage() {
         <p className="text-sm text-texto-secundario">Encuentra las actividades cerca de ti.</p>
       </header>
 
-      <section aria-label="Mapa del campus" className="relative h-[650px] overflow-hidden rounded-tarjeta bg-[#EBECE8] md:h-[620px]">
+      <section aria-label="Mapa del campus" className="relative h-[490px] overflow-hidden rounded-tarjeta bg-[#EBECE8] md:h-[550px]">
         {mapa.data && <MapaCampus ubicaciones={mapa.data} seleccionado={seleccionado} onSeleccionar={setSeleccionado} />}
-        <div className="absolute top-4 left-4">
+        <div className="absolute top-4 left-4 z-20">
           <LeyendaCategorias categorias={categorias.data ?? []} />
         </div>
         {/* G-51: mismo patrón que el Feed si la consulta falla */}
@@ -36,7 +36,10 @@ export function MapaPage() {
         )}
         {evento && (
           // La integración puede ubicarla junto al pin, como en Desktop (Figma 4:29322); en Mobile va abajo (4:29909).
-          <TarjetaEventoMapa evento={detalleEvento.data ?? evento} className="absolute inset-x-4 bottom-12 md:inset-x-auto md:right-16 md:bottom-auto md:top-16 md:w-[348px]" />
+          <TarjetaEventoMapa
+            evento={detalleEvento.data ?? evento}
+            className="absolute z-20 inset-x-4 bottom-12 md:inset-x-auto md:right-16 md:bottom-auto md:top-16 md:w-[348px]"
+          />
         )}
       </section>
     </main>

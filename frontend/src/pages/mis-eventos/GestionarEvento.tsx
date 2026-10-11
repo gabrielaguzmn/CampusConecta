@@ -40,6 +40,9 @@ export function GestionarEvento({ evento, onEditar, onCerrar }: { evento: Evento
 
   const vigentes = evento.fechas.filter((f) => f.estado === 'proxima' || f.estado === 'en_vivo')
   const enVivo = evento.fechas.filter((f) => f.estado === 'en_vivo')
+  // PUBLICATION-7: solo se acepta un fin posterior al actual de la sesión en vivo.
+  const fechaElegida = evento.fechas.find((f) => f.id === elegida)
+  const finValido = Boolean(fechaElegida && fin && fin > isoALocal(fechaElegida.fin))
   const lugar = [evento.detalle_ubicacion, evento.ubicacion.nombre].filter(Boolean).join(' · ')
 
   function ir(siguiente: Paso, fechas: Fecha[] = []) {
@@ -120,8 +123,8 @@ export function GestionarEvento({ evento, onEditar, onCerrar }: { evento: Evento
               </AccionModal>
             </>
           )}
-          {/* PUBLICATION-5: acción independiente; tiene sentido con más de una fecha vigente */}
-          {vigentes.length > 1 && (
+          {/* PUBLICATION-5: acción independiente, disponible mientras haya fechas próximas o en vivo */}
+          {vigentes.length > 0 && (
             <AccionModal variante="accion" icono={<CalendarOff size={20} />} onClick={() => ir('cancelar-todas')}>
               Cancelar todas las fechas
             </AccionModal>
@@ -158,12 +161,18 @@ export function GestionarEvento({ evento, onEditar, onCerrar }: { evento: Evento
         texto: 'Elige la nueva hora de finalización de la sesión en vivo.',
         boton: 'Extender',
         variante: 'principal',
-        listo: Boolean(elegida && fin),
+        listo: finValido,
         hacer: () => api.POST('/api/fechas/{id}/extender/', { ...ruta, body: { fin: localAIso(fin) } }),
         campos: (
           <>
             {enVivo.length > 1 && <ElegirFecha fechas={enVivo} elegida={elegida} onElegir={setElegida} />}
-            <CampoTexto etiqueta="Nuevo fin" type="datetime-local" value={fin} onChange={(e) => setFin(e.target.value)} />
+            <CampoTexto
+              etiqueta="Nuevo fin"
+              type="datetime-local"
+              value={fin}
+              onChange={(e) => setFin(e.target.value)}
+              error={fin && !finValido ? 'El nuevo fin debe ser posterior al fin actual.' : undefined}
+            />
           </>
         ),
       },

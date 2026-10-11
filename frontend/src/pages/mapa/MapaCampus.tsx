@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type MouseEvent } from 'react'
 import { MapPin, Minus, Plus, RotateCcw } from 'lucide-react'
 import type { components } from '../../api/schema'
 import { PinMapa } from '../../components/PinMapa'
+import { useMascarasCampus } from '../../lib/Usemascarascampus'
 
 export type UbicacionMapa = components['schemas']['UbicacionMapa']
 
@@ -98,13 +99,16 @@ export function MapaCampus({ ubicaciones, seleccionado, onSeleccionar }: PropsMa
     return () => { vigente = false }
   }, [])
 
-  const eventos = useMemo(() => ubicaciones.flatMap((u) => u.eventos), [ubicaciones])
-  const posiciones = useMemo(() => eventos.map((evento, i) => {
-    // La API no expone coordenadas: reparte los pines por el plano hasta contar con coordenadas de ubicación.
-    const zonaBase = [0.48, 0.32, 0.76, 0.58, 0.39][i % 5]
-    const variacion = Math.floor(i / 5)
-    return { evento, zona: zonas[i % zonas.length], x: Math.min(0.9, zonaBase + (variacion % 3) * 0.035), y: Math.min(0.88, [0.73, 0.28, 0.3, 0.68, 0.49][i % 5] + variacion * 0.035) }
-  }), [eventos])
+  // Cada evento se dibuja en el centro de su ubicación del catálogo (Ubicacion.codigo enlaza con el plano).
+  const { datos: mascaras } = useMascarasCampus()
+  const posiciones = useMemo(() => ubicaciones.flatMap(({ ubicacion, eventos }) => {
+    const { codigo, zona: zonaUbicacion } = ubicacion as { codigo?: string | null; zona?: string }
+    const centro = codigo ? mascaras?.centros[codigo] : undefined
+    const zonaPin = zonas.find((z) => z === zonaUbicacion)
+    if (!centro || !zonaPin) return []
+    // Varios eventos en el mismo lugar: se separan un poco para que no se tapen.
+    return eventos.map((evento, j) => ({ clave: `${ubicacion.id}-${evento.id}`, evento, zona: zonaPin, x: centro.x / ancho + (j % 3) * 0.012, y: centro.y / alto + Math.floor(j / 3) * 0.02 }))
+  }), [ubicaciones, mascaras])
 
   function puntoEnMapa(event: MouseEvent<HTMLDivElement>) {
     const r = event.currentTarget.getBoundingClientRect()
@@ -183,7 +187,7 @@ export function MapaCampus({ ubicaciones, seleccionado, onSeleccionar }: PropsMa
       {zonas.map((z) => renderZona(z))}
       {renderEdificios()}
       {renderComplementosZonaE()}
-      {posiciones.map(({ evento, x, y }) => <button key={evento.id} type="button" className="mapa-pin" style={{ left: `${x * 100}%`, top: `${y * 100}%` }} aria-label={`Ver ${evento.nombre}`} aria-pressed={seleccionado === evento.id} onClick={(e) => { e.stopPropagation(); onSeleccionar(evento.id) }}><PinMapa color={evento.categoria.color ?? '#950000'} seleccionado={seleccionado === evento.id} /></button>)}
+      {posiciones.map(({ clave, evento, x, y }) => <button key={clave} type="button" className="mapa-pin" style={{ left: `${x * 100}%`, top: `${y * 100}%` }} aria-label={`Ver ${evento.nombre}`} aria-pressed={seleccionado === evento.id} onClick={(e) => { e.stopPropagation(); onSeleccionar(evento.id) }}><PinMapa color={evento.categoria.color ?? '#950000'} seleccionado={seleccionado === evento.id} /></button>)}
     </div>
     {zona && <div className="mapa-focus-layer" aria-label={`Vista ampliada de la zona ${zona}`}>
       <div className={`mapa-stage mapa-stage-foco${edificioSeleccionado ? ' mapa-foco-difuminado' : ''}`} style={{ transform: `translate(-50%, -50%) ${transform}` }} onMouseMove={(e) => { if (!edificioSeleccionado) setHoverEdificio(edificioEnPunto(e, zona)) }} onMouseLeave={() => setHoverEdificio(null)} onClick={(e) => {
@@ -194,7 +198,7 @@ export function MapaCampus({ ubicaciones, seleccionado, onSeleccionar }: PropsMa
         {renderZona(zona, true)}
         {renderEdificios(zona, edificioSeleccionado ?? undefined)}
         {zona === 'E' && renderComplementosZonaE()}
-        {posiciones.filter((item) => item.zona === zona).map(({ evento, x, y }) => <button key={evento.id} type="button" className="mapa-pin" style={{ left: `${x * 100}%`, top: `${y * 100}%` }} aria-label={`Ver ${evento.nombre}`} aria-pressed={seleccionado === evento.id} onClick={(e) => { e.stopPropagation(); onSeleccionar(evento.id) }}><PinMapa color={evento.categoria.color ?? '#950000'} seleccionado={seleccionado === evento.id} /></button>)}
+        {posiciones.filter((item) => item.zona === zona).map(({ clave, evento, x, y }) => <button key={clave} type="button" className="mapa-pin" style={{ left: `${x * 100}%`, top: `${y * 100}%` }} aria-label={`Ver ${evento.nombre}`} aria-pressed={seleccionado === evento.id} onClick={(e) => { e.stopPropagation(); onSeleccionar(evento.id) }}><PinMapa color={evento.categoria.color ?? '#950000'} seleccionado={seleccionado === evento.id} /></button>)}
       </div>
       {edificioEnfocado && <div className="mapa-stage mapa-stage-edificio" style={{ transform: `translate(-50%, -50%) ${transformEdificio}` }} aria-label={`Edificación ${edificioEnfocado.id}`}>
         <img className="mapa-edificio-enfocado" src={`${carpeta(edificioEnfocado.zona)}${encodeURIComponent(edificioEnfocado.archivo)}`} alt={`Edificación ${edificioEnfocado.id}`} draggable="false" />

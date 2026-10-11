@@ -30,8 +30,7 @@ class CategoriaSerializer(serializers.ModelSerializer):
 class UbicacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ubicacion
-        fields = ["id", "nombre"]
-
+        fields = ["id", "nombre", "tipo", "zona", "codigo"]
 
 class FechaSerializer(serializers.ModelSerializer):
     estado = serializers.SerializerMethodField()
@@ -87,7 +86,8 @@ class EventoMapaSerializer(serializers.ModelSerializer):
     """Información básica del pin (INTERACTIVITY-2 · criterio 1); el detalle completo está en GET eventos/{id}/."""
 
     categoria = CategoriaSerializer()
-    fechas = FechaPublicaSerializer(many=True)
+    # MapaView deja en `fechas_mapa` las fechas vigentes del evento.
+    fechas = FechaPublicaSerializer(many=True, source="fechas_mapa")
 
     class Meta:
         model = Evento
@@ -192,11 +192,10 @@ class EventoEdicionSerializer(serializers.ModelSerializer):
 
 
 class FechaEdicionSerializer(serializers.Serializer):
-    """PUBLICATION-3, G-30: de una fecha solo se editan el día, la hora de inicio y el fin."""
+    """PUBLICATION-3, G-30: de una fecha próxima se editan el día, el inicio y el fin."""
 
     inicio = serializers.DateTimeField(required=False)
     fin = serializers.DateTimeField(required=False)
-
     def validate(self, datos):
         fecha = self.instance
         inicio = datos.get("inicio", fecha.inicio)

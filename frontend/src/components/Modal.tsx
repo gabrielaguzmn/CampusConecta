@@ -7,11 +7,13 @@ export function Modal({
   onCerrar,
   children,
   className = 'p-8',
+  ancho = 'max-w-[500px]',
 }: {
   titulo: string
   onCerrar: () => void
   children: ReactNode
   className?: string
+  ancho?: string
 }) {
   const idTitulo = useId()
   const dialogo = useRef<HTMLDivElement>(null)
@@ -23,7 +25,10 @@ export function Modal({
   }, [])
 
   function alPulsarTecla(e: React.KeyboardEvent) {
-    if (e.key === 'Escape') onCerrar()
+    if (e.key === 'Escape') {
+      e.stopPropagation()
+      onCerrar()
+    }
     if (e.key !== 'Tab' || !dialogo.current) return
     const enfocables = dialogo.current.querySelectorAll<HTMLElement>(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
@@ -48,7 +53,7 @@ export function Modal({
         aria-labelledby={idTitulo}
         tabIndex={-1}
         onKeyDown={alPulsarTecla}
-        className={`mx-auto my-auto flex w-full max-w-[500px] flex-col gap-6 rounded-tarjeta bg-superficie shadow-elevada outline-none ${className}`}
+        className={`mx-auto my-auto flex w-full ${ancho} flex-col gap-6 rounded-tarjeta bg-superficie shadow-elevada outline-none ${className}`}
       >
         <div className="flex items-center justify-between">
           <h2 id={idTitulo} className="text-2xl font-bold text-texto">

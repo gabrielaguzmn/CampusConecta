@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useFieldArray, useForm } from 'react-hook-form'
+import { useMemo, useState } from 'react'
+import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQueryClient } from '@tanstack/react-query'
@@ -12,6 +12,8 @@ import { CampoSeleccion } from '../../components/CampoSeleccion'
 import { CampoTexto } from '../../components/CampoTexto'
 import { Modal } from '../../components/Modal'
 import { formatoDia, isoALocal, localAIso } from '../../lib/formato'
+// Ajusta la ruta si la carpeta del mapa se llama distinto (donde están MapaCampus.tsx y mapa.css).
+import { CampoUbicacionMapa } from '../evento/Campoubicacionmapa'
 
 type Evento = components['schemas']['Evento']
 
@@ -23,19 +25,22 @@ const fecha = z
   .object({ id: z.number().optional(), inicio: z.string().min(1), fin: z.string().min(1) })
   .refine((f) => f.fin > f.inicio, { path: ['fin'], message: 'El fin debe ser posterior al inicio.' })
 
-const esquema = z.object({
+const esquemaBase = z.object({
   nombre: z.string().trim().min(1),
   descripcion: z.string().trim().min(1),
   categoria: z.string().min(1),
   ubicacion: z.string().min(1),
   detalle_ubicacion: z.string(),
   responsable: z.string().trim().min(1),
-  fechas: z.array(fecha).min(1),
+  fechas: z.array(fecha),
   cupo: z.string().regex(/^([1-9]\d*)?$/, 'El cupo debe ser un número entero positivo.'),
   contacto: z.string(),
   enlace_externo: z.union([z.literal(''), z.url({ protocol: /^https?$/, error: 'Introduce un enlace que empiece por http:// o https://.' })]),
 })
-type Datos = z.infer<typeof esquema>
+// Al crear hace falta al menos una fecha. Al editar puede no haber ninguna próxima (todas en vivo, finalizadas o
+// canceladas) y aun así se pueden corregir los datos del evento (PUBLICATION-3).
+const crearEsquema = (editando: boolean) => (editando ? esquemaBase : esquemaBase.extend({ fechas: z.array(fecha).min(1) }))
+type Datos = z.infer<typeof esquemaBase>
 
 const TIPOS_IMAGEN = ['image/jpeg', 'image/png']
 const MAX_IMAGEN = 5 * 1024 * 1024 // G-07
@@ -66,8 +71,8 @@ export function FormularioEvento({ evento, onCerrar }: { evento?: Evento; onCerr
   const [imagen, setImagen] = useState<File>()
   const [errorImagen, setErrorImagen] = useState<string>()
   const [errores, setErrores] = useState<string[]>([])
-  const { register, control, handleSubmit, formState } = useForm<Datos>({
-    resolver: zodResolver(esquema),
+  const { register, control, watch, handleSubmit, formState } = useForm<Datos>({
+    resolver: zodResolver(useMemo(() => crearEsquema(editando), [editando])),
     mode: 'onChange',
     defaultValues: valoresIniciales(evento),
   })
@@ -126,7 +131,8 @@ export function FormularioEvento({ evento, onCerrar }: { evento?: Evento; onCerr
       // PUBLICATION-3 · criterio 2: solo se envían las fechas que cambiaron; las demás no se tocan.
       for (const f of datos.fechas) {
         const original = evento.fechas.find((o) => o.id === f.id)
-        if (!f.id || !original || (isoALocal(original.inicio) === f.inicio && isoALocal(original.fin) === f.fin)) continue
+        const sinCambios = original && isoALocal(original.inicio) === f.inicio && isoALocal(original.fin) === f.fin
+        if (!f.id || !original || sinCambios) continue
         const { error: errorFecha } = await api.PATCH('/api/fechas/{id}/', {
           params: { path: { id: f.id } },
           body: { inicio: localAIso(f.inicio), fin: localAIso(f.fin) },
@@ -159,16 +165,21 @@ export function FormularioEvento({ evento, onCerrar }: { evento?: Evento; onCerr
               </option>
             ))}
           </CampoSeleccion>
-          <CampoSeleccion etiqueta="Ubicación" required {...register('ubicacion')}>
-            <option value="" disabled>
-              Selecciona una ubicación del campus
-            </option>
-            {ubicaciones.data?.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.nombre}
-              </option>
-            ))}
-          </CampoSeleccion>
+          {/* RF-009: ubicación del catálogo, elegida en el select o tocando el mapa. El campo del formulario es texto
+              (como el select original), por eso el id se guarda con String(). */}
+          <Controller
+            name="ubicacion"
+            control={control}
+            render={({ field }) => (
+              <CampoUbicacionMapa
+                ubicaciones={ubicaciones.data ?? []}
+                value={field.value ? Number(field.value) : undefined}
+                onChange={(id) => field.onChange(String(id))}
+                colorCategoria={categorias.data?.find((c) => String(c.id) === watch('categoria'))?.color ?? undefined}
+                error={errors.ubicacion?.message}
+              />
+            )}
+          />
           <CampoTexto etiqueta="Ubicación exacta (opcional)" placeholder="Ej. Sala de arte · Edificio C" {...register('detalle_ubicacion')} />
           <CampoTexto etiqueta="Responsable" placeholder="Persona o grupo que organiza" {...register('responsable')} />
 
@@ -192,6 +203,9 @@ export function FormularioEvento({ evento, onCerrar }: { evento?: Evento; onCerr
                 </div>
               </div>
             ))}
+            {editando && fechas.fields.length === 0 && (
+              <p className="text-[13px] text-texto-secundario">No hay sesiones próximas para editar. Las que están en vivo, finalizadas o canceladas no se pueden modificar.</p>
+            )}
             {!editando && (
               <>
                 <p className="text-[13px] text-texto-secundario">Puedes añadir una o varias sesiones.</p>

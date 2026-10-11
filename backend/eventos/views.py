@@ -1,3 +1,5 @@
+from copy import copy
+
 from django.db import transaction
 from django.db.models import ProtectedError
 from django.db.models import Prefetch
@@ -62,12 +64,16 @@ def exigir_vigente(evento):
         raise Conflicto("El evento está en el historial y solo admite consulta.", code="evento_en_historial")
 
 
+def prefetch_fechas(**filtros):
+    return Prefetch("fechas", queryset=Fecha.objects.filter(**filtros))
+
+
 def eventos_visibles(estado=None):
     """Feed, mapa y detalle: solo lo vigente y no moderado, con sus fechas no ocultas (RF-032)."""
     return (
         Evento.objects.visibles(estado=estado)
         .select_related("categoria", "ubicacion")
-        .prefetch_related(Prefetch("fechas", queryset=Fecha.objects.filter(oculta=False)))
+        .prefetch_related(prefetch_fechas(oculta=False))
     )
 
 
@@ -81,7 +87,7 @@ def borrar_o_conflicto(objeto):
 
 
 def respuesta_evento(request, evento, codigo=status.HTTP_200_OK):
-    evento = Evento.objects.select_related("categoria", "ubicacion").prefetch_related("fechas").get(pk=evento.pk)
+    evento = Evento.objects.select_related("categoria", "ubicacion").prefetch_related(prefetch_fechas()).get(pk=evento.pk)
     # Con `request` en el contexto, `imagen` es una URL absoluta, igual que en "Mis eventos".
     return Response(EventoSerializer(evento, context={"request": request}).data, status=codigo)
 
@@ -257,10 +263,16 @@ class CancelarTodasView(APIView):
 class MapaView(APIView):
     @extend_schema(responses=UbicacionMapaSerializer(many=True))
     def get(self, request):
-        """INTERACTIVITY-1, INTERACTIVITY-2 · criterio 1: eventos vigentes agrupados por ubicación del catálogo."""
+        """INTERACTIVITY-1, INTERACTIVITY-2 · criterio 1: eventos vigentes agrupados por ubicación del catálogo.
+        Cada evento aparece en la ubicación del evento, solo con sus fechas próximas o en vivo."""
         grupos = {}
         for evento in eventos_visibles().order_by("-pk"):
-            grupos.setdefault(evento.ubicacion_id, {"ubicacion": evento.ubicacion, "eventos": []})["eventos"].append(evento)
+            fechas = [f for f in evento.fechas.all() if f.estado() in (PROXIMA, EN_VIVO)]
+            if not fechas:
+                continue
+            copia = copy(evento)
+            copia.fechas_mapa = fechas
+            grupos.setdefault(evento.ubicacion.pk, {"ubicacion": evento.ubicacion, "eventos": []})["eventos"].append(copia)
         datos = sorted(grupos.values(), key=lambda g: g["ubicacion"].nombre)
         return Response(UbicacionMapaSerializer(datos, many=True, context={"request": request}).data)
 
@@ -282,7 +294,7 @@ class MisEventosView(generics.ListAPIView):
         # TODO(PENDIENTE G-23: si un evento oculto con fechas futuras aparece como vigente o como historial)
         eventos = Evento.objects.filter(creador=self.request.user)
         eventos = eventos.vigentes() if vista == "vigentes" else eventos.historial()
-        return eventos.select_related("categoria", "ubicacion").prefetch_related("fechas").order_by("pk")
+        return eventos.select_related("categoria", "ubicacion").prefetch_related(prefetch_fechas()).order_by("pk")
 
 
 # --- Fechas ---
