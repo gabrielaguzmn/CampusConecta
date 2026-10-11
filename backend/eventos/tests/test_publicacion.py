@@ -397,6 +397,7 @@ class EliminacionTests(BaseEventosTest):
         fecha = evento.fechas.first()
         self.assertEqual(self.client.delete(f"/api/fechas/{fecha.pk}/").status_code, 204)
         self.assertFalse(Fecha.objects.filter(pk=fecha.pk).exists())
+        self.assertTrue(Fecha.con_eliminadas.filter(pk=fecha.pk, eliminado=True).exists())  # borrado lógico (G-24)
         self.assertEqual(evento.fechas.count(), 1)
 
     def test_PUBLICATION_8_c2_elimina_evento_completo_con_sus_fechas_proximas(self):
@@ -404,6 +405,8 @@ class EliminacionTests(BaseEventosTest):
         self.assertEqual(self.client.delete(f"/api/eventos/{evento.pk}/").status_code, 204)
         self.assertFalse(Evento.objects.exists())
         self.assertFalse(Fecha.objects.exists())
+        self.assertTrue(Evento.con_eliminados.filter(pk=evento.pk, eliminado=True).exists())  # borrado lógico (G-24)
+        self.assertEqual(Fecha.con_eliminadas.filter(evento=evento, eliminado=True).count(), 2)
 
     def test_PUBLICATION_8_c3_fecha_finalizada_no_se_elimina(self):
         evento = self.crear_evento((-5, -3), (24, 26))
@@ -416,10 +419,44 @@ class EliminacionTests(BaseEventosTest):
         self.assertEqual(self.client.delete(f"/api/fechas/{evento.fechas.first().pk}/").status_code, 403)
         self.assertEqual(self.client.delete(f"/api/eventos/{evento.pk}/").status_code, 403)
 
-    def test_PUBLICATION_8_casos_pendientes_de_G24_se_rechazan(self):
-        unica = self.crear_evento((24, 26))
-        respuesta = self.client.delete(f"/api/fechas/{unica.fechas.get().pk}/")
-        self.assertEqual(respuesta.status_code, 409)
-        self.assertEqual(respuesta.json()["code"], "pendiente_g24")
-        con_fecha_en_vivo = self.crear_evento((-1, 1), (24, 26))
-        self.assertEqual(self.client.delete(f"/api/eventos/{con_fecha_en_vivo.pk}/").status_code, 409)
+    #def test_PUBLICATION_8_casos_pendientes_de_G24_se_rechazan(self):
+    #    unica = self.crear_evento((24, 26))
+    #    respuesta = self.client.delete(f"/api/fechas/{unica.fechas.get().pk}/")
+    #    self.assertEqual(respuesta.status_code, 409)
+    #    self.assertEqual(respuesta.json()["code"], "pendiente_g24")
+    #    con_fecha_en_vivo = self.crear_evento((-1, 1), (24, 26))
+    #    self.assertEqual(self.client.delete(f"/api/eventos/{con_fecha_en_vivo.pk}/").status_code, 409)
+    
+    def test_PUBLICATION_8_la_unica_fecha_no_se_elimina_sola(self):
+            unica = self.crear_evento((24, 26))
+            respuesta = self.client.delete(f"/api/fechas/{unica.fechas.get().pk}/")
+            self.assertEqual(respuesta.status_code, 409)
+            self.assertEqual(respuesta.json()["code"], "unica_fecha")
+    
+    def test_PUBLICATION_8_c2_evento_con_otras_fechas_solo_pierde_las_proximas(self):
+            evento = self.crear_evento((-5, -3), (-1, 1), (24, 26), (48, 50))
+            finalizada, en_vivo = evento.fechas.all()[0], evento.fechas.all()[1]
+            self.assertEqual(self.client.delete(f"/api/eventos/{evento.pk}/").status_code, 204)
+            self.assertTrue(Evento.objects.filter(pk=evento.pk).exists())
+            self.assertEqual(sorted(evento.fechas.values_list("pk", flat=True)), sorted([finalizada.pk, en_vivo.pk]))
+    
+    def test_PUBLICATION_8_c2_evento_sin_fechas_proximas_no_tiene_nada_que_eliminar(self):
+            evento = self.crear_evento((-5, -3), (-1, 1))
+            respuesta = self.client.delete(f"/api/eventos/{evento.pk}/")
+            self.assertEqual((respuesta.status_code, respuesta.json()["code"]), (409, "sin_fechas_proximas"))
+    
+    def test_PUBLICATION_8_lo_eliminado_desaparece_de_toda_la_plataforma(self):
+            evento = self.crear_evento((24, 26))
+            otro = self.crear_evento((48, 50), (72, 74))
+            self.client.delete(f"/api/eventos/{evento.pk}/")
+            self.client.delete(f"/api/fechas/{otro.fechas.first().pk}/")
+            self.assertEqual(self.client.get(f"/api/eventos/{evento.pk}/").status_code, 404)
+            self.assertEqual([e["id"] for e in self.client.get("/api/eventos/").data], [otro.pk])
+            self.assertEqual([e["id"] for e in self.client.get("/api/mis-eventos/").data], [otro.pk])
+            self.assertEqual(len(self.client.get("/api/mis-eventos/").data[0]["fechas"]), 1)
+            self.assertEqual(self.client.delete(f"/api/eventos/{evento.pk}/").status_code, 404)
+    
+    def test_PUBLICATION_8_el_creador_no_elimina_contenido_oculto(self):
+            evento = self.crear_evento((24, 26), (48, 50), oculto=True)
+            respuesta = self.client.delete(f"/api/eventos/{evento.pk}/")
+            self.assertEqual((respuesta.status_code, respuesta.json()["code"]), (409, "contenido_oculto"))

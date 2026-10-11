@@ -3,8 +3,8 @@ from django.core.exceptions import PermissionDenied
 from rest_framework.test import APIClient
 
 from cuentas.models import Usuario
-from eventos.models import Fecha
-from eventos.tests.base import CLAVE, BaseEventosTest
+from eventos.models import Evento,Fecha
+from eventos.tests.base import CLAVE, BaseEventosTest, en
 from moderacion.models import CasoReporte, RegistroModeracion, Reporte
 from moderacion.normas import Norma
 
@@ -343,3 +343,237 @@ class AdministradoresYRegistroTests(BaseModeracionTest):
         self.assertEqual(len(self.client.get("/api/admin/registro/").data), 1)
         self.como(self.creador)
         self.assertEqual(self.client.get("/api/admin/registro/").status_code, 403)
+
+
+class EliminacionModeracionTests(BaseModeracionTest):
+    """PUBLICATION-8 · criterio 4, G-24: el administrador elimina un evento o una fecha que incumple las normas."""
+
+    def eliminar_evento(self, evento=None, datos=None):
+        return self.post_admin(
+            f"/api/admin/eventos/{(evento or self.evento).pk}/eliminar/",
+            (
+                {"norma": Norma.RESPETO, "explicacion": "Ofensivo"}
+                if datos is None
+                else datos
+            ),
+        )
+
+    def eliminar_fecha(self, fecha, datos=None):
+        return self.post_admin(
+            f"/api/admin/fechas/{fecha.pk}/eliminar/",
+            {"norma": Norma.RESPETO} if datos is None else datos,
+        )
+
+    def test_c1_eliminar_evento_lo_retira_de_la_plataforma_y_lo_registra(self):
+        respuesta = self.eliminar_evento()
+        self.assertEqual(respuesta.status_code, 204)
+        self.assertNotIn(self.evento.pk, self.feed())
+        self.assertFalse(Evento.objects.filter(pk=self.evento.pk).exists())
+        self.assertEqual(self.client.get("/api/admin/eventos/").data, [])
+        registro = RegistroModeracion.objects.get()
+        self.assertEqual(
+            (registro.tipo_accion, registro.estado_anterior, registro.estado_posterior),
+            ("eliminar", "visible", "eliminado"),
+        )
+        self.assertEqual(
+            (registro.evento_id, registro.norma, registro.cuenta_afectada_id),
+            (self.evento.pk, Norma.RESPETO, self.creador.pk),
+        )
+        self.como(self.creador)
+        self.assertEqual(self.client.get("/api/mis-eventos/").data, [])
+
+    def test_c1_eliminar_evento_avisa_al_creador_con_la_norma(self):
+        self.eliminar_evento()
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, [self.creador.email])
+        self.assertIn("Respeto y convivencia", mail.outbox[0].body)
+        self.assertIn("Ofensivo", mail.outbox[0].body)
+
+    def test_c1_eliminar_una_fecha_no_afecta_a_las_demas(self):
+        primera, segunda = self.evento.fechas.all()
+        self.assertEqual(self.eliminar_fecha(primera).status_code, 204)
+        self.assertEqual(list(self.evento.fechas.all()), [segunda])
+        self.assertIn(self.evento.pk, self.feed())
+        registro = RegistroModeracion.objects.get()
+        self.assertEqual(
+            (registro.tipo_accion, registro.fecha_id, registro.estado_posterior),
+            ("eliminar", primera.pk, "eliminado"),
+        )
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_c1_se_puede_eliminar_contenido_ya_oculto(self):
+        self.post_admin(
+            f"/api/admin/eventos/{self.evento.pk}/ocultar/", {"norma": Norma.RESPETO}
+        )
+        self.assertEqual(self.eliminar_evento().status_code, 204)
+        self.assertEqual(RegistroModeracion.objects.first().estado_anterior, "oculto")
+
+    def test_c1_la_unica_fecha_obliga_a_eliminar_el_evento(self):
+        unico = self.crear_evento((24, 26))
+        respuesta = self.eliminar_fecha(unico.fechas.get())
+        self.assertEqual(
+            (respuesta.status_code, respuesta.json()["code"]), (409, "unica_fecha")
+        )
+
+    def test_c3_no_se_elimina_contenido_caducado(self):
+        evento = self.crear_evento((-5, -3), (24, 26))
+        finalizada = evento.fechas.first()
+        respuesta = self.eliminar_fecha(finalizada)
+        self.assertEqual(
+            (respuesta.status_code, respuesta.json()["code"]),
+            (409, "contenido_caducado"),
+        )
+        caducado = self.crear_evento((-5, -3))
+        respuesta = self.eliminar_evento(caducado)
+        self.assertEqual(
+            (respuesta.status_code, respuesta.json()["code"]),
+            (409, "contenido_caducado"),
+        )
+        self.assertFalse(RegistroModeracion.objects.exists())
+
+    def test_DoD_motivo_obligatorio_y_acceso_exclusivo_del_administrador(self):
+        self.assertEqual(self.eliminar_evento(datos={}).status_code, 400)
+        self.assertTrue(Evento.objects.filter(pk=self.evento.pk).exists())
+        self.como(self.creador)
+        self.assertEqual(
+            self.client.post(
+                f"/api/admin/eventos/{self.evento.pk}/eliminar/", {"norma": 3}
+            ).status_code,
+            403,
+        )
+        self.assertEqual(
+            self.client.post(
+                f"/api/admin/fechas/{self.evento.fechas.first().pk}/eliminar/",
+                {"norma": 3},
+            ).status_code,
+            403,
+        )
+
+    def test_lo_ya_eliminado_no_existe(self):
+        self.eliminar_evento()
+        self.assertEqual(self.eliminar_evento().status_code, 404)
+
+    def test_eliminar_el_evento_cierra_su_caso_de_reportes(self):
+        self.como(self.otro)
+        self.client.post(
+            f"/api/eventos/{self.evento.pk}/reportes/",
+            {"causa": Norma.RESPETO},
+            format="json",
+        )
+        self.eliminar_evento()
+        caso = CasoReporte.objects.get()
+        self.assertEqual((caso.estado, caso.decision_ocultar), ("revisado", True))
+        self.assertEqual(
+            list(RegistroModeracion.objects.get().reportes.all()),
+            list(caso.reportes.all()),
+        )
+
+
+class TransicionesDeCasosTests(BaseModeracionTest):
+    """ADMIN-2 · criterios 2 y 3, G-25."""
+
+    def reportar(self, usuario=None):
+        self.como(usuario or self.otro)
+        return self.client.post(
+            f"/api/eventos/{self.evento.pk}/reportes/",
+            {"causa": Norma.SIN_SPAM},
+            format="json",
+        )
+
+    def patch_caso(self, caso, datos):
+        self.como(self.admin)
+        with self.captureOnCommitCallbacks(execute=True):
+            return self.client.patch(
+                f"/api/admin/casos/{caso.pk}/", datos, format="json"
+            )
+
+    def test_el_caso_solo_avanza(self):
+        self.reportar()
+        caso = CasoReporte.objects.get()
+        self.assertEqual(
+            self.patch_caso(caso, {"estado": "pendiente"}).status_code, 409
+        )
+        self.assertEqual(
+            self.patch_caso(caso, {"estado": "en_revision"}).status_code, 200
+        )
+        self.assertEqual(
+            self.patch_caso(caso, {"estado": "en_revision"}).status_code, 409
+        )
+        self.assertEqual(
+            self.patch_caso(caso, {"estado": "pendiente"}).status_code, 409
+        )
+        self.assertEqual(
+            self.patch_caso(
+                caso, {"estado": "revisado", "decision_ocultar": False}
+            ).status_code,
+            200,
+        )
+        for datos in [
+            {"estado": "en_revision"},
+            {"estado": "pendiente"},
+            {"estado": "revisado", "decision_ocultar": True, "norma": Norma.SIN_SPAM},
+        ]:
+            respuesta = self.patch_caso(caso, datos)
+            self.assertEqual(
+                (respuesta.status_code, respuesta.json()["code"]),
+                (409, "transicion_no_permitida"),
+                datos,
+            )
+        self.evento.refresh_from_db()
+        self.assertFalse(self.evento.oculto)
+
+    def test_un_reporte_nuevo_reabre_un_caso_revisado(self):
+        self.reportar()
+        caso = CasoReporte.objects.get()
+        self.patch_caso(caso, {"estado": "revisado", "decision_ocultar": False})
+        tercero = Usuario.objects.create_user("tercero@example.com", CLAVE)
+        self.reportar(tercero)
+        caso.refresh_from_db()
+        self.assertEqual(
+            (caso.estado, caso.decision_ocultar, caso.reportes.count()),
+            ("pendiente", None, 2),
+        )
+        self.assertEqual(CasoReporte.objects.count(), 1)
+
+    def test_decidir_ocultar_un_evento_que_ya_estaba_oculto_solo_registra_la_decision(
+        self,
+    ):
+        self.reportar()
+        caso = CasoReporte.objects.get()
+        self.post_admin(
+            f"/api/admin/eventos/{self.evento.pk}/ocultar/", {"norma": Norma.RESPETO}
+        )
+        respuesta = self.patch_caso(
+            caso,
+            {"estado": "revisado", "decision_ocultar": True, "norma": Norma.SIN_SPAM},
+        )
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(
+            (respuesta.data["estado"], respuesta.data["decision_ocultar"]),
+            ("revisado", True),
+        )
+        self.assertEqual(
+            RegistroModeracion.objects.count(), 1
+        )  # solo el ocultamiento original
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_un_evento_caducado_se_puede_cerrar_sin_ocultar_pero_no_ocultar(self):
+        self.reportar()
+        caso = CasoReporte.objects.get()
+        Fecha.objects.filter(evento=self.evento).update(inicio=en(-9), fin=en(-8))
+        respuesta = self.patch_caso(
+            caso,
+            {"estado": "revisado", "decision_ocultar": True, "norma": Norma.SIN_SPAM},
+        )
+        self.assertEqual(
+            (respuesta.status_code, respuesta.json()["code"]),
+            (409, "contenido_caducado"),
+        )
+        caso.refresh_from_db()
+        self.assertEqual(caso.estado, "pendiente")
+        self.assertEqual(
+            self.patch_caso(
+                caso, {"estado": "revisado", "decision_ocultar": False}
+            ).status_code,
+            200,
+        )

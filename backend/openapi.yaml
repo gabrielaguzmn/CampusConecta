@@ -179,6 +179,37 @@ paths:
                 items:
                   $ref: '#/components/schemas/Evento'
           description: ''
+  /api/admin/eventos/{id}/eliminar/:
+    post:
+      operationId: admin_eventos_eliminar_create
+      description: |-
+        PUBLICATION-8 · criterio 4, RF-017, RF-025: eliminar un evento completo (también si está oculto); se avisa al
+        creador por correo y queda en el registro. No se elimina contenido caducado.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MotivoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MotivoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MotivoRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/admin/eventos/{id}/ocultar/:
     post:
       operationId: admin_eventos_ocultar_create
@@ -234,6 +265,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/Evento'
           description: ''
+  /api/admin/fechas/{id}/eliminar/:
+    post:
+      operationId: admin_fechas_eliminar_create
+      description: |-
+        PUBLICATION-8 · criterio 4, RF-017, RF-025: eliminar una fecha próxima o en vivo (también si está oculta).
+        Si es la única fecha del evento, hay que eliminar el evento completo.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MotivoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MotivoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MotivoRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/admin/fechas/{id}/ocultar/:
     post:
       operationId: admin_fechas_ocultar_create
@@ -717,7 +779,10 @@ paths:
           description: ''
     delete:
       operationId: eventos_destroy
-      description: 'PUBLICATION-8 · criterio 2: eliminar el evento completo.'
+      description: |-
+        PUBLICATION-8 · criterio 2: eliminar el evento y sus fechas próximas. Si el evento solo tiene fechas
+        próximas, se elimina completo; si tiene también fechas en vivo, finalizadas o canceladas, estas se conservan
+        (las finalizadas siguen consultables en el historial) y solo se retiran las próximas.
       parameters:
       - in: path
         name: id
@@ -1727,12 +1792,14 @@ components:
       - restaurar
       - suspender
       - reactivar
+      - eliminar
       type: string
       description: |-
         * `ocultar` - Ocultar
         * `restaurar` - Restaurar
         * `suspender` - Suspender
         * `reactivar` - Reactivar
+        * `eliminar` - Eliminar
     TokenRefresh:
       type: object
       properties:

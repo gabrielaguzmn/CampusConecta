@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 
 from config.excepciones import Conflicto
 from cuentas.permissions import EsAdministrador
+from eventos import servicios
 from eventos.models import EN_VIVO, PROXIMA, Categoria, Evento, Fecha, Ubicacion
 from eventos.serializers import (
     CategoriaSerializer,
@@ -77,13 +78,13 @@ def eventos_visibles(estado=None):
     )
 
 
-def borrar_o_conflicto(objeto):
-    try:
-        with transaction.atomic():
-            objeto.delete()
-    except ProtectedError:
-        # TODO(PENDIENTE G-24: borrado lógico; el registro de moderación (RF-034) debe seguir apuntando al contenido)
-        raise Conflicto("El contenido figura en el registro de moderación y no se puede eliminar.", code="pendiente_g24")
+#def borrar_o_conflicto(objeto):
+#    try:
+#        with transaction.atomic():
+#            objeto.delete()
+#    except ProtectedError:
+#        # TODO(PENDIENTE G-24: borrado lógico; el registro de moderación (RF-034) debe seguir apuntando al contenido)
+#        raise Conflicto("El contenido figura en el registro de moderación y no se puede eliminar.", code="pendiente_g24")
 
 
 def respuesta_evento(request, evento, codigo=status.HTTP_200_OK):
@@ -193,9 +194,9 @@ class EventoView(APIView):
         evento = evento_propio(request, pk)
         rechazar_si_oculto(evento)
         if any(fecha.estado() != PROXIMA for fecha in evento.fechas.all()):
-            # TODO(PENDIENTE G-24: eliminar un evento con fechas en vivo, finalizadas o canceladas)
             raise Conflicto("Solo se puede eliminar un evento cuyas fechas son todas próximas.", code="pendiente_g24")
-        borrar_o_conflicto(evento)
+        servicios.eliminar_fechas_proximas(evento)
+        #borrar_o_conflicto(evento)
         evento.imagen.delete(save=False)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -323,7 +324,8 @@ class FechaView(APIView):
         if not fecha.evento.fechas.exclude(pk=fecha.pk).exists():
             # TODO(PENDIENTE G-24: eliminar la única fecha de un evento)
             raise Conflicto("Es la única fecha del evento; elimina el evento completo.", code="pendiente_g24")
-        borrar_o_conflicto(fecha)
+        #borrar_o_conflicto(fecha)
+        servicios.eliminar_fecha(fecha)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

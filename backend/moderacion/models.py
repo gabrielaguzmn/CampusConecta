@@ -52,9 +52,9 @@ class RegistroModeracion(models.Model):
     RESTAURAR = "restaurar"
     SUSPENDER = "suspender"
     REACTIVAR = "reactivar"
-    # TODO(PENDIENTE G-24: "eliminar" se añadirá cuando se defina el borrado por moderación)
+    ELIMINAR = "eliminar"
     # TODO(PENDIENTE G-34: si también se registran cambios de categorías y de rol administrador)
-    ACCIONES = [(OCULTAR, "Ocultar"), (RESTAURAR, "Restaurar"), (SUSPENDER, "Suspender"), (REACTIVAR, "Reactivar")]
+    ACCIONES = [(OCULTAR, "Ocultar"), (RESTAURAR, "Restaurar"), (SUSPENDER, "Suspender"), (REACTIVAR, "Reactivar"), (ELIMINAR, "Eliminar")]
 
     fecha_hora = models.DateTimeField(auto_now_add=True)
     administrador = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")

@@ -82,6 +82,11 @@ class EventoQuerySet(models.QuerySet):
         return self.filter(oculto=False, creador__is_active=True).filter(Exists(fechas))
 
 
+class EventoManager(models.Manager.from_queryset(EventoQuerySet)):
+    def get_queryset(self):
+        return super().get_queryset().filter(eliminado=False)
+
+
 class Evento(models.Model):
     creador = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="eventos")
     # RF-008: obligatorios.
@@ -106,8 +111,13 @@ class Evento(models.Model):
     oculto = models.BooleanField(default=False)
     norma_ocultamiento = models.PositiveSmallIntegerField(choices=Norma.choices, null=True, blank=True)
     explicacion_ocultamiento = models.TextField(blank=True)
+    # RF-017, G-24: borrado lógico. El registro de moderación (RF-034) sigue apuntando al contenido eliminado.
+    eliminado = models.BooleanField(default=False)
 
-    objects = EventoQuerySet.as_manager()
+    # `objects` no devuelve lo eliminado, así que el feed, el mapa, "Mis eventos" y el panel de administración
+    # lo ignoran sin cambios. `con_eliminados` los incluye.
+    objects = EventoManager()
+    con_eliminados = EventoQuerySet.as_manager()
 
     def __str__(self):
         return self.nombre
@@ -131,6 +141,11 @@ class FechaQuerySet(models.QuerySet):
         )
 
 
+class FechaManager(models.Manager.from_queryset(FechaQuerySet)):
+    def get_queryset(self):
+        return super().get_queryset().filter(eliminado=False)
+
+
 class Fecha(models.Model):
     evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name="fechas")
     # RF-008, G-07: horario propio con inicio y fin.
@@ -143,8 +158,10 @@ class Fecha(models.Model):
     oculta = models.BooleanField(default=False)
     norma_ocultamiento = models.PositiveSmallIntegerField(choices=Norma.choices, null=True, blank=True)
     explicacion_ocultamiento = models.TextField(blank=True)
-
-    objects = FechaQuerySet.as_manager()
+    # RF-017, G-24: borrado lógico (ver Evento.eliminado).
+    eliminado = models.BooleanField(default=False)
+    objects = FechaManager()
+    con_eliminadas = FechaQuerySet.as_manager()
 
     class Meta:
         ordering = ["inicio"]

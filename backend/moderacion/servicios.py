@@ -3,10 +3,12 @@ cuando corresponde, envía el correo (RNF-007) una vez confirmada la transacció
 
 from django.db import transaction
 
+from eventos import servicios as servicios_eventos
 from moderacion import correos
+from moderacion.models import CasoReporte
 from moderacion.models import RegistroModeracion as Registro
 
-VISIBLE, OCULTO = "visible", "oculto"
+VISIBLE, OCULTO, ELIMINADO = "visible", "oculto", "eliminado"
 ACTIVA, SUSPENDIDA = "activa", "suspendida"
 
 
@@ -60,6 +62,41 @@ def suspender(administrador, usuario, norma, explicacion=""):
     _registrar(administrador, Registro.SUSPENDER, ACTIVA, SUSPENDIDA, cuenta_afectada=usuario,
                norma=norma, explicacion=explicacion)
     transaction.on_commit(lambda: correos.enviar_suspension(usuario, norma, explicacion))
+
+
+@transaction.atomic
+def eliminar(administrador, evento, norma, explicacion="", fecha=None, reportes=()):
+    """G-24: el administrador elimina un evento completo o una de sus fechas. Es un borrado lógico (el contenido deja
+    de estar disponible en toda la plataforma) para que el registro (RF-034) siga apuntando a él.
+    """
+    anterior = (
+        OCULTO if (fecha.oculta if fecha is not None else evento.oculto) else VISIBLE
+    )
+    if fecha is None:
+        servicios_eventos.eliminar_evento(evento)
+        # Eliminar el evento es la decisión sobre sus reportes: el caso abierto se cierra.
+        casos = CasoReporte.objects.filter(evento=evento).exclude(
+            estado=CasoReporte.REVISADO
+        )
+        reportes = reportes or [r for caso in casos for r in caso.reportes.all()]
+        casos.update(estado=CasoReporte.REVISADO, decision_ocultar=True)
+    else:
+        servicios_eventos.eliminar_fecha(fecha)
+    _registrar(
+        administrador,
+        Registro.ELIMINAR,
+        anterior,
+        ELIMINADO,
+        reportes,
+        evento=evento,
+        fecha=fecha,
+        cuenta_afectada=evento.creador,
+        norma=norma,
+        explicacion=explicacion,
+    )
+    transaction.on_commit(
+        lambda: correos.enviar_eliminacion(evento, fecha, norma, explicacion)
+    )
 
 
 @transaction.atomic

@@ -42,3 +42,21 @@ def enviar_suspension(usuario, norma, explicacion):
         f"{_motivo(norma, explicacion)}"
     )
     send_mail("Tu cuenta de CampusConecta fue suspendida", mensaje, None, [usuario.email])
+
+
+def enviar_eliminacion(evento, fecha, norma, explicacion):
+    """ADMIN-1, G-24: se informa al creador la norma incumplida cuando el administrador elimina contenido."""
+    if fecha is None:
+        asunto = "Tu evento fue eliminado de CampusConecta"
+        contenido = f'tu evento "{evento.nombre}"'
+    else:
+        inicio = timezone.localtime(fecha.inicio).strftime("%d/%m/%Y %H:%M")
+        asunto = "Una fecha de tu evento fue eliminada de CampusConecta"
+        contenido = f'la fecha del {inicio} de tu evento "{evento.nombre}"'
+    mensaje = (
+        f"Hola, {evento.creador.nombre}:\n\n"
+        f"El equipo de administración de CampusConecta eliminó {contenido} porque incumple las normas de uso "
+        "de la plataforma. El contenido ya no está disponible.\n\n"
+        f"{_motivo(norma, explicacion)}"
+    )
+    send_mail(asunto, mensaje, None, [evento.creador.email])

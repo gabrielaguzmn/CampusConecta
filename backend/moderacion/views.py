@@ -47,11 +47,16 @@ class ReportarView(APIView):
         serializer.is_valid(raise_exception=True)
         # RF-026: todos los reportes de un mismo evento van al mismo caso.
         caso, _ = CasoReporte.objects.get_or_create(evento=evento)
+        if caso.estado == CasoReporte.REVISADO:
+            caso.estado, caso.decision_ocultar = CasoReporte.PENDIENTE, None
+            caso.save(update_fields=["estado","decision_ocultar"])
         serializer.save(caso=caso, evento=evento, usuario=request.user)
         return Response({"detail": CONFIRMACION_REPORTE}, status=status.HTTP_201_CREATED)
 
 
 # --- Reportes (ADMIN-2) ---
+
+ORDEN_ESTADOS= {CasoReporte.PENDIENTE: 0, CasoReporte.EN_REVISION: 1, CasoReporte.REVISADO: 2}
 
 
 def casos():
@@ -88,10 +93,18 @@ class AdminCasoView(APIView):
         serializer = CasoActualizacionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         datos = serializer.validated_data
+         # G-25: el caso solo avanza (pendiente → en revisión → revisado); "revisado" es final hasta un nuevo reporte.
+        if ORDEN_ESTADOS[datos["estado"]] <= ORDEN_ESTADOS[caso.estado]:
+            raise Conflicto(
+                f"El caso ya está en \"{caso.get_estado_display()}\"; solo puede avanzar al siguiente estado.",
+                code="transicion_no_permitida",
+            )
         if datos["decision_ocultar"]:
             evento = caso.evento
-            comprobar_evento_moderable(evento, oculto=False)
-            servicios.ocultar(request.user, evento, datos["norma"], datos["explicacion"], reportes=caso.reportes.all())
+            # Si el evento ya está oculto (o fue eliminado) por otra vía, solo se registra la decisión del caso.
+            if not (evento.oculto or evento.eliminado):
+                comprobar_evento_moderable(evento, oculto=False)
+                servicios.ocultar(request.user, evento, datos["norma"], datos["explicacion"], reportes=caso.reportes.all())
         caso.estado = datos["estado"]
         caso.decision_ocultar = datos["decision_ocultar"]
         caso.save()
@@ -109,15 +122,21 @@ def comprobar_evento_moderable(evento, oculto):
         raise Conflicto("El evento ya está oculto." if evento.oculto else "El evento no está oculto.")
 
 
-def comprobar_fecha_moderable(fecha, oculta):
+def comprobar_fecha_vigente(fecha):
     estado = fecha.estado()
     if estado == "finalizada":
         raise Conflicto("La fecha ya finalizó.", code="contenido_caducado")  # RF-025
     if estado == "cancelada":
         # TODO(PENDIENTE G-23: si se puede moderar una fecha cancelada)
         raise Conflicto("La fecha está cancelada.", code="pendiente_g23")
+
+
+def comprobar_fecha_moderable(fecha, oculta):
+    comprobar_fecha_vigente(fecha)
     if fecha.oculta != oculta:
-        raise Conflicto("La fecha ya está oculta." if fecha.oculta else "La fecha no está oculta.")
+        raise Conflicto(
+            "La fecha ya está oculta." if fecha.oculta else "La fecha no está oculta."
+        )
 
 
 class AdminEventosView(generics.ListAPIView):
@@ -209,7 +228,51 @@ class AdminRestaurarFechaView(APIView):
         return respuesta_admin(request, fecha.evento)
 
 
-# TODO(PENDIENTE G-24: eliminación de eventos y fechas por moderación — PUBLICATION-8 · criterio 4, RF-017, RF-025)
+class AdminEliminarEventoView(APIView):
+    permission_classes = [EsAdministrador]
+
+    @extend_schema(request=MotivoSerializer, responses={204: None})
+    @transaction.atomic
+    def post(self, request, pk):
+        """PUBLICATION-8 · criterio 4, RF-017, RF-025: eliminar un evento completo (también si está oculto); se avisa al
+        creador por correo y queda en el registro. No se elimina contenido caducado."""
+        evento = evento_bloqueado(pk)
+        if (
+            not evento.fechas.con_estado()
+            .filter(estado_calculado__in=[PROXIMA, EN_VIVO])
+            .exists()
+        ):
+            raise Conflicto(
+                "El evento ya no tiene fechas próximas o en vivo.",
+                code="contenido_caducado",
+            )
+        motivo = MotivoSerializer(data=request.data)
+        motivo.is_valid(raise_exception=True)
+        servicios.eliminar(request.user, evento, **motivo.validated_data)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AdminEliminarFechaView(APIView):
+    permission_classes = [EsAdministrador]
+
+    @extend_schema(request=MotivoSerializer, responses={204: None})
+    @transaction.atomic
+    def post(self, request, pk):
+        """PUBLICATION-8 · criterio 4, RF-017, RF-025: eliminar una fecha próxima o en vivo (también si está oculta).
+        Si es la única fecha del evento, hay que eliminar el evento completo."""
+        fecha = fecha_bloqueada(pk)
+        comprobar_fecha_vigente(fecha)
+        if not fecha.evento.fechas.exclude(pk=fecha.pk).exists():
+            raise Conflicto(
+                "Es la única fecha del evento; elimina el evento completo.",
+                code="unica_fecha",
+            )
+        motivo = MotivoSerializer(data=request.data)
+        motivo.is_valid(raise_exception=True)
+        servicios.eliminar(
+            request.user, fecha.evento, fecha=fecha, **motivo.validated_data
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # --- Suspensión de cuentas (ADMIN-3) ---
