@@ -1,19 +1,21 @@
 import { useState, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, CalendarOff, CalendarPlus, CalendarX, CircleStop, ClockPlus, Pencil, Trash2 } from 'lucide-react'
+import { ArrowLeft,CalendarMinus, CalendarOff, CalendarPlus, CalendarX, CircleStop, ClockPlus, Pencil, Trash2 } from 'lucide-react'
 import { api, todosLosMensajes } from '../../api/client'
 import type { components } from '../../api/schema'
 import { AccionModal } from '../../components/AccionModal'
 import { CampoTexto } from '../../components/CampoTexto'
 import { Modal } from '../../components/Modal'
+import { Sesiones } from '../../components/Sesiones'
 import { formatoDiaYHorario, isoALocal, localAIso } from '../../lib/formato'
 
 type Evento = components['schemas']['Evento']
 type Fecha = components['schemas']['Fecha']
-type Paso = 'menu' | 'cancelar' | 'cancelar-todas' | 'finalizar' | 'extender' | 'anadir' | 'eliminar'
+type Paso = 'menu' | 'cancelar' | 'cancelar-todas' | 'finalizar' | 'extender' | 'anadir' | 'eliminar' | 'eliminar-fecha'
 
 // Figma 4:29200 / 4:29792 · «Gestionar evento»: Editar, Cancelar y Eliminar.
 // Decisiones 2026-10-07: «Cancelar» cancela una fecha elegida (G-10); «Eliminar» borra el evento completo (RF-017).
+// una fecha próxima (PUBLICATION-8). Si el evento tiene fechas que no son próximas, «Eliminar» solo retira las próximas.
 // Las demás acciones (RF-014, RF-015, RF-016, añadir fecha de G-30) no tienen diseño y se añaden con el mismo estilo (G-12).
 function ElegirFecha({ fechas, elegida, onElegir }: { fechas: Fecha[]; elegida?: number; onElegir: (id: number) => void }) {
   return (
@@ -40,6 +42,8 @@ export function GestionarEvento({ evento, onEditar, onCerrar }: { evento: Evento
 
   const vigentes = evento.fechas.filter((f) => f.estado === 'proxima' || f.estado === 'en_vivo')
   const enVivo = evento.fechas.filter((f) => f.estado === 'en_vivo')
+  const proximas = evento.fechas.filter((f) => f.estado === 'proxima')
+  const soloProximas = proximas.length === evento.fechas.length
   // PUBLICATION-7: solo se acepta un fin posterior al actual de la sesión en vivo.
   const fechaElegida = evento.fechas.find((f) => f.id === elegida)
   const finValido = Boolean(fechaElegida && fin && fin > isoALocal(fechaElegida.fin))
@@ -102,10 +106,18 @@ export function GestionarEvento({ evento, onEditar, onCerrar }: { evento: Evento
           <AccionModal variante="accion" icono={<CalendarX size={20} />} onClick={() => ir('cancelar', vigentes)}>
             Cancelar
           </AccionModal>
-          {/* PUBLICATION-8 · decisión G-10: borra el evento completo */}
-          <AccionModal variante="destructiva" icono={<Trash2 size={20} />} onClick={() => ir('eliminar')}>
-            Eliminar
-          </AccionModal>
+          {/* PUBLICATION-8 · criterio 1: una fecha próxima (la única fecha obliga a eliminar el evento) */}
+          {proximas.length > 0 && evento.fechas.length > 1 && (
+            <AccionModal variante="destructiva" icono={<CalendarMinus size={20} />} onClick={() => ir('eliminar-fecha', proximas)}>
+              Eliminar sesión
+            </AccionModal>
+          )}
+          {/* PUBLICATION-8 · criterio 2: el evento y sus fechas próximas; solo si hay alguna próxima (criterio 3) */}
+          {proximas.length > 0 && (
+            <AccionModal variante="destructiva" icono={<Trash2 size={20} />} onClick={() => ir('eliminar')}>
+              Eliminar
+            </AccionModal>
+          )}
         </div>
         <div className="flex flex-col gap-2">
           <p className="text-[13px] font-semibold text-texto-secundario">Más acciones</p>

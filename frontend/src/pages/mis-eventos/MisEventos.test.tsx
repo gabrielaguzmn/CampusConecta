@@ -272,6 +272,56 @@ describe('PUBLICATION-8: eliminación del evento (decisión G-10)', () => {
     expect(peticiones.some((p) => p.method === 'DELETE' && p.url.endsWith('/api/eventos/21/'))).toBe(true)
   })
 
+  it('criterio 2: si el evento tiene fechas que no son próximas, solo se retiran las próximas', async () => {
+    const peticiones = iniciar([multifecha], { 'DELETE /api/eventos/20/': () => new Response(null, { status: 204 }) })
+    renderizarApp('/mis-eventos')
+    const dialogo = await abrirGestion('Evento multifecha')
+    await userEvent.click(within(dialogo).getByRole('button', { name: 'Eliminar' }))
+    expect(dialogo).toHaveTextContent('Las sesiones en vivo, finalizadas o canceladas se conservan.')
+    expect(within(dialogo).queryByRole('button', { name: 'Eliminar evento' })).not.toBeInTheDocument()
+    await userEvent.click(within(dialogo).getByRole('button', { name: 'Eliminar sesiones próximas' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(peticiones.some((p) => p.method === 'DELETE' && p.url.endsWith('/api/eventos/20/'))).toBe(true)
+  })
+
+  it('criterio 1: elimina una sesión próxima elegida; las demás no cambian', async () => {
+    const dosProximas = evento({
+      id: 22,
+      nombre: 'Evento con dos próximas',
+      fechas: [fecha(5, 'proxima', '2026-10-24T21:00:00Z', '2026-10-24T23:00:00Z'), fecha(6, 'proxima', '2026-10-31T21:00:00Z', '2026-10-31T23:00:00Z')],
+    })
+    const peticiones = iniciar([dosProximas], { 'DELETE /api/fechas/6/': () => new Response(null, { status: 204 }) })
+    renderizarApp('/mis-eventos')
+    const dialogo = await abrirGestion('Evento con dos próximas')
+    await userEvent.click(within(dialogo).getByRole('button', { name: 'Eliminar sesión' }))
+    expect(within(dialogo).getByRole('button', { name: 'Eliminar sesión' })).toBeDisabled()
+    await userEvent.click(within(dialogo).getByLabelText(/31 Oct\./))
+    await userEvent.click(within(dialogo).getByRole('button', { name: 'Eliminar sesión' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(peticiones.some((p) => p.method === 'DELETE' && p.url.endsWith('/api/fechas/6/'))).toBe(true)
+    expect(peticiones.some((p) => p.method === 'DELETE' && p.url.endsWith('/api/fechas/5/'))).toBe(false)
+  })
+
+  it('una sola fecha no ofrece eliminar sesión: se elimina el evento', async () => {
+    iniciar([sencillo])
+    renderizarApp('/mis-eventos')
+    const dialogo = await abrirGestion('Evento sencillo')
+    expect(within(dialogo).queryByRole('button', { name: 'Eliminar sesión' })).not.toBeInTheDocument()
+    expect(within(dialogo).getByRole('button', { name: 'Eliminar' })).toBeInTheDocument()
+  })
+
+  it('criterio 3: sin fechas próximas no hay nada que eliminar', async () => {
+    const sinProximas = evento({
+      id: 23,
+      nombre: 'Evento sin próximas',
+      fechas: [fecha(7, 'finalizada', '2026-10-10T21:00:00Z', '2026-10-10T23:00:00Z'), fecha(8, 'en_vivo', '2026-10-17T21:00:00Z', '2026-10-17T23:00:00Z')],
+    })
+    iniciar([sinProximas])
+    renderizarApp('/mis-eventos')
+    const dialogo = await abrirGestion('Evento sin próximas')
+    expect(within(dialogo).queryByRole('button', { name: /^Eliminar/ })).not.toBeInTheDocument()
+  })
+
   it('criterio 3: si la API lo impide (fechas no próximas, G-24) se muestra su mensaje', async () => {
     iniciar([multifecha], {
       'DELETE /api/eventos/20/': () => json({ detail: 'Solo se puede eliminar un evento cuyas fechas son todas próximas.', code: 'pendiente_g24' }, 409),

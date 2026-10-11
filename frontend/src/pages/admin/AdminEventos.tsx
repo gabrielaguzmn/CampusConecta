@@ -19,7 +19,34 @@ function ModerarEvento({ evento, onCerrar }: { evento: Evento; onCerrar: () => v
   const refrescar = useRefrescar()
   const { enviando, errores, ejecutar } = useAccion()
   const [ocultar, setOcultar] = useState<Objetivo>()
+  const [eliminar, setEliminar] = useState<Objetivo>()
   const moderables = evento.fechas.filter((f) => f.estado !== 'finalizada') // ADMIN-1 · criterio 3
+  // PUBLICATION-8 · criterio 4: solo se elimina contenido vigente (próximo o en vivo); la única fecha obliga a eliminar el evento.
+  const vigentes = evento.fechas.filter((f) => f.estado === 'proxima' || f.estado === 'en_vivo')
+  const eliminables = evento.fechas.length > 1 ? vigentes : []
+
+  if (eliminar) {
+    return (
+      <ModalMotivo
+        titulo={eliminar.tipo === 'evento' ? 'Eliminar evento' : 'Eliminar sesión'}
+        texto={
+          eliminar.tipo === 'evento'
+            ? `«${evento.nombre}» y todas sus sesiones dejarán de estar disponibles. Esta acción no se puede deshacer. Su creador recibirá un correo con el motivo.`
+            : `La sesión del ${eliminar.cuando} dejará de estar disponible. Esta acción no se puede deshacer. Su creador recibirá un correo con el motivo.`
+        }
+        boton={eliminar.tipo === 'evento' ? 'Eliminar evento' : 'Eliminar sesión'}
+        onCerrar={onCerrar}
+        onConfirmar={async (motivo) => {
+          const r =
+            eliminar.tipo === 'evento'
+              ? await api.POST('/api/admin/eventos/{id}/eliminar/', { params: { path: { id: evento.id } }, body: motivo })
+              : await api.POST('/api/admin/fechas/{id}/eliminar/', { params: { path: { id: eliminar.id } }, body: motivo })
+          if (r.response.ok) await refrescar()
+          return r
+        }}
+      />
+    )
+  }
 
   if (ocultar) {
     return (
@@ -63,6 +90,11 @@ function ModerarEvento({ evento, onCerrar }: { evento: Evento; onCerrar: () => v
             Ocultar evento
           </AccionModal>
         )}
+        {vigentes.length > 0 && (
+          <AccionModal variante="destructiva" onClick={() => setEliminar({ tipo: 'evento' })}>
+            Eliminar evento
+          </AccionModal>
+        )}
         {moderables.map((f) => {
           const cuando = formatoDiaYHorario(f.inicio, f.fin)
           return f.oculta ? (
@@ -76,6 +108,14 @@ function ModerarEvento({ evento, onCerrar }: { evento: Evento; onCerrar: () => v
           ) : (
             <AccionModal key={f.id} variante="destructiva" onClick={() => setOcultar({ tipo: 'fecha', id: f.id, cuando })}>
               Ocultar sesión del {cuando}
+            </AccionModal>
+          )
+        })}
+        {eliminables.map((f) => {
+          const cuando = formatoDiaYHorario(f.inicio, f.fin)
+          return (
+            <AccionModal key={`eliminar-${f.id}`} variante="destructiva" onClick={() => setEliminar({ tipo: 'fecha', id: f.id, cuando })}>
+              Eliminar sesión del {cuando}
             </AccionModal>
           )
         })}

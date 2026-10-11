@@ -3,7 +3,8 @@ import { useNormas } from '../../api/queries'
 import { Cargando, Pildora } from './comunes'
 
 // ADMIN-4 · criterios 3 y 4 · RF-034: registro completo y de solo lectura (sin acciones de edición ni borrado).
-const ACCIONES = { ocultar: 'Ocultar', restaurar: 'Restaurar', suspender: 'Suspender', reactivar: 'Reactivar' } as const
+const ACCIONES = { ocultar: 'Ocultar', restaurar: 'Restaurar', suspender: 'Suspender', reactivar: 'Reactivar', eliminar: 'Eliminar' } as const
+const ACCIONES_DE_ALERTA = ['ocultar', 'suspender', 'eliminar']
 
 const fechaHora = new Intl.DateTimeFormat('es-CO', { timeZone: 'America/Bogota', dateStyle: 'medium', timeStyle: 'short' })
 
@@ -16,7 +17,7 @@ export function AdminRegistro() {
         {registro.data?.map((r) => (
           <li key={r.id} className="flex flex-col gap-3 rounded-tarjeta bg-superficie p-5 shadow-tarjeta">
             <div className="flex flex-wrap items-center gap-2">
-              <Pildora tono={r.tipo_accion === 'ocultar' || r.tipo_accion === 'suspender' ? 'alerta' : 'ok'}>{ACCIONES[r.tipo_accion]}</Pildora>
+              <Pildora tono={ACCIONES_DE_ALERTA.includes(r.tipo_accion) ? 'alerta' : 'ok'}>{ACCIONES[r.tipo_accion]}</Pildora>
               <span className="text-[13px] text-texto-secundario">{fechaHora.format(new Date(r.fecha_hora))}</span>
             </div>
             <dl className="grid gap-x-6 gap-y-2 text-[13px] md:grid-cols-2">

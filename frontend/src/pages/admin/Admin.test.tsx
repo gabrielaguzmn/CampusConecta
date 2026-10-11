@@ -134,6 +134,67 @@ describe('ADMIN-1: moderación de eventos y fechas', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Ocultos' }))
     await waitFor(() => expect(peticiones.some((p) => p.url.endsWith('/api/admin/eventos/?oculto=true'))).toBe(true))
   })
+
+  it('PUBLICATION-8 · criterio 4: elimina el evento con su motivo tras elegir la norma', async () => {
+    const peticiones = iniciar({ 'GET /api/admin/eventos/': () => json([visible]), 'POST /api/admin/eventos/5/eliminar/': () => new Response(null, { status: 204 }) })
+    renderizarApp('/admin/eventos')
+    await userEvent.click(await screen.findByRole('button', { name: 'Moderar Evento moderado' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Eliminar evento' }))
+    const dialogo = screen.getByRole('dialog', { name: 'Eliminar evento' })
+    expect(dialogo).toHaveTextContent('Esta acción no se puede deshacer.')
+    expect(within(dialogo).getByRole('button', { name: 'Eliminar evento' })).toBeDisabled()
+    await within(dialogo).findByRole('option', { name: '3. Respeto y convivencia' })
+    await userEvent.selectOptions(within(dialogo).getByLabelText('Norma incumplida'), '3')
+    await userEvent.type(within(dialogo).getByLabelText('Explicación (opcional)'), 'Ofensivo')
+    await userEvent.click(within(dialogo).getByRole('button', { name: 'Eliminar evento' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(await cuerpo(peticiones, 'POST', '/api/admin/eventos/5/eliminar/')).toEqual({ norma: 3, explicacion: 'Ofensivo' })
+  })
+
+  it('PUBLICATION-8 · criterio 4: elimina una sesión vigente; las finalizadas no se ofrecen', async () => {
+    const peticiones = iniciar({ 'GET /api/admin/eventos/': () => json([visible]), 'POST /api/admin/fechas/2/eliminar/': () => new Response(null, { status: 204 }) })
+    renderizarApp('/admin/eventos')
+    await userEvent.click(await screen.findByRole('button', { name: 'Moderar Evento moderado' }))
+    const moderar = screen.getByRole('dialog', { name: 'Moderar evento' })
+    expect(within(moderar).queryByRole('button', { name: /^Eliminar sesión del 10 Oct\./ })).not.toBeInTheDocument()
+    await userEvent.click(within(moderar).getByRole('button', { name: 'Eliminar sesión del 24 Oct. · 16:00–18:00' }))
+    const dialogo = screen.getByRole('dialog', { name: 'Eliminar sesión' })
+    await within(dialogo).findByRole('option', { name: '3. Respeto y convivencia' })
+    await userEvent.selectOptions(within(dialogo).getByLabelText('Norma incumplida'), '3')
+    await userEvent.click(within(dialogo).getByRole('button', { name: 'Eliminar sesión' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(await cuerpo(peticiones, 'POST', '/api/admin/fechas/2/eliminar/')).toEqual({ norma: 3, explicacion: '' })
+  })
+
+  it('PUBLICATION-8 · criterio 4: la única fecha obliga a eliminar el evento y un evento caducado no se elimina', async () => {
+    const unica = evento({ id: 6, nombre: 'Evento de una fecha', fechas: [fecha(3, 'proxima', '2026-10-24T21:00:00Z', '2026-10-24T23:00:00Z')] })
+    const caducado = evento({ id: 7, nombre: 'Evento caducado', fechas: [fecha(4, 'finalizada', '2026-10-10T21:00:00Z', '2026-10-10T23:00:00Z')] })
+    iniciar({ 'GET /api/admin/eventos/': () => json([unica, caducado]) })
+    renderizarApp('/admin/eventos')
+    await userEvent.click(await screen.findByRole('button', { name: 'Moderar Evento de una fecha' }))
+    let dialogo = screen.getByRole('dialog', { name: 'Moderar evento' })
+    expect(within(dialogo).getByRole('button', { name: 'Eliminar evento' })).toBeInTheDocument()
+    expect(within(dialogo).queryByRole('button', { name: /^Eliminar sesión/ })).not.toBeInTheDocument()
+    await userEvent.click(within(dialogo).getByRole('button', { name: 'Cerrar' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Moderar Evento caducado' }))
+    dialogo = screen.getByRole('dialog', { name: 'Moderar evento' })
+    expect(within(dialogo).queryByRole('button', { name: /^Eliminar/ })).not.toBeInTheDocument()
+  })
+
+  it('muestra el motivo de la API si no se puede eliminar', async () => {
+    iniciar({
+      'GET /api/admin/eventos/': () => json([visible]),
+      'POST /api/admin/eventos/5/eliminar/': () => json({ detail: 'El evento ya no tiene fechas próximas o en vivo.', code: 'contenido_caducado' }, 409),
+    })
+    renderizarApp('/admin/eventos')
+    await userEvent.click(await screen.findByRole('button', { name: 'Moderar Evento moderado' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Eliminar evento' }))
+    const dialogo = screen.getByRole('dialog', { name: 'Eliminar evento' })
+    await within(dialogo).findByRole('option', { name: '3. Respeto y convivencia' })
+    await userEvent.selectOptions(within(dialogo).getByLabelText('Norma incumplida'), '3')
+    await userEvent.click(within(dialogo).getByRole('button', { name: 'Eliminar evento' }))
+    expect(await within(dialogo).findByRole('alert')).toHaveTextContent('El evento ya no tiene fechas próximas o en vivo.')
+  })
 })
 
 describe('ADMIN-3 y ADMIN-4: cuentas y administradores', () => {
