@@ -168,7 +168,7 @@ class ModeracionContenidoTests(BaseModeracionTest):
     def test_ADMIN_1_c4_creador_ve_marca_y_motivo_y_recibe_correo(self):
         self.post_admin(f"/api/admin/eventos/{self.evento.pk}/ocultar/", {"norma": Norma.SIN_SPAM, "explicacion": "Duplicado"})
         self.como(self.creador)
-        evento = self.client.get("/api/mis-eventos/").data[0]
+        evento = self.client.get("/api/mis-eventos/?vista=historial").data[0]
         self.assertTrue(evento["oculto"])
         self.assertEqual((evento["norma_ocultamiento"], evento["explicacion_ocultamiento"]), (5, "Duplicado"))
         self.assertEqual(len(mail.outbox), 1)
@@ -207,6 +207,21 @@ class ModeracionContenidoTests(BaseModeracionTest):
         self.como(self.creador)
         respuesta = self.client.post(f"/api/eventos/{self.evento.pk}/cancelar-todas/")
         self.assertEqual((respuesta.status_code, respuesta.json()["code"]), (409, "contenido_oculto"))
+
+    def test_G23_oculto_pasa_al_historial_y_vuelve_al_restaurar(self):
+        # Decisión 2026-10-11: oculto → historial y sin edición; restaurado → activo y editable.
+        self.post_admin(f"/api/admin/eventos/{self.evento.pk}/ocultar/", {"norma": Norma.RESPETO})
+        self.como(self.creador)
+        self.assertEqual(self.client.get("/api/mis-eventos/").data, [])
+        self.assertEqual(self.client.get("/api/mis-eventos/?vista=historial").data[0]["id"], self.evento.pk)
+        editar = self.client.patch(f"/api/eventos/{self.evento.pk}/", {"nombre": "Otro"}, format="json")
+        self.assertEqual(editar.status_code, 409)
+
+        self.post_admin(f"/api/admin/eventos/{self.evento.pk}/restaurar/")
+        self.como(self.creador)
+        self.assertEqual(self.client.get("/api/mis-eventos/").data[0]["id"], self.evento.pk)
+        editar = self.client.patch(f"/api/eventos/{self.evento.pk}/", {"nombre": "Otro"}, format="json")
+        self.assertEqual(editar.status_code, 200)
 
     def test_G24_contenido_con_registro_no_se_elimina(self):
         self.post_admin(f"/api/admin/eventos/{self.evento.pk}/ocultar/", {"norma": Norma.RESPETO})

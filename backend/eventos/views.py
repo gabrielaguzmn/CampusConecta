@@ -292,7 +292,6 @@ class MisEventosView(generics.ListAPIView):
         vista = self.request.query_params.get("vista", "vigentes")
         if vista not in ("vigentes", "historial"):
             raise ValidationError({"vista": "Debe ser 'vigentes' o 'historial'."})
-        # TODO(PENDIENTE G-23: si un evento oculto con fechas futuras aparece como vigente o como historial)
         eventos = Evento.objects.filter(creador=self.request.user)
         eventos = eventos.vigentes() if vista == "vigentes" else eventos.historial()
         return eventos.select_related("categoria", "ubicacion").prefetch_related(prefetch_fechas()).order_by("pk")

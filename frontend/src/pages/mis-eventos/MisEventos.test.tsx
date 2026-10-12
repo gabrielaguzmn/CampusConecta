@@ -196,7 +196,7 @@ describe('PUBLICATION-4: cancelación de una fecha', () => {
     const peticiones = iniciar([multifecha], { 'POST /api/fechas/3/cancelar/': () => json(multifecha.fechas[2]) })
     renderizarApp('/mis-eventos')
     const dialogo = await abrirGestion('Evento multifecha')
-    await userEvent.click(within(dialogo).getByRole('button', { name: 'Cancelar' }))
+    await userEvent.click(within(dialogo).getByRole('button', { name: 'Cancelar sesión' }))
     const opciones = within(dialogo).getAllByRole('radio')
     expect(opciones).toHaveLength(2) // en vivo y próxima; la finalizada solo se consulta
     await userEvent.click(within(dialogo).getByLabelText('24 Oct. · 16:00–18:00 — Próxima'))
@@ -355,7 +355,7 @@ describe('RNF-005 · PUBLICATION-3 · criterio 3: los cambios se ven en la sigui
     const dialogo = await abrirGestion('Evento multifecha')
     const consultas = () => peticiones.filter((p) => p.method === 'GET' && new URL(p.url).pathname === '/api/mis-eventos/').length
     const antes = consultas()
-    await userEvent.click(within(dialogo).getByRole('button', { name: 'Cancelar' }))
+    await userEvent.click(within(dialogo).getByRole('button', { name: 'Cancelar sesión' }))
     await userEvent.click(within(dialogo).getByLabelText('24 Oct. · 16:00–18:00 — Próxima'))
     await userEvent.click(within(dialogo).getByRole('button', { name: 'Cancelar sesión' }))
     await waitFor(() => expect(consultas()).toBeGreaterThan(antes))

@@ -1,8 +1,9 @@
 import { useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import { ArrowLeft, DoorOpen, ExternalLink, Flag, MapPin, MessageCircle, User, Users } from 'lucide-react'
+import { ArrowLeft, DoorOpen, ExternalLink, Flag, MapPin, Maximize2, MessageCircle, User, Users } from 'lucide-react'
 import { useEvento } from '../../api/queries'
 import { EstadoBadge } from '../../components/EstadoBadge'
+import { Modal } from '../../components/Modal'
 import { Sesiones } from '../../components/Sesiones'
 import { ReportarEvento } from './ReportarEvento'
 
@@ -25,6 +26,8 @@ export function EventoPage() {
   const navegar = useNavigate()
   const consulta = useEvento(id)
   const [reportando, setReportando] = useState(false)
+  const [imagenCompleta, setImagenCompleta] = useState(false)
+  const [imagenFallo, setImagenFallo] = useState(false)
   const evento = consulta.data
   const unaFecha = evento?.fechas.length === 1 ? evento.fechas[0] : undefined
 
@@ -64,8 +67,27 @@ export function EventoPage() {
             style={evento.categoria.color ? { borderLeftColor: evento.categoria.color } : undefined}
             className={`overflow-hidden rounded-tarjeta bg-superficie shadow-tarjeta ${evento.categoria.color ? 'border-l-4' : ''}`}
           >
-            <div className="relative h-56 bg-primario md:h-80">
-              {evento.imagen && <img src={evento.imagen} alt="" className="h-full w-full object-cover" />}
+            <div
+              // Decisión 2026-10-11: igual que en la tarjeta del feed, el color de la categoría queda detrás de la imagen
+              // y se ve si no hay imagen o si no carga.
+              style={evento.categoria.color ? { backgroundColor: evento.categoria.color } : undefined}
+              className={`relative h-56 md:h-80 ${evento.categoria.color ? '' : 'bg-primario'}`}
+            >
+              {evento.imagen && !imagenFallo && (
+                // Decisión 2026-10-11: la portada recorta la imagen; al pulsarla se ve completa (p. ej. un flyer).
+                <button
+                  type="button"
+                  onClick={() => setImagenCompleta(true)}
+                  aria-label="Ver imagen completa"
+                  className="group block h-full w-full cursor-zoom-in focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-primario"
+                >
+                  <img src={evento.imagen} alt="" className="h-full w-full object-cover" onError={() => setImagenFallo(true)} />
+                  <span className="absolute right-4 bottom-4 flex items-center gap-1.5 rounded-pildora bg-texto/70 px-3 py-1.5 text-[13px] font-semibold text-white group-hover:bg-texto/85">
+                    <Maximize2 size={14} aria-hidden />
+                    Ver imagen completa
+                  </span>
+                </button>
+              )}
               <span className="absolute top-4 left-4 rounded-pildora bg-texto/70 px-3 py-1.5 text-[13px] font-semibold text-white">
                 {evento.categoria.nombre}
               </span>
@@ -124,6 +146,11 @@ export function EventoPage() {
         </div>
       )}
       {reportando && evento && <ReportarEvento eventoId={evento.id} onCerrar={() => setReportando(false)} />}
+      {imagenCompleta && evento?.imagen && (
+        <Modal titulo={evento.nombre} onCerrar={() => setImagenCompleta(false)} ancho="max-w-[1000px]" className="p-4 md:p-6">
+          <img src={evento.imagen} alt={`Imagen de ${evento.nombre}`} className="max-h-[80vh] w-full rounded-control object-contain" />
+        </Modal>
+      )}
     </main>
   )
 }

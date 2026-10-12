@@ -62,11 +62,12 @@ class Ubicacion(models.Model):
 
 class EventoQuerySet(models.QuerySet):
     def vigentes(self, ahora=None):
-        """RF-020, G-32: al menos una fecha no cancelada próxima o en vivo."""
+        """"Mis eventos" activos (RF-020, G-32): al menos una fecha no cancelada próxima o en vivo.
+        G-23 (decisión 2026-10-11): lo oculto por moderación pasa al historial y no se edita hasta que se restaure."""
         fechas_vigentes = Fecha.objects.con_estado(ahora).filter(
-            evento=OuterRef("pk"), estado_calculado__in=[PROXIMA, EN_VIVO]
+            evento=OuterRef("pk"), oculta=False, estado_calculado__in=[PROXIMA, EN_VIVO]
         )
-        return self.filter(Exists(fechas_vigentes))
+        return self.filter(oculto=False).filter(Exists(fechas_vigentes))
 
     def historial(self, ahora=None):
         """RF-021: eventos sin fechas vigentes."""

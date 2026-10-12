@@ -155,11 +155,21 @@ class MisEventosTests(BaseEventosTest):
         self.assertEqual([e["id"] for e in self.mis_eventos("vigentes")], [vigente.pk])
         self.assertEqual([e["id"] for e in self.mis_eventos("historial")], [terminado.pk, cancelado.pk])
 
-    def test_PUBLICATION_2_c4_oculto_se_muestra_marcado(self):
+    def test_PUBLICATION_2_c4_oculto_se_muestra_marcado_en_el_historial(self):
+        # G-23 (decisión 2026-10-11): lo oculto por moderación pasa al historial.
         evento = self.crear_evento(oculto=True)
-        self.assertTrue(self.mis_eventos()[0]["oculto"])
+        self.assertEqual(self.mis_eventos("vigentes"), [])
+        self.assertTrue(self.mis_eventos("historial")[0]["oculto"])
         evento.fechas.update(oculta=True)
-        self.assertTrue(self.mis_eventos()[0]["fechas"][0]["oculta"])
+        self.assertTrue(self.mis_eventos("historial")[0]["fechas"][0]["oculta"])
+
+    def test_G23_fecha_oculta_no_cuenta_como_vigente(self):
+        con_otra_fecha = self.crear_evento((24, 26), (48, 50))
+        solo_oculta = self.crear_evento((24, 26))
+        Fecha.objects.filter(pk=con_otra_fecha.fechas.first().pk).update(oculta=True)
+        solo_oculta.fechas.update(oculta=True)
+        self.assertEqual([e["id"] for e in self.mis_eventos("vigentes")], [con_otra_fecha.pk])
+        self.assertEqual([e["id"] for e in self.mis_eventos("historial")], [solo_oculta.pk])
 
     def test_PUBLICATION_2_solo_eventos_propios(self):
         self.crear_evento(creador=self.otro)

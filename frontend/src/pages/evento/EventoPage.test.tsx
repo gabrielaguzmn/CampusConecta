@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { tokens } from '../../auth/tokens'
 import { json, renderizarApp, simularApi } from '../../test/app'
@@ -101,5 +101,34 @@ describe('DISPLAY-3: reporte de eventos inapropiados', () => {
     expect(await reporte.json()).toEqual({ causa: 1, detalles: 'Es fuera del campus' })
     await userEvent.click(screen.getByRole('button', { name: 'Entendido' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+})
+
+describe('Imagen completa (decisión 2026-10-11)', () => {
+  it('al pulsar la portada se abre la imagen completa y se puede cerrar', async () => {
+    iniciar({ 'GET /api/eventos/5/': () => json(completo) })
+    renderizarApp('/eventos/5')
+    await userEvent.click(await screen.findByRole('button', { name: 'Ver imagen completa' }))
+    const dialogo = screen.getByRole('dialog')
+    const imagen = within(dialogo).getByRole('img', { name: 'Imagen de Evento de prueba' })
+    expect(imagen).toHaveAttribute('src', 'https://example.test/imagen.jpg')
+    expect(imagen).toHaveClass('object-contain')
+    await userEvent.click(within(dialogo).getByRole('button', { name: 'Cerrar' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('sin imagen no ofrece verla completa', async () => {
+    iniciar({ 'GET /api/eventos/5/': () => json({ ...completo, imagen: null }) })
+    renderizarApp('/eventos/5')
+    await screen.findByRole('heading', { name: 'Evento de prueba' })
+    expect(screen.queryByRole('button', { name: 'Ver imagen completa' })).not.toBeInTheDocument()
+  })
+
+  it('si la imagen no carga, desaparece el botón y queda el color de la categoría', async () => {
+    iniciar({ 'GET /api/eventos/5/': () => json(completo) })
+    renderizarApp('/eventos/5')
+    const boton = await screen.findByRole('button', { name: 'Ver imagen completa' })
+    fireEvent.error(boton.querySelector('img')!)
+    expect(screen.queryByRole('button', { name: 'Ver imagen completa' })).not.toBeInTheDocument()
   })
 })
