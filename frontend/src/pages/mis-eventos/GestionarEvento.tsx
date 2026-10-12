@@ -214,6 +214,14 @@ export function GestionarEvento({ evento, onEditar, onCerrar }: { evento: Evento
         listo: true,
         hacer: () => api.DELETE('/api/eventos/{id}/', delEvento),
       },
+      'eliminar-fecha': {
+        texto: 'Elige la sesión próxima que quieres eliminar. Las demás sesiones no cambian. Esta acción no se puede deshacer.',
+        boton: 'Eliminar sesión',
+        variante: 'destructiva',
+        listo: Boolean(elegida),
+        hacer: () => api.DELETE('/api/fechas/{id}/', ruta),
+        campos: <ElegirFecha fechas={proximas} elegida={elegida} onElegir={setElegida} />,
+    },
     }
     const actual = pasos[paso]
     contenido = (
