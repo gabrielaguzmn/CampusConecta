@@ -1,4 +1,4 @@
-import { render as renderBase, screen } from '@testing-library/react'
+import { fireEvent, render as renderBase, screen } from '@testing-library/react'
 import type { ReactElement } from 'react'
 import { MemoryRouter } from 'react-router'
 import { evento, fecha } from '../test/datos'
@@ -42,12 +42,29 @@ describe('TarjetaEvento (Figma 4:30135 · 5:17–5:18)', () => {
   })
 })
 
-describe('TarjetaEvento sin imagen (G-55)', () => {
-  it('mantiene el bloque en rojo Primario y la categoría visible', () => {
-    const { container } = render(<TarjetaEvento evento={evento({ imagen: null })} />)
+describe('TarjetaEvento sin imagen (G-55, decisión 2026-10-11)', () => {
+  it('el bloque toma el color de la categoría y la categoría sigue visible', () => {
+    const categoria = { id: 1, nombre: 'Ventas', activa: true, color: '#E0E800' }
+    const { container } = render(<TarjetaEvento evento={evento({ imagen: null, categoria })} />)
     expect(container.querySelector('img')).toBeNull()
+    expect(container.querySelector('.bg-primario')).toBeNull()
+    expect(container.querySelector('.h-40')).toHaveStyle({ backgroundColor: '#E0E800' })
+    expect(screen.getByText('Ventas')).toBeInTheDocument()
+  })
+
+  it('si la categoría no tiene color, queda en rojo Primario', () => {
+    const { container } = render(<TarjetaEvento evento={evento({ imagen: null })} />)
     expect(container.querySelector('.bg-primario')).toBeInTheDocument()
-    expect(screen.getByText('Categoría de prueba')).toBeInTheDocument()
+  })
+
+  it('con imagen, el color queda detrás; si la imagen no carga, se oculta y se ve el color', () => {
+    const categoria = { id: 1, nombre: 'Ventas', activa: true, color: '#E0E800' }
+    const { container } = render(<TarjetaEvento evento={evento({ categoria })} />)
+    expect(container.querySelector('.h-40')).toHaveStyle({ backgroundColor: '#E0E800' })
+    const imagen = container.querySelector('img')!
+    expect(imagen).toBeVisible()
+    fireEvent.error(imagen)
+    expect(imagen).not.toBeVisible()
   })
 })
 

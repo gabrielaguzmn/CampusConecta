@@ -104,7 +104,7 @@ export function GestionarEvento({ evento, onEditar, onCerrar }: { evento: Evento
           </AccionModal>
           {/* PUBLICATION-4: una fecha próxima o en vivo */}
           <AccionModal variante="accion" icono={<CalendarX size={20} />} onClick={() => ir('cancelar', vigentes)}>
-            Cancelar
+            Cancelar sesión
           </AccionModal>
           {/* PUBLICATION-8 · criterio 1: una fecha próxima (la única fecha obliga a eliminar el evento) */}
           {proximas.length > 0 && evento.fechas.length > 1 && (

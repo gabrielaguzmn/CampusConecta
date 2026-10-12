@@ -20,9 +20,21 @@ export function TarjetaEvento({ evento }: { evento: Evento }) {
       style={evento.categoria.color ? { borderLeftColor: evento.categoria.color } : undefined}
       className={`relative flex h-full flex-col overflow-hidden rounded-tarjeta bg-superficie shadow-tarjeta transition-shadow hover:shadow-elevada ${evento.categoria.color ? 'border-l-4' : ''}`}
     >
-      <div className="relative h-40 bg-primario">
-        {/* G-55 (decisión 2026-10-07): sin imagen, el bloque queda en Primario #950000 de la paleta de Figma */}
-        {evento.imagen && <img src={evento.imagen} alt="" className="h-full w-full object-cover" />}
+      <div
+        // Decisión 2026-10-11: el color de la categoría queda detrás de la imagen; se ve si no hay imagen o si no
+        // carga (p. ej. Ventas en amarillo). Solo si la categoría no tiene color queda en Primario #950000 (G-55).
+        style={evento.categoria.color ? { backgroundColor: evento.categoria.color } : undefined}
+        className={`relative h-40 ${evento.categoria.color ? '' : 'bg-primario'}`}
+      >
+        {evento.imagen && (
+          <img
+            src={evento.imagen}
+            alt=""
+            className="h-full w-full object-cover"
+            // Si la imagen falla, se oculta para que no se vea el icono de imagen rota y quede el color.
+            onError={(e) => { e.currentTarget.style.display = 'none' }}
+          />
+        )}
         <span className="absolute top-4 left-4 rounded-pildora bg-texto/70 px-3 py-1.5 text-[13px] font-semibold text-white">
           {evento.categoria.nombre}
         </span>
