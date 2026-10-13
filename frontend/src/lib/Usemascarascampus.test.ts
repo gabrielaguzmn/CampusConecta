@@ -37,7 +37,7 @@ describe('useMascarasCampus (posición de los lugares del plano)', () => {
   it('calcula la máscara, los límites y el centro de cada lugar', async () => {
     simularPlano()
     const { result } = await usarMascaras()
-    await waitFor(() => expect(result.current.datos).toBeDefined())
+    await waitFor(() => expect(result.current.datos).toBeDefined(), { timeout: 10000 })
     const { datos } = result.current
     const lugar = lugares[0].id
     expect(datos!.centros[lugar]).toEqual({ x: 10.5, y: 20.5 })

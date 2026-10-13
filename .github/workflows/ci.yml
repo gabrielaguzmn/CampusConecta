@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: campusconecta
+          POSTGRES_USER: campus
+          POSTGRES_PASSWORD: campus
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U campus -d campusconecta"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Instalar dependencias
+        run: python -m pip install -r backend/requirements.txt
+
+      - name: Verificar configuración
+        working-directory: backend
+        env:
+          DJANGO_SECRET_KEY: ci-only-secret-key
+          DJANGO_DEBUG: '1'
+          DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+          DB_NAME: campusconecta
+          DB_USER: campus
+          DB_PASSWORD: campus
+          DB_HOST: localhost
+          DB_PORT: '5432'
+          DB_SSLMODE: disable
+        run: python manage.py check
+
+      - name: Ejecutar pruebas
+        working-directory: backend
+        env:
+          DJANGO_SECRET_KEY: ci-only-secret-key
+          DJANGO_DEBUG: '1'
+          DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+          DB_NAME: campusconecta
+          DB_USER: campus
+          DB_PASSWORD: campus
+          DB_HOST: localhost
+          DB_PORT: '5432'
+          DB_SSLMODE: disable
+        run: python manage.py test
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: frontend
+        run: npm ci
+
+      - name: Ejecutar pruebas
+        working-directory: frontend
+        run: npm test
+
+      - name: Verificar tipos y compilar
+        working-directory: frontend
+        run: npm run build
