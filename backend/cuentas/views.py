@@ -60,10 +60,10 @@ class SolicitudRecuperacionView(APIView):
         serializer.is_valid(raise_exception=True)
         usuario = Usuario.objects.filter(email__iexact=serializer.validated_data["email"]).first()
         if not usuario:
-            raise serializers.ValidationError({"email": "La cuenta no está registrada."}, code="correo_no_registrado")
+            raise serializers.ValidationError({"email": ["La cuenta no está registrada."]}, code="correo_no_registrado")
         if not usuario.is_active:
             raise serializers.ValidationError(
-                {"email": "La cuenta está suspendida. No puedes recuperar la contraseña mientras esté suspendida."},
+                {"email": ["La cuenta está suspendida. No puedes recuperar la contraseña mientras esté suspendida."]},
                 code="cuenta_suspendida",
             )
         enviar_recuperacion(usuario)

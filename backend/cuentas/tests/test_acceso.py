@@ -99,7 +99,7 @@ class AccesoTests(APITestCase):
         respuesta = self.client.post("/api/auth/recuperacion/", {"email": "nadie@example.com"})
         self.assertEqual(respuesta.status_code, 400)
         self.assertEqual(respuesta.json()["email"], ["La cuenta no está registrada."])
-        self.assertEqual(respuesta.json()["codes"]["email"], "correo_no_registrado")
+        self.assertEqual(respuesta.json()["codes"]["email"], ["correo_no_registrado"])
         self.assertEqual(len(mail.outbox), 0)
 
     def test_ACCESS_1_c3_cuenta_suspendida_no_puede_recuperar_contrasena(self):
@@ -110,7 +110,7 @@ class AccesoTests(APITestCase):
             respuesta.json()["email"],
             ["La cuenta está suspendida. No puedes recuperar la contraseña mientras esté suspendida."],
         )
-        self.assertEqual(respuesta.json()["codes"]["email"], "cuenta_suspendida")
+        self.assertEqual(respuesta.json()["codes"]["email"], ["cuenta_suspendida"])
         self.assertEqual(len(mail.outbox), 0)
 
     def test_ACCESS_1_c3_enlace_permite_cambiar_la_contrasena_una_sola_vez(self):
