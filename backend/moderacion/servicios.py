@@ -103,7 +103,10 @@ def eliminar(administrador, evento, norma, explicacion="", fecha=None, reportes=
 def reactivar(administrador, usuario):
     """RF-033: al reactivar, la cuenta vuelve a iniciar sesión y sus fechas se restablecen (G-06: lo ocultado
     individualmente sigue oculto)."""
-    # TODO(PENDIENTE G-22: si se notifica por correo al reactivar)
+    suspension = Registro.objects.filter(
+        cuenta_afectada=usuario, tipo_accion=Registro.SUSPENDER
+    ).order_by("-fecha_hora", "-pk").first()
     usuario.is_active = True
     usuario.save(update_fields=["is_active"])
     _registrar(administrador, Registro.REACTIVAR, SUSPENDIDA, ACTIVA, cuenta_afectada=usuario)
+    transaction.on_commit(lambda: correos.enviar_reactivacion(usuario, suspension))

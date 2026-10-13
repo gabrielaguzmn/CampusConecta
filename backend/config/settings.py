@@ -110,20 +110,22 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
-# T-9: correo por consola en desarrollo; SMTP configurado por entorno en producción.
+# T-9: correo por consola en desarrollo; SMTP configurable por entorno para probar entregas reales.
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "")
-if DEBUG:
-    MAILERS = {"default": {"BACKEND": "django.core.mail.backends.console.EmailBackend"}}
-else:
-    MAILERS = {
-        "default": {
-            "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
-            "OPTIONS": {
-                "host": os.environ.get("EMAIL_HOST", ""),
-                "port": int(os.environ.get("EMAIL_PORT") or 0) or None,
-                "username": os.environ.get("EMAIL_HOST_USER", ""),
-                "password": os.environ.get("EMAIL_HOST_PASSWORD", ""),
-                "use_tls": os.environ.get("EMAIL_USE_TLS") == "1",
-            },
-        }
+MAILER_BACKEND = os.environ.get(
+    "EMAIL_BACKEND"
+) or (
+    "django.core.mail.backends.console.EmailBackend" if DEBUG else "django.core.mail.backends.smtp.EmailBackend"
+)
+MAILERS = {
+    "default": {
+        "BACKEND": MAILER_BACKEND,
+        "OPTIONS": {
+            "host": os.environ.get("EMAIL_HOST", ""),
+            "port": int(os.environ.get("EMAIL_PORT") or 0) or None,
+            "username": os.environ.get("EMAIL_HOST_USER", ""),
+            "password": os.environ.get("EMAIL_HOST_PASSWORD", ""),
+            "use_tls": os.environ.get("EMAIL_USE_TLS") == "1",
+        },
     }
+}

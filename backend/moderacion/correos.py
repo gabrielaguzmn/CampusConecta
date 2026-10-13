@@ -41,7 +41,21 @@ def enviar_suspension(usuario, norma, explicacion):
         "y tus eventos no se mostrarán.\n\n"
         f"{_motivo(norma, explicacion)}"
     )
-    send_mail("Tu cuenta de CampusConecta fue suspendida", mensaje, None, [usuario.email])
+    send_mail("Tu cuenta de CampusConecta fue suspendida", mensaje, None, [usuario.email], fail_silently=False)
+
+
+def enviar_reactivacion(usuario, suspension=None):
+    """ADMIN-3: informa la reactivación y conserva el motivo de la suspensión anterior si existe."""
+    motivo = ""
+    if suspension is not None and suspension.norma is not None:
+        motivo = f"\n\nLa suspensión anterior estuvo relacionada con:\n{_motivo(suspension.norma, suspension.explicacion)}"
+    mensaje = (
+        f"Hola, {usuario.nombre}:\n\n"
+        "El equipo de administración de CampusConecta reactivó tu cuenta. "
+        "Ya puedes iniciar sesión y publicar eventos nuevamente."
+        f"{motivo}"
+    )
+    send_mail("Tu cuenta de CampusConecta fue reactivada", mensaje, None, [usuario.email], fail_silently=False)
 
 
 def enviar_eliminacion(evento, fecha, norma, explicacion):
