@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="1121"
+   height="916"
+   viewBox="0 0 1121 916"
+   xml:space="preserve"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1" /><g
+     id="g1"><image
+       width="1121"
+       height="916"
+       preserveAspectRatio="none"
+       xlink:href="B2.png"
+       id="image1-8"
+       x="0"
+       y="0" /><g
+       id="g7"><path
+         style="fill:#fafbf6"
+         d="M 276,600.5 V 587 h 1.375 1.375 l 3.125,-0.625 L 285,585.75 V 599.875 614 h -4.5 -4.5 z"
+         id="path12" /><path
+         style="fill:#f7f9f1"
+         d="M 276,600.5 V 587 h 2.91821 2.91822 l 1.58178,-0.60699 L 285,585.78602 V 599.89301 614 h -4.5 -4.5 z"
+         id="path11" /><path
+         style="fill:#f4f8ec"
+         d="m 276,600.60069 v -13.3993 l 4.5,-0.3579 4.5,-0.3579 V 600.24279 614 h -4.5 -4.5 z"
+         id="path10" /><path
+         style="fill:#70942c"
+         d="M 276,600.5 V 587 h 4.5 4.5 v 13.5 13.5 h -4.5 -4.5 z"
+         id="path9" /><path
+         style="fill:#70932c"
+         d="M 276,600.5 V 587 h 4.5 4.5 v 13.5 13.5 h -4.5 -4.5 z m 1.70726,7.26166 -0.4349,-2.26166 -0.0202,4 -0.0202,4 0.45508,-1.73834 0.45508,-1.73834 z m 0,-17 -0.4349,-2.26166 -0.0202,4 -0.0202,4 0.45508,-1.73834 0.45508,-1.73834 z"
+         id="path8" /><path
+         style="fill:#6f922c"
+         d="M 276,600.5 V 587 h 4.5 4.5 v 13.5 13.5 h -4.5 -4.5 z m 5.30896,11.781 -3.19104,-0.39892 -0.39892,-3.19104 -0.39893,-3.19104 -0.16003,3.75 L 277,613 l 3.75,-0.16004 3.75,-0.16003 z m 0,-22.562 3.19104,-0.39893 -3.75,-0.16003 L 277,589 l 0.16004,3.75 0.16003,3.75 0.39893,-3.19104 0.39892,-3.19104 z"
+         id="path7" /></g></g>
+<text x="280" y="600" text-anchor="middle" dominant-baseline="central" fill="#ffffff" stroke="#263550" stroke-width="1.08" paint-order="stroke" stroke-linejoin="round" font-family="Arial, sans-serif" font-size="7.2" font-weight="700">B2</text>
+</svg>

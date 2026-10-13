@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="1121"
+   height="916"
+   viewBox="0 0 1121 916"
+   xml:space="preserve"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1" /><g
+     id="g1"><image
+       width="1121"
+       height="916"
+       preserveAspectRatio="none"
+       xlink:href="E29-E30.png"
+       id="image1"
+       x="0"
+       y="0" /><g
+       id="g143"><path
+         style="fill:#fef000"
+         d="m 298,405 v -8 h -4.5 -4.5 v -8 -8 h -2 -2 v -3.5 -3.5 h 2 2 v -2 -2 h 2.5 2.5 v 13 13 h 2 2 V 379.5 363 h 10 10 v 25 25 h -10 -10 z"
+         id="path148" /><path
+         style="fill:#feef00"
+         d="M 307.75,412.2545 298,411.92758 V 404.46379 397 h -4.5 -4.5 v -8 -8 h -2.03133 -2.03132 l 0.23571,-3.5 0.23571,-3.5 H 287.20439 289 v -1.5 -1.5 h 2.5 2.5 v 12.5 12.5 h 2 2 V 379.5 363 h 10 10 v 25 25 l -0.25,-0.20929 -0.25,-0.20929 z"
+         id="path147" /><path
+         style="fill:#feee00"
+         d="M 307.75,412.2545 298,411.92758 V 404.46379 397 l -4.25,0.002 -4.25,0.002 v -7.70292 -7.70293 l -2,-0.54874 -2,-0.54874 -0.01,-3.25 -0.01,-3.25 H 287.74033 290 v -1.5 -1.5 h 1.46922 1.46922 l 0.28078,12.25 0.28078,12.25 2.25,0.31955 2.25,0.31955 V 379.56955 363 h 10 10 v 25 25 l -0.25,-0.20929 -0.25,-0.20929 z"
+         id="path146" /><path
+         style="fill:#fcec00"
+         d="m 316.76863,388.25 -0.23137,-24.75 -0.28641,24.25 -0.28641,24.25 h -8.43841 -8.43841 l -0.29381,-7.25 -0.29381,-7.25 -4.5,-0.29218 -4.5,-0.29219 0.32615,-7.95781 L 290.15229,381 h -2.43747 -2.43748 l 0.47791,-2.5 0.4779,-2.5 1.13343,-0.0703 1.13342,-0.0703 -2,-0.85943 -2,-0.85943 2.75,-0.0703 L 290,374 v -1.5 -1.5 h 1.5 1.5 v 12.5 12.5 h 3.04665 3.04664 l -0.29664,-16.50133 -0.29665,-16.50134 9.75,0.001 L 318,363 v 25 25 h -0.5 -0.5 z m -16.10635,3.5 -0.50439,-1.25 v 2.5 2.5 l 0.50439,-1.25 0.50439,-1.25 z"
+         id="path145" /><path
+         style="fill:#fae902"
+         d="m 302.78352,363.2616 5.28352,-0.36844 4.71648,0.37317 4.71648,0.37317 -10,-0.005 -10,-0.005 z"
+         id="path144" /><path
+         style="fill:#f8e702"
+         d="m 303.28017,363.26373 4.78018,-0.37578 4.21982,0.38132 4.21983,0.38132 -9,-0.006 -9,-0.006 z"
+         id="path143" /></g></g>
+<text x="293" y="369" text-anchor="middle" dominant-baseline="central" fill="#ffffff" stroke="#263550" stroke-width="1.08" paint-order="stroke" stroke-linejoin="round" font-family="Arial, sans-serif" font-size="7.2" font-weight="700">E30</text>
+<text x="310" y="389" text-anchor="middle" dominant-baseline="central" fill="#ffffff" stroke="#263550" stroke-width="1.08" paint-order="stroke" stroke-linejoin="round" font-family="Arial, sans-serif" font-size="7.2" font-weight="700">E29</text>
+</svg>

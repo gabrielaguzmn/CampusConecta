@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Entorno y datos locales
+.env
+.env.*
+!.env.example
+backend/media/
+docs/
+
+# Caché de compilación de TypeScript
+*.tsbuildinfo

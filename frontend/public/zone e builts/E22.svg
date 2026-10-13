@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="1121"
+   height="916"
+   viewBox="0 0 1121 916"
+   xml:space="preserve"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1" /><g
+     id="g1"><image
+       width="1121"
+       height="916"
+       preserveAspectRatio="none"
+       xlink:href="E22.png"
+       id="image1"
+       x="0"
+       y="0" /><g
+       id="g2"><path
+         style="fill:#f9f9f6"
+         d="M 447,411.5 V 403 h -2.5 -2.5 v -2 -2 h 5.5 5.5 v 10.5 10.5 h -3 -3 z"
+         id="path7" /><path
+         style="fill:#f1f0de"
+         d="M 447.70885,419.37552 447,418.66667 V 410.83333 403 h -2.5 -2.5 v -2 -2 h 5.53498 5.53499 l -0.28499,10.25 -0.28498,10.25 -2.04115,0.29218 -2.04115,0.29219 z"
+         id="path6" /><path
+         style="fill:#f1efde"
+         d="M 447.66667,419.33333 447,418.66667 V 410.83333 403 h -2.5 -2.5 v -2 -2 h 5.5 5.5 v 9.89301 9.89301 l -1.58179,0.60699 L 449.83643,420 h -0.75155 -0.75155 z"
+         id="path5" /><path
+         style="fill:#edead4"
+         d="M 447.69777,419.36443 447,418.66667 V 410.83333 403 h -2.5 -2.5 v -2 -2 h 5.5 5.5 v 10 10 h -0.91821 -0.91822 l -1.38402,0.5311 -1.38402,0.5311 z"
+         id="path4" /><path
+         style="fill:#fef000"
+         d="m 447,411 v -8 h -2.5 -2.5 v -2 -2 h 5.5 5.5 v 10 10 h -3 -3 z"
+         id="path3" /><path
+         style="fill:#fdec00"
+         d="M 447.1863,411.25 447,403 h -2.5 -2.5 v -2 -2 h 5.5 5.5 l -0.19142,10.25 -0.19141,10.25 L 452,410 l -0.61717,-9.5 -0.19141,9.25 L 451,419 h -1 -1 l -0.1863,-8.25 -0.18631,-8.25 L 448,411 l -0.62739,8.5 z m -0.9363,-9.91228 -1.25,-0.50439 -1.25,0.50439 -1.25,0.50439 h 2.5 2.5 z"
+         id="path2" /></g></g>
+<text x="447.5" y="409.5" text-anchor="middle" dominant-baseline="central" fill="#ffffff" stroke="#263550" stroke-width="1.08" paint-order="stroke" stroke-linejoin="round" font-family="Arial, sans-serif" font-size="7.2" font-weight="700">E22</text>
+</svg>

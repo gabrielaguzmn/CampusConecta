@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="1121"
+   height="916"
+   viewBox="0 0 1121 916"
+   xml:space="preserve"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1" /><g
+     id="g1"><image
+       width="1121"
+       height="916"
+       preserveAspectRatio="none"
+       xlink:href="B17.png"
+       id="image1"
+       x="0"
+       y="0" /><g
+       id="g35"><path
+         style="fill:#fefefd"
+         d="m 676.19774,238.75 0.30226,-5.25 4.75,-0.30479 4.75,-0.30479 V 238.44521 244 h -5.05226 -5.05226 z"
+         id="path38" /><path
+         style="fill:#fcfdfa"
+         d="m 676.35815,240.25 0.61984,-3.75 0.011,-1.75 L 677,233 h 4.5 4.5 v 5.5 5.5 h -5.13084 -5.13084 z"
+         id="path37" /><path
+         style="fill:#fbfcf8"
+         d="M 676.91667,243.58382 676.5,243.16765 676.84651,238.08382 677.19303,233 H 681.59651 686 v 5.5 5.5 h -4.33333 -4.33334 z"
+         id="path36" /><path
+         style="fill:#6d9228"
+         d="M 677,238.5 V 233 h 4.5 4.5 v 5.5 5.5 h -4.5 -4.5 z"
+         id="path35" /></g></g>
+<text x="682" y="232" text-anchor="middle" dominant-baseline="central" fill="#ffffff" stroke="#263550" stroke-width="1.08" paint-order="stroke" stroke-linejoin="round" font-family="Arial, sans-serif" font-size="7.2" font-weight="700">B17</text>
+</svg>

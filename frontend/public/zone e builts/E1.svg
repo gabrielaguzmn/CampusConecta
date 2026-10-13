@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="1121"
+   height="916"
+   viewBox="0 0 1121 916"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <g
+     id="g1">
+    <image
+       width="1121"
+       height="916"
+       preserveAspectRatio="none"
+       xlink:href="E1.png"
+       id="image1" />
+    <g
+       id="g9">
+      <path
+         style="fill:#fef300"
+         d="m 510,559 v -32 h 12 12 v 32 32 h -12 -12 z"
+         id="path16" />
+      <path
+         style="fill:#fef100"
+         d="m 510,559 v -32 h 12 12 v 32 32 h -12 -12 z"
+         id="path15" />
+      <path
+         style="fill:#fef000"
+         d="m 510,559 v -32 h 12 12 v 32 32 h -12 -12 z"
+         id="path14" />
+      <path
+         style="fill:#feee00"
+         d="m 510,559 v -32 h 12 12 v 32 32 h -12 -12 z m 17.28651,-30.73598 -5.21348,-0.36601 -5.78652,0.36191 -5.78651,0.36191 11,0.004 11,0.004 z"
+         id="path13" />
+      <path
+         style="fill:#feed00"
+         d="m 510,559 v -32 h 12 12 v 32 32 h -12 -12 z m 22,-30 v -1 l -10.75,0.19575 -10.75,0.19574 L 521,529 l 10.5,0.60851 0.25,0.19574 L 532,530 Z"
+         id="path12" />
+      <path
+         style="fill:#fdec00"
+         d="m 510,559 v -32 h 12 12 v 32 32 h -12 -12 z m 22.74786,-12.75 -0.30561,-14.75 v 29.5 29.5 l 0.30561,-14.75 0.30561,-14.75 z M 532,529 v -1 l -10.75,0.19575 -10.75,0.19574 L 521,529 l 10.5,0.60851 0.25,0.19574 L 532,530 Z"
+         id="path11" />
+      <path
+         style="fill:#fcec00"
+         d="m 525.15789,559 v -2.5 l 0.50439,1.25 0.50439,1.25 -0.50439,1.25 -0.50439,1.25 z"
+         id="path10" />
+      <path
+         style="fill:#fbeb00"
+         d="m 525.07895,558.41667 0.0789,-1.91667 0.52522,1.3125 0.52522,1.3125 -0.60416,0.60417 L 525,560.33333 Z"
+         id="path9" />
+    </g>
+  </g>
+
+<text x="522" y="559" text-anchor="middle" dominant-baseline="central" fill="#ffffff" stroke="#263550" stroke-width="1.08" paint-order="stroke" stroke-linejoin="round" font-family="Arial, sans-serif" font-size="7.2" font-weight="700">E1</text>
+</svg>

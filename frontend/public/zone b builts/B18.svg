@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="1121"
+   height="916"
+   viewBox="0 0 1121 916"
+   xml:space="preserve"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1" /><g
+     id="g1"><image
+       width="1121"
+       height="916"
+       preserveAspectRatio="none"
+       xlink:href="B18.png"
+       id="image1"
+       x="0"
+       y="0" /><g
+       id="g38"><path
+         style="fill:#fefefd"
+         d="m 667,228.10069 v -16.8993 l 4.55427,-0.36222 4.55427,-0.36221 -0.54062,2.01152 -0.54061,2.01152 -0.0137,15.25 L 675,245 h -4 -4 z"
+         id="path39" /><path
+         style="fill:#6f922c"
+         d="m 667,228 v -17 h 4 4 v 17 17 h -4 -4 z"
+         id="path38" /></g></g>
+<text x="661" y="218" text-anchor="middle" dominant-baseline="central" fill="#ffffff" stroke="#263550" stroke-width="1.08" paint-order="stroke" stroke-linejoin="round" font-family="Arial, sans-serif" font-size="7.2" font-weight="700">B18</text>
+</svg>
