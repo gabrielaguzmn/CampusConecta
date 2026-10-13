@@ -279,6 +279,16 @@ class SuspensionTests(BaseModeracionTest):
         self.assertIn("Norma incumplida: 10. Cuenta personal y reportes de buena fe.", correo.body)
         self.assertIn("Suplantación", correo.body)
 
+    def test_ADMIN_3_c4_reactivacion_notifica_el_resultado_y_motivo_anterior(self):
+        self.suspender(self.creador, {"norma": Norma.CUENTA_PERSONAL, "explicacion": "Suplantación"})
+        self.post_admin(f"/api/admin/usuarios/{self.creador.pk}/reactivar/")
+        correo = mail.outbox[-1]
+        self.assertEqual(correo.to, [self.creador.email])
+        self.assertEqual(correo.subject, "Tu cuenta de CampusConecta fue reactivada")
+        self.assertIn("reactivó tu cuenta", correo.body)
+        self.assertIn("Norma incumplida: 10. Cuenta personal y reportes de buena fe.", correo.body)
+        self.assertIn("Suplantación", correo.body)
+
     def test_ADMIN_3_DoD_exclusivo_del_administrador_y_registrado(self):
         self.como(self.otro)
         self.assertEqual(self.client.post(f"/api/admin/usuarios/{self.creador.pk}/suspender/", {"norma": 1}).status_code, 403)

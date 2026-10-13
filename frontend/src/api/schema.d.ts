@@ -4,2012 +4,2068 @@
  */
 
 export interface paths {
-  "/api/admin/casos/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/casos/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description ADMIN-2 · criterio 1: reportes agrupados por evento. */
+        get: operations["admin_casos_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** @description ADMIN-2 · criterio 1: reportes agrupados por evento. */
-    get: operations["admin_casos_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/admin/casos/{id}/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/casos/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_casos_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description ADMIN-2 · criterios 2 y 3: cambiar el estado del caso y, al revisarlo, decidir si el evento se oculta. */
+        patch: operations["admin_casos_partial_update"];
+        trace?: never;
     };
-    get: operations["admin_casos_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** @description ADMIN-2 · criterios 2 y 3: cambiar el estado del caso y, al revisarlo, decidir si el evento se oculta. */
-    patch: operations["admin_casos_partial_update"];
-    trace?: never;
-  };
-  "/api/admin/categorias/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/categorias/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description CATEGORY-1 · criterio 2, RF-023. */
+        get: operations["admin_categorias_list"];
+        put?: never;
+        /** @description CATEGORY-1 · criterio 2, RF-023. */
+        post: operations["admin_categorias_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** @description CATEGORY-1 · criterio 2, RF-023. */
-    get: operations["admin_categorias_list"];
-    put?: never;
-    /** @description CATEGORY-1 · criterio 2, RF-023. */
-    post: operations["admin_categorias_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/admin/categorias/{id}/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/categorias/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description CATEGORY-1 · criterios 2 y 3: renombrar, activar o desactivar. */
+        patch: operations["admin_categorias_partial_update"];
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** @description CATEGORY-1 · criterios 2 y 3: renombrar, activar o desactivar. */
-    patch: operations["admin_categorias_partial_update"];
-    trace?: never;
-  };
-  "/api/admin/eventos/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/eventos/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description ADMIN-1: "revisar" (RF-025). Lista todos los eventos, incluidos los ocultos. */
+        get: operations["admin_eventos_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** @description ADMIN-1: "revisar" (RF-025). Lista todos los eventos, incluidos los ocultos. */
-    get: operations["admin_eventos_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/admin/eventos/{id}/eliminar/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/eventos/{id}/eliminar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description PUBLICATION-8 · criterio 4, RF-017, RF-025: eliminar un evento completo (también si está oculto); se avisa al
+         *     creador por correo y queda en el registro. No se elimina contenido caducado.
+         */
+        post: operations["admin_eventos_eliminar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * @description PUBLICATION-8 · criterio 4, RF-017, RF-025: eliminar un evento completo (también si está oculto); se avisa al
-     *     creador por correo y queda en el registro. No se elimina contenido caducado.
-     */
-    post: operations["admin_eventos_eliminar_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/admin/eventos/{id}/ocultar/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/eventos/{id}/ocultar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ADMIN-1 · criterios 1 y 4: ocultar el evento completo; se avisa al creador por correo. */
+        post: operations["admin_eventos_ocultar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description ADMIN-1 · criterios 1 y 4: ocultar el evento completo; se avisa al creador por correo. */
-    post: operations["admin_eventos_ocultar_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/admin/eventos/{id}/restaurar/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/eventos/{id}/restaurar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ADMIN-1 · criterio 2: restaurar el evento. */
+        post: operations["admin_eventos_restaurar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description ADMIN-1 · criterio 2: restaurar el evento. */
-    post: operations["admin_eventos_restaurar_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/admin/fechas/{id}/eliminar/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/fechas/{id}/eliminar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description PUBLICATION-8 · criterio 4, RF-017, RF-025: eliminar una fecha próxima o en vivo (también si está oculta).
+         *     Si es la única fecha del evento, hay que eliminar el evento completo.
+         */
+        post: operations["admin_fechas_eliminar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * @description PUBLICATION-8 · criterio 4, RF-017, RF-025: eliminar una fecha próxima o en vivo (también si está oculta).
-     *     Si es la única fecha del evento, hay que eliminar el evento completo.
-     */
-    post: operations["admin_fechas_eliminar_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/admin/fechas/{id}/ocultar/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/fechas/{id}/ocultar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ADMIN-1 · criterios 1 y 4: ocultar una fecha; se avisa al creador por correo. */
+        post: operations["admin_fechas_ocultar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description ADMIN-1 · criterios 1 y 4: ocultar una fecha; se avisa al creador por correo. */
-    post: operations["admin_fechas_ocultar_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/admin/fechas/{id}/restaurar/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/fechas/{id}/restaurar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ADMIN-1 · criterio 2: restaurar una fecha. */
+        post: operations["admin_fechas_restaurar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description ADMIN-1 · criterio 2: restaurar una fecha. */
-    post: operations["admin_fechas_restaurar_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/admin/registro/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/registro/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description ADMIN-4 · criterios 3 y 4: consulta de solo lectura. */
+        get: operations["admin_registro_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** @description ADMIN-4 · criterios 3 y 4: consulta de solo lectura. */
-    get: operations["admin_registro_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/admin/registro/{id}/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/registro/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_registro_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["admin_registro_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/admin/usuarios/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/usuarios/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description ADMIN-3, ADMIN-4: listado de cuentas para el administrador. */
+        get: operations["admin_usuarios_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** @description ADMIN-3, ADMIN-4: listado de cuentas para el administrador. */
-    get: operations["admin_usuarios_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/admin/usuarios/{id}/asignar-admin/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/usuarios/{id}/asignar-admin/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ADMIN-4 · criterio 2, RF-028: asignar o revocar el rol administrador a otros usuarios. */
+        post: operations["admin_usuarios_asignar_admin_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description ADMIN-4 · criterio 2, RF-028: asignar o revocar el rol administrador a otros usuarios. */
-    post: operations["admin_usuarios_asignar_admin_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/admin/usuarios/{id}/reactivar/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/usuarios/{id}/reactivar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ADMIN-3 · criterio 3. */
+        post: operations["admin_usuarios_reactivar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description ADMIN-3 · criterio 3. */
-    post: operations["admin_usuarios_reactivar_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/admin/usuarios/{id}/revocar-admin/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/usuarios/{id}/revocar-admin/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ADMIN-4 · criterio 2, RF-028: asignar o revocar el rol administrador a otros usuarios. */
+        post: operations["admin_usuarios_revocar_admin_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description ADMIN-4 · criterio 2, RF-028: asignar o revocar el rol administrador a otros usuarios. */
-    post: operations["admin_usuarios_revocar_admin_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/admin/usuarios/{id}/suspender/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/admin/usuarios/{id}/suspender/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ADMIN-3 · criterios 1, 2 y 4. */
+        post: operations["admin_usuarios_suspender_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description ADMIN-3 · criterios 1, 2 y 4. */
-    post: operations["admin_usuarios_suspender_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/auth/recuperacion/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/auth/recuperacion/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ACCESS-1 · criterio 3. Rechaza cuentas suspendidas y no genera enlaces para ellas. */
+        post: operations["auth_recuperacion_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description ACCESS-1 · criterio 3. Responde igual exista o no la cuenta, para no revelar qué correos están registrados. */
-    post: operations["auth_recuperacion_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/auth/recuperacion/confirmar/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/auth/recuperacion/confirmar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ACCESS-1 · criterio 3 (G-17). */
+        post: operations["auth_recuperacion_confirmar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description ACCESS-1 · criterio 3 (G-17). */
-    post: operations["auth_recuperacion_confirmar_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/auth/registro/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/auth/registro/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ACCESS-1 · criterio 1. */
+        post: operations["auth_registro_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description ACCESS-1 · criterio 1. */
-    post: operations["auth_registro_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/auth/token/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/auth/token/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ACCESS-1 · criterio 2; ADMIN-3 · criterio 1 (cuenta suspendida → 401 `cuenta_suspendida`). */
+        post: operations["auth_token_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description ACCESS-1 · criterio 2; ADMIN-3 · criterio 1 (cuenta suspendida → 401 `cuenta_suspendida`). */
-    post: operations["auth_token_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/auth/token/refresh/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/auth/token/refresh/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Takes a refresh type JSON web token and returns an access type JSON web
+         *     token if the refresh token is valid.
+         */
+        post: operations["auth_token_refresh_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * @description Takes a refresh type JSON web token and returns an access type JSON web
-     *     token if the refresh token is valid.
-     */
-    post: operations["auth_token_refresh_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/auth/yo/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/auth/yo/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description RF-024: el frontend sabe si mostrar el módulo de administración. */
+        get: operations["auth_yo_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** @description RF-024: el frontend sabe si mostrar el módulo de administración. */
-    get: operations["auth_yo_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/categorias/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/categorias/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description CATEGORY-1 · criterio 1: categorías disponibles para publicar. */
+        get: operations["categorias_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** @description CATEGORY-1 · criterio 1: categorías disponibles para publicar. */
-    get: operations["categorias_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/eventos/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/eventos/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description DISPLAY-1, DISPLAY-2: feed de eventos vigentes, del más reciente al más antiguo (G-37).
+         *     No hay filtro por fecha (G-19, decisión 2026-10-07).
+         */
+        get: operations["eventos_list"];
+        put?: never;
+        /** @description PUBLICATION-1: crear y publicar un evento con una o varias fechas. */
+        post: operations["eventos_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * @description DISPLAY-1, DISPLAY-2: feed de eventos vigentes, del más reciente al más antiguo (G-37).
-     *     No hay filtro por fecha (G-19, decisión 2026-10-07).
-     */
-    get: operations["eventos_list"];
-    put?: never;
-    /** @description PUBLICATION-1: crear y publicar un evento con una o varias fechas. */
-    post: operations["eventos_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/eventos/{id}/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/eventos/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description INTERACTIVITY-2 · criterio 2, INTERACTIVITY-3: detalle completo. G-38: misma regla que el feed; si no, 404. */
+        get: operations["eventos_retrieve"];
+        put?: never;
+        post?: never;
+        /**
+         * @description PUBLICATION-8 · criterio 2 (RF-017: "el evento completo junto con todas sus fechas próximas").
+         *     Decisión 2026-10-12 (G-24): si todas sus fechas son próximas, se elimina el evento completo; si además tiene
+         *     fechas en vivo, finalizadas o canceladas, solo se retiran las próximas y el evento sigue con las demás.
+         */
+        delete: operations["eventos_destroy"];
+        options?: never;
+        head?: never;
+        /** @description G-30: editar los datos del evento. */
+        patch: operations["eventos_partial_update"];
+        trace?: never;
     };
-    /** @description INTERACTIVITY-2 · criterio 2, INTERACTIVITY-3: detalle completo. G-38: misma regla que el feed; si no, 404. */
-    get: operations["eventos_retrieve"];
-    put?: never;
-    post?: never;
-    /** @description PUBLICATION-8 · criterio 2: eliminar el evento completo. */
-    delete: operations["eventos_destroy"];
-    options?: never;
-    head?: never;
-    /** @description G-30: editar los datos del evento. */
-    patch: operations["eventos_partial_update"];
-    trace?: never;
-  };
-  "/api/eventos/{id}/cancelar-todas/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/eventos/{id}/cancelar-todas/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description PUBLICATION-5: cancelar de una vez todas las fechas próximas o en vivo. */
+        post: operations["eventos_cancelar_todas_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description PUBLICATION-5: cancelar de una vez todas las fechas próximas o en vivo. */
-    post: operations["eventos_cancelar_todas_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/eventos/{id}/fechas/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/eventos/{id}/fechas/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description G-30: añadir una fecha a un evento ya publicado. */
+        post: operations["eventos_fechas_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description G-30: añadir una fecha a un evento ya publicado. */
-    post: operations["eventos_fechas_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/eventos/{id}/imagen/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/eventos/{id}/imagen/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description RF-010: imagen opcional del evento (JPG o PNG, 5 MB como máximo). */
+        put: operations["eventos_imagen_update"];
+        post?: never;
+        delete: operations["eventos_imagen_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    /** @description RF-010: imagen opcional del evento (JPG o PNG, 5 MB como máximo). */
-    put: operations["eventos_imagen_update"];
-    post?: never;
-    delete: operations["eventos_imagen_destroy"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/eventos/{id}/reportes/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/eventos/{id}/reportes/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description DISPLAY-3, RF-007, RF-030: reportar un evento desde su detalle; solo se confirma el envío. */
+        post: operations["eventos_reportes_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description DISPLAY-3, RF-007, RF-030: reportar un evento desde su detalle; solo se confirma el envío. */
-    post: operations["eventos_reportes_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/fechas/{id}/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/fechas/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description PUBLICATION-8 · criterio 1: eliminar una fecha próxima. */
+        delete: operations["fechas_destroy"];
+        options?: never;
+        head?: never;
+        /** @description PUBLICATION-3: editar el horario de una fecha próxima. */
+        patch: operations["fechas_partial_update"];
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post?: never;
-    /** @description PUBLICATION-8 · criterio 1: eliminar una fecha próxima. */
-    delete: operations["fechas_destroy"];
-    options?: never;
-    head?: never;
-    /** @description PUBLICATION-3: editar el horario de una fecha próxima. */
-    patch: operations["fechas_partial_update"];
-    trace?: never;
-  };
-  "/api/fechas/{id}/cancelar/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/fechas/{id}/cancelar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description PUBLICATION-4: cancelar una fecha próxima o en vivo (G-32: queda cancelada de forma permanente). */
+        post: operations["fechas_cancelar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description PUBLICATION-4: cancelar una fecha próxima o en vivo (G-32: queda cancelada de forma permanente). */
-    post: operations["fechas_cancelar_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/fechas/{id}/extender/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/fechas/{id}/extender/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description PUBLICATION-7: extender una fecha en vivo con un nuevo fin. */
+        post: operations["fechas_extender_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description PUBLICATION-7: extender una fecha en vivo con un nuevo fin. */
-    post: operations["fechas_extender_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/fechas/{id}/finalizar/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/fechas/{id}/finalizar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description PUBLICATION-6: finalizar antes de tiempo una fecha en vivo. */
+        post: operations["fechas_finalizar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** @description PUBLICATION-6: finalizar antes de tiempo una fecha en vivo. */
-    post: operations["fechas_finalizar_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/mapa/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/mapa/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description INTERACTIVITY-1, INTERACTIVITY-2 · criterio 1: eventos vigentes agrupados por ubicación del catálogo.
+         *     Cada evento aparece en la ubicación del evento, solo con sus fechas próximas o en vivo.
+         */
+        get: operations["mapa_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** @description INTERACTIVITY-1, INTERACTIVITY-2 · criterio 1: eventos vigentes agrupados por ubicación del catálogo. */
-    get: operations["mapa_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/mis-eventos/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/mis-eventos/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description PUBLICATION-2: eventos propios, separados en vigentes e historial. */
+        get: operations["mis_eventos_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** @description PUBLICATION-2: eventos propios, separados en vigentes e historial. */
-    get: operations["mis_eventos_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/normas/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/normas/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Las 10 normas de uso: causas de reporte (G-20) y motivos de moderación (G-21). */
+        get: operations["normas_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** @description Las 10 normas de uso: causas de reporte (G-20) y motivos de moderación (G-21). */
-    get: operations["normas_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/ubicaciones/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/ubicaciones/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description RF-009: catálogo fijo de ubicaciones. */
+        get: operations["ubicaciones_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** @description RF-009: catálogo fijo de ubicaciones. */
-    get: operations["ubicaciones_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    /** @description ADMIN-2 · criterio 1: un caso por evento con todos sus reportes. */
-    Caso: {
-      readonly id: number;
-      evento: components["schemas"]["EventoBreve"];
-      estado?: components["schemas"]["EstadoCasoEnum"];
-      decision_ocultar?: boolean | null;
-      reportes: components["schemas"]["Reporte"][];
+    schemas: {
+        /** @description ADMIN-2 · criterio 1: un caso por evento con todos sus reportes. */
+        Caso: {
+            readonly id: number;
+            evento: components["schemas"]["EventoBreve"];
+            estado?: components["schemas"]["EstadoCasoEnum"];
+            decision_ocultar?: boolean | null;
+            reportes: components["schemas"]["Reporte"][];
+        };
+        Categoria: {
+            readonly id: number;
+            nombre: string;
+            activa?: boolean;
+            color?: string | null;
+        };
+        CategoriaRequest: {
+            nombre: string;
+            activa?: boolean;
+            color?: string | null;
+        };
+        ConfirmacionRecuperacionRequest: {
+            uid: string;
+            token: string;
+            password: string;
+        };
+        ConfirmacionReporte: {
+            detail: string;
+        };
+        /**
+         * @description * `pendiente` - Pendiente por revisión
+         *     * `en_revision` - En revisión
+         *     * `revisado` - Revisado
+         * @enum {string}
+         */
+        EstadoCasoEnum: "pendiente" | "en_revision" | "revisado";
+        EstadoCuenta: {
+            id: number;
+            /** Format: email */
+            email: string;
+            suspendida: boolean;
+        };
+        /**
+         * @description * `proxima` - Próxima
+         *     * `en_vivo` - En vivo
+         *     * `finalizada` - Finalizada
+         *     * `cancelada` - Cancelada
+         * @enum {string}
+         */
+        EstadoFechaEnum: "proxima" | "en_vivo" | "finalizada" | "cancelada";
+        /** @description Representación para el creador ("Mis eventos" y respuestas de sus acciones). */
+        Evento: {
+            readonly id: number;
+            nombre: string;
+            categoria: components["schemas"]["Categoria"];
+            descripcion: string;
+            responsable: string;
+            ubicacion: components["schemas"]["Ubicacion"];
+            detalle_ubicacion?: string;
+            cupo?: number | null;
+            /** Format: uri */
+            imagen?: string | null;
+            enlace_externo?: string;
+            contacto?: string;
+            oculto?: boolean;
+            norma_ocultamiento?: (components["schemas"]["NormaEnum"] | components["schemas"]["NullEnum"]) | null;
+            explicacion_ocultamiento?: string;
+            fechas: components["schemas"]["Fecha"][];
+        };
+        EventoBreve: {
+            id: number;
+            nombre: string;
+            oculto: boolean;
+            creador: components["schemas"]["UsuarioBreve"];
+        };
+        /** @description PUBLICATION-1: RF-008 (obligatorios) y RF-010 (opcionales). La imagen se sube aparte. */
+        EventoCreacionRequest: {
+            nombre: string;
+            categoria: number;
+            descripcion: string;
+            responsable: string;
+            ubicacion: number;
+            detalle_ubicacion?: string;
+            cupo?: number | null;
+            enlace_externo?: string;
+            contacto?: string;
+            fechas: components["schemas"]["FechaEntradaRequest"][];
+        };
+        /** @description Información básica del pin (INTERACTIVITY-2 · criterio 1); el detalle completo está en GET eventos/{id}/. */
+        EventoMapa: {
+            readonly id: number;
+            nombre: string;
+            categoria: components["schemas"]["Categoria"];
+            detalle_ubicacion?: string;
+            fechas: components["schemas"]["FechaPublica"][];
+        };
+        /** @description Feed y detalle (DISPLAY-1, INTERACTIVITY-2, INTERACTIVITY-3). Las fechas ocultas no se incluyen. */
+        EventoPublico: {
+            readonly id: number;
+            nombre: string;
+            categoria: components["schemas"]["Categoria"];
+            descripcion: string;
+            responsable: string;
+            ubicacion: components["schemas"]["Ubicacion"];
+            detalle_ubicacion?: string;
+            cupo?: number | null;
+            /** Format: uri */
+            imagen?: string | null;
+            enlace_externo?: string;
+            contacto?: string;
+            fechas: components["schemas"]["FechaPublica"][];
+        };
+        /** @description PUBLICATION-7, G-05: nuevo fin posterior al actual y sin solapar otra fecha. */
+        ExtensionRequest: {
+            /** Format: date-time */
+            fin: string;
+        };
+        Fecha: {
+            readonly id: number;
+            /** Format: date-time */
+            inicio: string;
+            /** Format: date-time */
+            fin: string;
+            /** Format: date-time */
+            finalizada_en?: string | null;
+            readonly estado: components["schemas"]["EstadoFechaEnum"];
+            oculta?: boolean;
+            norma_ocultamiento?: (components["schemas"]["NormaEnum"] | components["schemas"]["NullEnum"]) | null;
+            explicacion_ocultamiento?: string;
+        };
+        FechaEntradaRequest: {
+            /** Format: date-time */
+            inicio: string;
+            /** Format: date-time */
+            fin: string;
+        };
+        /** @description Fecha tal como la ve cualquier usuario: sin marcas de moderación. */
+        FechaPublica: {
+            readonly id: number;
+            /** Format: date-time */
+            inicio: string;
+            /** Format: date-time */
+            fin: string;
+            /** Format: date-time */
+            finalizada_en?: string | null;
+            readonly estado: components["schemas"]["EstadoFechaEnum"];
+        };
+        ImagenRequest: {
+            /** Format: binary */
+            imagen: string;
+        };
+        /** @description RF-034, G-21: norma incumplida y explicación opcional. */
+        MotivoRequest: {
+            norma: components["schemas"]["NormaEnum"];
+            /** @default  */
+            explicacion: string;
+        };
+        Norma: {
+            id: number;
+            nombre: string;
+        };
+        /**
+         * @description * `1` - Ámbito de los eventos
+         *     * `2` - Información veraz y completa
+         *     * `3` - Respeto y convivencia
+         *     * `4` - Actividades y ventas lícitas
+         *     * `5` - Sin spam, duplicados ni publicidad ajena
+         *     * `6` - Privacidad
+         *     * `7` - Propiedad intelectual
+         *     * `8` - Uso de los espacios del campus
+         *     * `9` - Responsabilidad sobre el evento
+         *     * `10` - Cuenta personal y reportes de buena fe
+         * @enum {integer}
+         */
+        NormaEnum: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+        /** @enum {unknown} */
+        NullEnum: null;
+        /** @description ADMIN-2 · criterios 2 y 3. Al pasar a "revisado" se decide si el evento se oculta; si se oculta, con su motivo. */
+        PatchedCasoActualizacionRequest: {
+            estado?: components["schemas"]["EstadoCasoEnum"];
+            decision_ocultar?: boolean | null;
+            norma?: components["schemas"]["NormaEnum"];
+            /** @default  */
+            explicacion: string;
+        };
+        PatchedCategoriaRequest: {
+            nombre?: string;
+            activa?: boolean;
+            color?: string | null;
+        };
+        /** @description G-30: los datos del evento se editan mientras no pase al historial. */
+        PatchedEventoEdicionRequest: {
+            nombre?: string;
+            categoria?: number;
+            descripcion?: string;
+            responsable?: string;
+            ubicacion?: number;
+            detalle_ubicacion?: string;
+            cupo?: number | null;
+            enlace_externo?: string;
+            contacto?: string;
+        };
+        /** @description PUBLICATION-3, G-30: de una fecha próxima se editan el día, el inicio y el fin. */
+        PatchedFechaEdicionRequest: {
+            /** Format: date-time */
+            inicio?: string;
+            /** Format: date-time */
+            fin?: string;
+        };
+        Registro: {
+            readonly id: number;
+            nombre: string;
+            /** Format: email */
+            email: string;
+        };
+        /** @description ADMIN-4 · criterio 3: datos completos de cada acción. */
+        RegistroModeracion: {
+            readonly id: number;
+            /** Format: date-time */
+            readonly fecha_hora: string;
+            administrador: components["schemas"]["UsuarioBreve"];
+            tipo_accion: components["schemas"]["TipoAccionEnum"];
+            evento?: number | null;
+            fecha?: number | null;
+            cuenta_afectada: components["schemas"]["UsuarioBreve"];
+            norma?: (components["schemas"]["NormaEnum"] | components["schemas"]["NullEnum"]) | null;
+            explicacion?: string;
+            reportes?: number[];
+            estado_anterior: string;
+            estado_posterior: string;
+        };
+        RegistroRequest: {
+            nombre: string;
+            /** Format: email */
+            email: string;
+            password: string;
+        };
+        Reporte: {
+            readonly id: number;
+            usuario: components["schemas"]["UsuarioBreve"];
+            causa: components["schemas"]["NormaEnum"];
+            detalles?: string;
+        };
+        /** @description DISPLAY-3: causa obligatoria (una norma de uso, G-20) y detalles opcionales. */
+        ReporteEntradaRequest: {
+            causa: components["schemas"]["NormaEnum"];
+            detalles?: string;
+        };
+        SolicitudRecuperacionRequest: {
+            /** Format: email */
+            email: string;
+        };
+        /**
+         * @description * `ocultar` - Ocultar
+         *     * `restaurar` - Restaurar
+         *     * `suspender` - Suspender
+         *     * `reactivar` - Reactivar
+         *     * `eliminar` - Eliminar
+         * @enum {string}
+         */
+        TipoAccionEnum: "ocultar" | "restaurar" | "suspender" | "reactivar" | "eliminar";
+        /**
+         * @description * `edificio` - Edificio
+         *     * `cancha` - Cancha
+         *     * `plazoleta` - Plazoleta
+         *     * `otro` - Otro
+         * @enum {string}
+         */
+        TipoEnum: "edificio" | "cancha" | "plazoleta" | "otro";
+        TokenRefresh: {
+            readonly access: string;
+        };
+        TokenRefreshRequest: {
+            refresh: string;
+        };
+        TokenRequest: {
+            email: string;
+            password: string;
+        };
+        Tokens: {
+            access: string;
+            refresh: string;
+        };
+        Ubicacion: {
+            readonly id: number;
+            nombre: string;
+            tipo?: components["schemas"]["TipoEnum"];
+            zona?: string;
+            codigo?: string | null;
+        };
+        /** @description INTERACTIVITY-1 · criterio 2: los eventos vigentes agrupados por ubicación del catálogo. */
+        UbicacionMapa: {
+            ubicacion: components["schemas"]["Ubicacion"];
+            eventos: components["schemas"]["EventoMapa"][];
+        };
+        UsuarioActual: {
+            readonly id: number;
+            nombre: string;
+            /** Format: email */
+            email: string;
+            es_administrador?: boolean;
+        };
+        /** @description ADMIN-3, ADMIN-4: cuentas para que el administrador suspenda, reactive o asigne roles. */
+        UsuarioAdmin: {
+            readonly id: number;
+            nombre: string;
+            /** Format: email */
+            email: string;
+            es_administrador?: boolean;
+            readonly suspendida: boolean;
+        };
+        UsuarioBreve: {
+            readonly id: number;
+            nombre: string;
+            /** Format: email */
+            email: string;
+        };
     };
-    Categoria: {
-      readonly id: number;
-      nombre: string;
-      activa?: boolean;
-      color?: string | null;
-    };
-    CategoriaRequest: {
-      nombre: string;
-      activa?: boolean;
-      color?: string | null;
-    };
-    ConfirmacionRecuperacionRequest: {
-      uid: string;
-      token: string;
-      password: string;
-    };
-    ConfirmacionReporte: {
-      detail: string;
-    };
-    /**
-     * @description * `pendiente` - Pendiente por revisión
-     *     * `en_revision` - En revisión
-     *     * `revisado` - Revisado
-     * @enum {string}
-     */
-    EstadoCasoEnum: "pendiente" | "en_revision" | "revisado";
-    EstadoCuenta: {
-      id: number;
-      /** Format: email */
-      email: string;
-      suspendida: boolean;
-    };
-    /**
-     * @description * `proxima` - Próxima
-     *     * `en_vivo` - En vivo
-     *     * `finalizada` - Finalizada
-     *     * `cancelada` - Cancelada
-     * @enum {string}
-     */
-    EstadoFechaEnum: "proxima" | "en_vivo" | "finalizada" | "cancelada";
-    /** @description Representación para el creador ("Mis eventos" y respuestas de sus acciones). */
-    Evento: {
-      readonly id: number;
-      nombre: string;
-      categoria: components["schemas"]["Categoria"];
-      descripcion: string;
-      responsable: string;
-      ubicacion: components["schemas"]["Ubicacion"];
-      detalle_ubicacion?: string;
-      cupo?: number | null;
-      /** Format: uri */
-      imagen?: string | null;
-      enlace_externo?: string;
-      contacto?: string;
-      oculto?: boolean;
-      norma_ocultamiento?:
-        | (
-            | components["schemas"]["NormaEnum"]
-            | components["schemas"]["NullEnum"]
-          )
-        | null;
-      explicacion_ocultamiento?: string;
-      fechas: components["schemas"]["Fecha"][];
-    };
-    EventoBreve: {
-      id: number;
-      nombre: string;
-      oculto: boolean;
-      creador: components["schemas"]["UsuarioBreve"];
-    };
-    /** @description PUBLICATION-1: RF-008 (obligatorios) y RF-010 (opcionales). La imagen se sube aparte. */
-    EventoCreacionRequest: {
-      nombre: string;
-      categoria: number;
-      descripcion: string;
-      responsable: string;
-      ubicacion: number;
-      detalle_ubicacion?: string;
-      cupo?: number | null;
-      enlace_externo?: string;
-      contacto?: string;
-      fechas: components["schemas"]["FechaEntradaRequest"][];
-    };
-    /** @description Información básica del pin (INTERACTIVITY-2 · criterio 1); el detalle completo está en GET eventos/{id}/. */
-    EventoMapa: {
-      readonly id: number;
-      nombre: string;
-      categoria: components["schemas"]["Categoria"];
-      detalle_ubicacion?: string;
-      fechas: components["schemas"]["FechaPublica"][];
-    };
-    /** @description Feed y detalle (DISPLAY-1, INTERACTIVITY-2, INTERACTIVITY-3). Las fechas ocultas no se incluyen. */
-    EventoPublico: {
-      readonly id: number;
-      nombre: string;
-      categoria: components["schemas"]["Categoria"];
-      descripcion: string;
-      responsable: string;
-      ubicacion: components["schemas"]["Ubicacion"];
-      detalle_ubicacion?: string;
-      cupo?: number | null;
-      /** Format: uri */
-      imagen?: string | null;
-      enlace_externo?: string;
-      contacto?: string;
-      fechas: components["schemas"]["FechaPublica"][];
-    };
-    /** @description PUBLICATION-7, G-05: nuevo fin posterior al actual y sin solapar otra fecha. */
-    ExtensionRequest: {
-      /** Format: date-time */
-      fin: string;
-    };
-    Fecha: {
-      readonly id: number;
-      /** Format: date-time */
-      inicio: string;
-      /** Format: date-time */
-      fin: string;
-      /** Format: date-time */
-      finalizada_en?: string | null;
-      readonly estado: components["schemas"]["EstadoFechaEnum"];
-      oculta?: boolean;
-      norma_ocultamiento?:
-        | (
-            | components["schemas"]["NormaEnum"]
-            | components["schemas"]["NullEnum"]
-          )
-        | null;
-      explicacion_ocultamiento?: string;
-    };
-    FechaEntradaRequest: {
-      /** Format: date-time */
-      inicio: string;
-      /** Format: date-time */
-      fin: string;
-    };
-    /** @description Fecha tal como la ve cualquier usuario: sin marcas de moderación. */
-    FechaPublica: {
-      readonly id: number;
-      /** Format: date-time */
-      inicio: string;
-      /** Format: date-time */
-      fin: string;
-      /** Format: date-time */
-      finalizada_en?: string | null;
-      readonly estado: components["schemas"]["EstadoFechaEnum"];
-    };
-    ImagenRequest: {
-      /** Format: binary */
-      imagen: string;
-    };
-    /** @description RF-034, G-21: norma incumplida y explicación opcional. */
-    MotivoRequest: {
-      norma: components["schemas"]["NormaEnum"];
-      /** @default  */
-      explicacion: string;
-    };
-    Norma: {
-      id: number;
-      nombre: string;
-    };
-    /**
-     * @description * `1` - Ámbito de los eventos
-     *     * `2` - Información veraz y completa
-     *     * `3` - Respeto y convivencia
-     *     * `4` - Actividades y ventas lícitas
-     *     * `5` - Sin spam, duplicados ni publicidad ajena
-     *     * `6` - Privacidad
-     *     * `7` - Propiedad intelectual
-     *     * `8` - Uso de los espacios del campus
-     *     * `9` - Responsabilidad sobre el evento
-     *     * `10` - Cuenta personal y reportes de buena fe
-     * @enum {integer}
-     */
-    NormaEnum: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-    /** @enum {unknown} */
-    NullEnum: null;
-    /** @description ADMIN-2 · criterios 2 y 3. Al pasar a "revisado" se decide si el evento se oculta; si se oculta, con su motivo. */
-    PatchedCasoActualizacionRequest: {
-      estado?: components["schemas"]["EstadoCasoEnum"];
-      decision_ocultar?: boolean | null;
-      norma?: components["schemas"]["NormaEnum"];
-      /** @default  */
-      explicacion: string;
-    };
-    PatchedCategoriaRequest: {
-      nombre?: string;
-      activa?: boolean;
-      color?: string | null;
-    };
-    /** @description G-30: los datos del evento se editan mientras no pase al historial. */
-    PatchedEventoEdicionRequest: {
-      nombre?: string;
-      categoria?: number;
-      descripcion?: string;
-      responsable?: string;
-      ubicacion?: number;
-      detalle_ubicacion?: string;
-      cupo?: number | null;
-      enlace_externo?: string;
-      contacto?: string;
-    };
-    /** @description PUBLICATION-3, G-30: de una fecha solo se editan el día, la hora de inicio y el fin. */
-    PatchedFechaEdicionRequest: {
-      /** Format: date-time */
-      inicio?: string;
-      /** Format: date-time */
-      fin?: string;
-    };
-    Registro: {
-      readonly id: number;
-      nombre: string;
-      /** Format: email */
-      email: string;
-    };
-    /** @description ADMIN-4 · criterio 3: datos completos de cada acción. */
-    RegistroModeracion: {
-      readonly id: number;
-      /** Format: date-time */
-      readonly fecha_hora: string;
-      administrador: components["schemas"]["UsuarioBreve"];
-      tipo_accion: components["schemas"]["TipoAccionEnum"];
-      evento?: number | null;
-      fecha?: number | null;
-      cuenta_afectada: components["schemas"]["UsuarioBreve"];
-      norma?:
-        | (
-            | components["schemas"]["NormaEnum"]
-            | components["schemas"]["NullEnum"]
-          )
-        | null;
-      explicacion?: string;
-      reportes?: number[];
-      estado_anterior: string;
-      estado_posterior: string;
-    };
-    RegistroRequest: {
-      nombre: string;
-      /** Format: email */
-      email: string;
-      password: string;
-    };
-    Reporte: {
-      readonly id: number;
-      usuario: components["schemas"]["UsuarioBreve"];
-      causa: components["schemas"]["NormaEnum"];
-      detalles?: string;
-    };
-    /** @description DISPLAY-3: causa obligatoria (una norma de uso, G-20) y detalles opcionales. */
-    ReporteEntradaRequest: {
-      causa: components["schemas"]["NormaEnum"];
-      detalles?: string;
-    };
-    SolicitudRecuperacionRequest: {
-      /** Format: email */
-      email: string;
-    };
-    /**
-     * @description * `ocultar` - Ocultar
-     *     * `restaurar` - Restaurar
-     *     * `suspender` - Suspender
-     *     * `reactivar` - Reactivar
-     * @enum {string}
-     */
-    TipoAccionEnum: "ocultar" | "restaurar" | "suspender" | "reactivar";
-    TokenRefresh: {
-      readonly access: string;
-    };
-    TokenRefreshRequest: {
-      refresh: string;
-    };
-    TokenRequest: {
-      email: string;
-      password: string;
-    };
-    Tokens: {
-      access: string;
-      refresh: string;
-    };
-    Ubicacion: {
-      readonly id: number;
-      nombre: string;
-    };
-    /** @description INTERACTIVITY-1 · criterio 2: los eventos vigentes agrupados por ubicación del catálogo. */
-    UbicacionMapa: {
-      ubicacion: components["schemas"]["Ubicacion"];
-      eventos: components["schemas"]["EventoMapa"][];
-    };
-    UsuarioActual: {
-      readonly id: number;
-      nombre: string;
-      /** Format: email */
-      email: string;
-      es_administrador?: boolean;
-    };
-    /** @description ADMIN-3, ADMIN-4: cuentas para que el administrador suspenda, reactive o asigne roles. */
-    UsuarioAdmin: {
-      readonly id: number;
-      nombre: string;
-      /** Format: email */
-      email: string;
-      es_administrador?: boolean;
-      readonly suspendida: boolean;
-    };
-    UsuarioBreve: {
-      readonly id: number;
-      nombre: string;
-      /** Format: email */
-      email: string;
-    };
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  admin_casos_list: {
-    parameters: {
-      query?: {
-        estado?: "en_revision" | "pendiente" | "revisado";
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Caso"][];
-        };
-      };
-    };
-  };
-  admin_casos_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Caso"];
-        };
-      };
-    };
-  };
-  admin_casos_partial_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["PatchedCasoActualizacionRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["PatchedCasoActualizacionRequest"];
-        "multipart/form-data": components["schemas"]["PatchedCasoActualizacionRequest"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Caso"];
-        };
-      };
-    };
-  };
-  admin_categorias_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Categoria"][];
-        };
-      };
-    };
-  };
-  admin_categorias_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CategoriaRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["CategoriaRequest"];
-        "multipart/form-data": components["schemas"]["CategoriaRequest"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Categoria"];
-        };
-      };
-    };
-  };
-  admin_categorias_partial_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["PatchedCategoriaRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["PatchedCategoriaRequest"];
-        "multipart/form-data": components["schemas"]["PatchedCategoriaRequest"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Categoria"];
-        };
-      };
-    };
-  };
-  admin_eventos_list: {
-    parameters: {
-      query?: {
-        oculto?: boolean;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Evento"][];
-        };
-      };
-    };
-  };
-  admin_eventos_ocultar_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["MotivoRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["MotivoRequest"];
-        "multipart/form-data": components["schemas"]["MotivoRequest"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Evento"];
-        };
-      };
-    };
-  };
-  admin_eventos_restaurar_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Evento"];
-        };
-      };
-    };
-  };
-  admin_fechas_ocultar_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["MotivoRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["MotivoRequest"];
-        "multipart/form-data": components["schemas"]["MotivoRequest"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Evento"];
-        };
-      };
-    };
-  };
-  admin_fechas_restaurar_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Evento"];
-        };
-      };
-    };
-  };
-  admin_registro_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["RegistroModeracion"][];
-        };
-      };
-    };
-  };
-  admin_registro_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["RegistroModeracion"];
-        };
-      };
-    };
-  };
-  admin_usuarios_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["UsuarioAdmin"][];
-        };
-      };
-    };
-  };
-  admin_usuarios_asignar_admin_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["UsuarioAdmin"];
-        };
-      };
-    };
-  };
-  admin_usuarios_reactivar_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["EstadoCuenta"];
-        };
-      };
-    };
-  };
-  admin_usuarios_revocar_admin_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["UsuarioAdmin"];
-        };
-      };
-    };
-  };
-  admin_usuarios_suspender_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["MotivoRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["MotivoRequest"];
-        "multipart/form-data": components["schemas"]["MotivoRequest"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["EstadoCuenta"];
-        };
-      };
-    };
-  };
-  auth_recuperacion_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SolicitudRecuperacionRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["SolicitudRecuperacionRequest"];
-        "multipart/form-data": components["schemas"]["SolicitudRecuperacionRequest"];
-      };
-    };
-    responses: {
-      /** @description No response body */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  auth_recuperacion_confirmar_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ConfirmacionRecuperacionRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["ConfirmacionRecuperacionRequest"];
-        "multipart/form-data": components["schemas"]["ConfirmacionRecuperacionRequest"];
-      };
-    };
-    responses: {
-      /** @description No response body */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  auth_registro_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RegistroRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["RegistroRequest"];
-        "multipart/form-data": components["schemas"]["RegistroRequest"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Registro"];
-        };
-      };
-    };
-  };
-  auth_token_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TokenRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["TokenRequest"];
-        "multipart/form-data": components["schemas"]["TokenRequest"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Tokens"];
-        };
-      };
-    };
-  };
-  auth_token_refresh_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TokenRefreshRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["TokenRefreshRequest"];
-        "multipart/form-data": components["schemas"]["TokenRefreshRequest"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["TokenRefresh"];
-        };
-      };
-    };
-  };
-  auth_yo_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["UsuarioActual"];
-        };
-      };
-    };
-  };
-  categorias_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Categoria"][];
-        };
-      };
-    };
-  };
-  eventos_list: {
-    parameters: {
-      query?: {
-        /** @description Id de la categoría (DISPLAY-2 · criterio 1) */
-        categoria?: number;
-        /** @description DISPLAY-2 · criterio 3, G-33 */
-        estado?: "en_vivo" | "proxima";
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["EventoPublico"][];
-        };
-      };
-    };
-  };
-  eventos_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["EventoCreacionRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["EventoCreacionRequest"];
-        "multipart/form-data": components["schemas"]["EventoCreacionRequest"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Evento"];
-        };
-      };
-    };
-  };
-  eventos_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["EventoPublico"];
-        };
-      };
-    };
-  };
-  eventos_destroy: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  eventos_partial_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["PatchedEventoEdicionRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["PatchedEventoEdicionRequest"];
-        "multipart/form-data": components["schemas"]["PatchedEventoEdicionRequest"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Evento"];
-        };
-      };
-    };
-  };
-  eventos_cancelar_todas_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Evento"];
-        };
-      };
-    };
-  };
-  eventos_fechas_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["FechaEntradaRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["FechaEntradaRequest"];
-        "multipart/form-data": components["schemas"]["FechaEntradaRequest"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Evento"];
-        };
-      };
-    };
-  };
-  eventos_imagen_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": components["schemas"]["ImagenRequest"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Evento"];
-        };
-      };
-    };
-  };
-  eventos_imagen_destroy: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  eventos_reportes_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ReporteEntradaRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["ReporteEntradaRequest"];
-        "multipart/form-data": components["schemas"]["ReporteEntradaRequest"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ConfirmacionReporte"];
-        };
-      };
-    };
-  };
-  fechas_destroy: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  fechas_partial_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["PatchedFechaEdicionRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["PatchedFechaEdicionRequest"];
-        "multipart/form-data": components["schemas"]["PatchedFechaEdicionRequest"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Evento"];
-        };
-      };
-    };
-  };
-  fechas_cancelar_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Evento"];
-        };
-      };
-    };
-  };
-  fechas_extender_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ExtensionRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["ExtensionRequest"];
-        "multipart/form-data": components["schemas"]["ExtensionRequest"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Evento"];
-        };
-      };
-    };
-  };
-  fechas_finalizar_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Evento"];
-        };
-      };
-    };
-  };
-  mapa_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["UbicacionMapa"][];
-        };
-      };
-    };
-  };
-  mis_eventos_list: {
-    parameters: {
-      query?: {
-        vista?: "historial" | "vigentes";
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Evento"][];
-        };
-      };
-    };
-  };
-  normas_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Norma"][];
-        };
-      };
-    };
-  };
-  ubicaciones_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Ubicacion"][];
-        };
-      };
-    };
-  };
+    admin_casos_list: {
+        parameters: {
+            query?: {
+                estado?: "en_revision" | "pendiente" | "revisado";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Caso"][];
+                };
+            };
+        };
+    };
+    admin_casos_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Caso"];
+                };
+            };
+        };
+    };
+    admin_casos_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedCasoActualizacionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedCasoActualizacionRequest"];
+                "multipart/form-data": components["schemas"]["PatchedCasoActualizacionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Caso"];
+                };
+            };
+        };
+    };
+    admin_categorias_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Categoria"][];
+                };
+            };
+        };
+    };
+    admin_categorias_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CategoriaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CategoriaRequest"];
+                "multipart/form-data": components["schemas"]["CategoriaRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Categoria"];
+                };
+            };
+        };
+    };
+    admin_categorias_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedCategoriaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedCategoriaRequest"];
+                "multipart/form-data": components["schemas"]["PatchedCategoriaRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Categoria"];
+                };
+            };
+        };
+    };
+    admin_eventos_list: {
+        parameters: {
+            query?: {
+                oculto?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evento"][];
+                };
+            };
+        };
+    };
+    admin_eventos_eliminar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MotivoRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MotivoRequest"];
+                "multipart/form-data": components["schemas"]["MotivoRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_eventos_ocultar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MotivoRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MotivoRequest"];
+                "multipart/form-data": components["schemas"]["MotivoRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evento"];
+                };
+            };
+        };
+    };
+    admin_eventos_restaurar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evento"];
+                };
+            };
+        };
+    };
+    admin_fechas_eliminar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MotivoRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MotivoRequest"];
+                "multipart/form-data": components["schemas"]["MotivoRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_fechas_ocultar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MotivoRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MotivoRequest"];
+                "multipart/form-data": components["schemas"]["MotivoRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evento"];
+                };
+            };
+        };
+    };
+    admin_fechas_restaurar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evento"];
+                };
+            };
+        };
+    };
+    admin_registro_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegistroModeracion"][];
+                };
+            };
+        };
+    };
+    admin_registro_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegistroModeracion"];
+                };
+            };
+        };
+    };
+    admin_usuarios_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsuarioAdmin"][];
+                };
+            };
+        };
+    };
+    admin_usuarios_asignar_admin_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsuarioAdmin"];
+                };
+            };
+        };
+    };
+    admin_usuarios_reactivar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EstadoCuenta"];
+                };
+            };
+        };
+    };
+    admin_usuarios_revocar_admin_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsuarioAdmin"];
+                };
+            };
+        };
+    };
+    admin_usuarios_suspender_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MotivoRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MotivoRequest"];
+                "multipart/form-data": components["schemas"]["MotivoRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EstadoCuenta"];
+                };
+            };
+        };
+    };
+    auth_recuperacion_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SolicitudRecuperacionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SolicitudRecuperacionRequest"];
+                "multipart/form-data": components["schemas"]["SolicitudRecuperacionRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_recuperacion_confirmar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmacionRecuperacionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ConfirmacionRecuperacionRequest"];
+                "multipart/form-data": components["schemas"]["ConfirmacionRecuperacionRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_registro_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegistroRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["RegistroRequest"];
+                "multipart/form-data": components["schemas"]["RegistroRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Registro"];
+                };
+            };
+        };
+    };
+    auth_token_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["TokenRequest"];
+                "multipart/form-data": components["schemas"]["TokenRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Tokens"];
+                };
+            };
+        };
+    };
+    auth_token_refresh_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenRefreshRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["TokenRefreshRequest"];
+                "multipart/form-data": components["schemas"]["TokenRefreshRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenRefresh"];
+                };
+            };
+        };
+    };
+    auth_yo_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsuarioActual"];
+                };
+            };
+        };
+    };
+    categorias_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Categoria"][];
+                };
+            };
+        };
+    };
+    eventos_list: {
+        parameters: {
+            query?: {
+                /** @description Id de la categoría (DISPLAY-2 · criterio 1) */
+                categoria?: number;
+                /** @description DISPLAY-2 · criterio 3, G-33 */
+                estado?: "en_vivo" | "proxima";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventoPublico"][];
+                };
+            };
+        };
+    };
+    eventos_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventoCreacionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["EventoCreacionRequest"];
+                "multipart/form-data": components["schemas"]["EventoCreacionRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evento"];
+                };
+            };
+        };
+    };
+    eventos_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventoPublico"];
+                };
+            };
+        };
+    };
+    eventos_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    eventos_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedEventoEdicionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedEventoEdicionRequest"];
+                "multipart/form-data": components["schemas"]["PatchedEventoEdicionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evento"];
+                };
+            };
+        };
+    };
+    eventos_cancelar_todas_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evento"];
+                };
+            };
+        };
+    };
+    eventos_fechas_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FechaEntradaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["FechaEntradaRequest"];
+                "multipart/form-data": components["schemas"]["FechaEntradaRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evento"];
+                };
+            };
+        };
+    };
+    eventos_imagen_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["ImagenRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evento"];
+                };
+            };
+        };
+    };
+    eventos_imagen_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    eventos_reportes_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReporteEntradaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReporteEntradaRequest"];
+                "multipart/form-data": components["schemas"]["ReporteEntradaRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConfirmacionReporte"];
+                };
+            };
+        };
+    };
+    fechas_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    fechas_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedFechaEdicionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedFechaEdicionRequest"];
+                "multipart/form-data": components["schemas"]["PatchedFechaEdicionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evento"];
+                };
+            };
+        };
+    };
+    fechas_cancelar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evento"];
+                };
+            };
+        };
+    };
+    fechas_extender_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExtensionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ExtensionRequest"];
+                "multipart/form-data": components["schemas"]["ExtensionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evento"];
+                };
+            };
+        };
+    };
+    fechas_finalizar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evento"];
+                };
+            };
+        };
+    };
+    mapa_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UbicacionMapa"][];
+                };
+            };
+        };
+    };
+    mis_eventos_list: {
+        parameters: {
+            query?: {
+                vista?: "historial" | "vigentes";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evento"][];
+                };
+            };
+        };
+    };
+    normas_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Norma"][];
+                };
+            };
+        };
+    };
+    ubicaciones_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ubicacion"][];
+                };
+            };
+        };
+    };
 }

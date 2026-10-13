@@ -131,9 +131,43 @@ describe('ACCESS-1 · criterio 3: recuperación de contraseña', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Enviar enlace de recuperación' }))
     await waitFor(() => expect(peticiones).toHaveLength(1))
     expect(await peticiones[0].json()).toEqual({ email: 'persona@cualquierdominio.test' })
+    expect(await screen.findByRole('status')).toHaveTextContent('Enlace de recuperación enviado')
   })
 
-  it('si la API rechaza el correo, muestra el error en el campo', async () => {
+  it('si el correo no está registrado muestra solo un toast de error', async () => {
+    simularApi({
+      'POST /api/auth/recuperacion/': () => json({ email: ['La cuenta no está registrada.'] }, 400),
+    })
+    renderizarApp('/recuperar')
+    await userEvent.type(await screen.findByLabelText('Correo electrónico'), 'nadie@example.com')
+    await userEvent.click(screen.getByRole('button', { name: 'Enviar enlace de recuperación' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('La cuenta no está registrada.')
+    expect(screen.getAllByText('La cuenta no está registrada.')).toHaveLength(1)
+  })
+
+  it('traduce el código de cuenta suspendida aunque la API no incluya el texto', async () => {
+    simularApi({
+      'POST /api/auth/recuperacion/': () => json({ codes: { email: 'cuenta_suspendida' } }, 400),
+    })
+    renderizarApp('/recuperar')
+    await userEvent.type(await screen.findByLabelText('Correo electrónico'), 'suspendida@example.com')
+    await userEvent.click(screen.getByRole('button', { name: 'Enviar enlace de recuperación' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('No puedes recuperar la contraseña mientras esté suspendida.')
+  })
+
+  it('si la cuenta está suspendida muestra un toast y no ofrece recuperación', async () => {
+    simularApi({
+      'POST /api/auth/recuperacion/': () =>
+        json({ email: ['La cuenta está suspendida. No puedes recuperar la contraseña mientras esté suspendida.'] }, 400),
+    })
+    renderizarApp('/recuperar')
+    await userEvent.type(await screen.findByLabelText('Correo electrónico'), 'suspendida@example.com')
+    await userEvent.click(screen.getByRole('button', { name: 'Enviar enlace de recuperación' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('La cuenta está suspendida. No puedes recuperar la contraseña mientras esté suspendida.')
+    expect(screen.getAllByText('La cuenta está suspendida. No puedes recuperar la contraseña mientras esté suspendida.')).toHaveLength(1)
+  })
+
+  it('si la API rechaza el correo, muestra el error solo en un toast', async () => {
     simularApi({
       'POST /api/auth/recuperacion/': () =>
         json({ email: ['Introduzca una dirección de correo electrónico válida.'], codes: { email: ['invalid'] } }, 400),
@@ -141,9 +175,8 @@ describe('ACCESS-1 · criterio 3: recuperación de contraseña', () => {
     renderizarApp('/recuperar')
     await userEvent.type(await screen.findByLabelText('Correo electrónico'), 'persona@cualquierdominio.test')
     await userEvent.click(screen.getByRole('button', { name: 'Enviar enlace de recuperación' }))
-    expect(await screen.findByLabelText('Correo electrónico')).toHaveAccessibleDescription(
-      'Introduzca una dirección de correo electrónico válida.',
-    )
+    expect(await screen.findByRole('alert')).toHaveTextContent('Introduzca una dirección de correo electrónico válida.')
+    expect(screen.getAllByText('Introduzca una dirección de correo electrónico válida.')).toHaveLength(1)
   })
 
   it('enlaza de vuelta a Login', async () => {

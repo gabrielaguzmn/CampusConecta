@@ -506,8 +506,8 @@ paths:
   /api/auth/recuperacion/:
     post:
       operationId: auth_recuperacion_create
-      description: ACCESS-1 · criterio 3. Responde igual exista o no la cuenta, para
-        no revelar qué correos están registrados.
+      description: ACCESS-1 · criterio 3. Rechaza cuentas suspendidas y no genera
+        enlaces para ellas.
       tags:
       - auth
       requestBody:

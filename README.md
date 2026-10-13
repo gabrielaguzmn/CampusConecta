@@ -30,16 +30,15 @@ Esta sección se hace **una sola vez** por computador. Después, para usar la ap
 
 ### 2.1 Base de datos
 
-Agrega las credenciales de la base de datos `campusconecta`:
+Instala PostgreSQL, da permiso a tu usuario de Linux para crear bases (las pruebas del backend crean una base temporal) y crea la base local:
 
 ```bash
-DB_NAME=campusconectadb
-DB_USER=
-DB_PASSWORD=
-DB_HOST=
-DB_PORT=
-DB_SSLMODE=
+sudo apt install postgresql                     # Debian/Ubuntu; en otras distribuciones usa su gestor de paquetes
+sudo -u postgres createuser --createdb "$USER"  # tu usuario de Linux como usuario de PostgreSQL
+createdb campusconecta
 ```
+
+Así Django se conecta por el socket local con tu usuario de Linux y no hace falta contraseña. Si además quieres usar la base compartida del equipo, ver la [sección 5](#5-base-de-datos-compartida-del-equipo-render).
 
 ### 2.2 Backend
 
@@ -60,8 +59,7 @@ Copia el resultado en `backend/.env`: `DJANGO_SECRET_KEY=<lo que salió>`. No se
 
 **Resto del `.env`:**
 
-- `DB_NAME=campusconecta`.
-- Con la opción A, deja vacíos `DB_USER`, `DB_PASSWORD` y `DB_HOST`. Con la opción B, pon `DB_USER=campus`, `DB_PASSWORD=...`, `DB_HOST=localhost` y `DB_PORT=5432`. Para usar la base compartida del equipo, ver la sección 5.
+- `DB_NAME=campusconecta` y deja vacíos `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` y `DB_SSLMODE` (conexión local por socket, ver 2.1). Para la base compartida del equipo, ver la [sección 5](#5-base-de-datos-compartida-del-equipo-render).
 - `FRONTEND_URL_RECUPERACION=http://localhost:5173/recuperar/confirmar`, para que funcione el enlace de "¿Olvidaste tu contraseña?".
 
 Crea las tablas:
@@ -87,14 +85,16 @@ En `backend/`, con el `.env` cargado:
 
 | Paso | ¿Obligatorio? | Para qué |
 |---|---|---|
-| Ubicaciones | **Necesario para crear eventos** | La app arranca sin ellas, pero "Crear evento" no tendrá ubicaciones para elegir |
+| Ubicaciones | **Necesario para crear eventos y ver el mapa** | La app arranca sin ellas, pero "Crear evento" no tendrá ubicaciones para elegir y el mapa no mostrará pines |
 | Cuenta administradora | **Opcional** | Solo si vas a probar el módulo de administración |
 
-**Ubicaciones.** El catálogo oficial de ubicaciones del campus aún no se ha entregado. Para poder crear eventos, crea alguna a mano (solo queda en tu base, no en el código):
+**Ubicaciones.** Carga el catálogo de ubicaciones del campus (79 lugares: edificios, plazoletas y lagos, con su zona y el código que los enlaza con el plano del mapa):
 
 ```bash
-.venv/bin/python manage.py shell -c "from eventos.models import Ubicacion; [Ubicacion.objects.get_or_create(nombre=n) for n in ['Edificio de prueba', 'Biblioteca']]"
+.venv/bin/python manage.py seed_ubicaciones
 ```
+
+Se puede repetir sin crear duplicados: actualiza las ubicaciones que ya existan. Vuelve a ejecutarlo si llega al repositorio un cambio en `eventos/management/commands/seed_ubicaciones.py`.
 
 **Cuenta administradora (opcional).** Rellena en `backend/.env` los datos que quieras (solo valen para tu base local), vuelve a cargar el `.env` y créala:
 
@@ -169,7 +169,7 @@ npm install
 Igual que en [2.4](#24-datos-iniciales), con `python` en lugar de `.venv/bin/python`:
 
 ```powershell
-python manage.py shell -c "from eventos.models import Ubicacion; [Ubicacion.objects.get_or_create(nombre=n) for n in ['Edificio de prueba', 'Biblioteca']]"
+python manage.py seed_ubicaciones
 python manage.py crear_admin_inicial   # opcional, con ADMIN_INICIAL_* rellenos en el .env
 ```
 
@@ -216,6 +216,7 @@ En desarrollo, Vite reenvía `/api` y `/media` al backend en `localhost:8000` (v
 
 **Después de un `git pull`**, si llegaron cambios:
 - **Migraciones nuevas** (archivos en `*/migrations/`): `manage.py migrate`.
+- **Cambios en el catálogo de ubicaciones** (`seed_ubicaciones.py`): `manage.py seed_ubicaciones`.
 - **Cambios en `requirements.txt` o `package.json`:** `pip install -r requirements.txt` o `npm install`.
 
 ### Qué probar
@@ -229,7 +230,23 @@ En desarrollo, Vite reenvía `/api` y `/media` al backend en `localhost:8000` (v
 | Administración (si creaste la cuenta administradora) | Entra con esa cuenta: aparece el módulo **Admin** (reportes, eventos, usuarios, categorías y registro de moderación) |
 | Recuperar contraseña | En **Login → ¿Olvidaste tu contraseña?**. El correo **no se envía**: aparece impreso en la terminal del backend con el enlace; ábrelo en el navegador |
 
-Todos los correos (recuperación, ocultamiento de un evento, suspensión de una cuenta) aparecen en la terminal del backend mientras `DJANGO_DEBUG=1`.
+Todos los correos (recuperación, ocultamiento de un evento, suspensión de una cuenta) aparecen en la terminal del backend mientras `DJANGO_DEBUG=1` y `EMAIL_BACKEND` esté vacío.
+
+### Enviar correos reales (opcional)
+
+Para que los correos lleguen de verdad, rellena en `backend/.env` los datos de un proveedor SMTP (por ejemplo Brevo, SendGrid, Mailgun o Gmail con una contraseña de aplicación) y vuelve a cargar el `.env`:
+
+```
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.proveedor.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=usuario
+EMAIL_HOST_PASSWORD=contraseña-o-clave-de-aplicación
+EMAIL_USE_TLS=1
+DEFAULT_FROM_EMAIL=CampusConecta <correo-remitente@dominio.com>
+```
+
+Estas credenciales tampoco se suben al repositorio.
 
 ---
 
@@ -239,9 +256,9 @@ Cada persona puede trabajar con su base local (secciones 2 y 3). Además, el equ
 
 ### Conectarse (el resto del equipo)
 
-Pon en tu `backend/.env` (o en `.env.compartida`) los datos que te pasaron, con `DB_PORT=5432` y `DB_SSLMODE=require`, carga el `.env` y ejecuta `runserver` como siempre. **No ejecutes `migrate` contra la base compartida**: lo hace solo quien la administra.
+Guarda los datos que te pasaron en `backend/.env.compartida`: una copia de tu `.env` con las variables `DB_*` del paso 3. Carga ese archivo en lugar del `.env` y ejecuta `runserver` como siempre. **No ejecutes `migrate` ni `seed_ubicaciones` contra la base compartida**: lo hace solo quien la administra.
 
-Para alternar entre tu base local y la de Supabase, guarda cada configuración en un archivo distinto, por ejemplo `.env` (local) y `.env.compartida` (nube), y carga el que necesites:
+Así alternas entre tu base local (`.env`) y la de Render (`.env.compartida`) cargando el archivo que necesites:
 
 ```bash
 set -a; source .env.compartida; set +a      # Linux
@@ -250,14 +267,15 @@ set -a; source .env.compartida; set +a      # Linux
 Get-Content .env.compartida | Where-Object { $_ -match '^\s*[^#\s][^=]*=' } | ForEach-Object { $n, $v = $_ -split '=', 2; Set-Item "env:$($n.Trim())" $v.Trim() }   # Windows
 ```
 
-En PowerShell las variables se quedan cargadas en la terminal. Al cambiar de archivo, abre una terminal nueva para que no se mezclen.
+Las variables se quedan cargadas en la terminal. Al cambiar de archivo, abre una terminal nueva para que no se mezclen.
 
 ### Reglas de uso
 
-- **Las credenciales nunca van al repositorio.** El `.gitignore` excluye `.env` y `.env.*` (salvo `.env.example`). Si se filtran, cambia la contraseña en el panel del proveedor y avisa al equipo.
-- **Solo quien administra la base ejecuta `migrate`**, cada vez que llegue al repositorio una migración nueva (archivos en `*/migrations/`). Si dos personas migran a la vez con código distinto, la base puede quedar inconsistente.
-- **Las pruebas (`manage.py test`) se ejecutan contra la base local**, no contra la compartida: crean y borran una base temporal, y en un servidor compartido chocarían entre sí.
-- **El plan gratuito de Supabase tiene límites**: espacio limitado y el proyecto se pausa tras un periodo sin actividad. Si se pausa, quien lo administra lo reactiva desde el panel.
+- **Las credenciales nunca van al repositorio.** El `.gitignore` excluye `.env` y `.env.*` (salvo `.env.example`). Si se filtran, cambia la contraseña desde el panel de Render y avisa al equipo.
+- **Solo quien administra la base ejecuta `migrate` y `seed_ubicaciones`**, cada vez que llegue al repositorio una migración nueva o un cambio en el catálogo. Si dos personas migran a la vez con código distinto, la base puede quedar inconsistente.
+- **Las pruebas (`manage.py test`) se ejecutan siempre contra la base local**, en una terminal con el `.env` local cargado: crean y borran una base temporal, y en el servidor compartido chocarían entre sí.
+- **Las imágenes de los eventos no se comparten.** Se guardan en el disco de quien crea el evento (`backend/media/`), no en la base de datos. Con la base compartida, los demás verán esos eventos sin imagen.
+- **El plan gratuito de Render tiene límites** de espacio y de duración. Quien administra la base revisa en el panel cuándo vence y avisa al equipo con tiempo.
 
 ---
 
@@ -312,6 +330,7 @@ backend/
 │   ├── models.py            Categoria, Ubicacion, Evento, Fecha; estado calculado de cada fecha y vigencia
 │   ├── serializers.py       validaciones de creación y edición (horarios, solapamientos, imagen…)
 │   ├── views.py             feed, mapa, detalle, crear/editar, acciones sobre fechas, "Mis eventos"
+│   ├── management/commands/seed_ubicaciones.py   catálogo de 79 ubicaciones del campus
 │   ├── migrations/          0002: las 6 categorías iniciales · 0004: sus colores
 │   └── tests/               pruebas de publicación, exploración (feed, mapa, detalle) y categorías
 └── moderacion/              reportes y administración
@@ -351,7 +370,7 @@ frontend/
     │   ├── evento/          detalle de un evento y formulario de reporte
     │   ├── mis-eventos/     "Mis eventos" (activos e historial), crear y gestionar eventos
     │   └── admin/           módulo de administración: reportes, eventos, usuarios, categorías y registro
-    ├── lib/                 utilidades (formato de fechas y horas en America/Bogota)
+    ├── lib/                 utilidades: formato de fechas y horas en America/Bogota, zonas y edificios del plano (Campusdata.ts) y posición de cada edificio (Usemascarascampus.ts)
     └── test/                configuración de las pruebas
 ```
 
@@ -373,6 +392,7 @@ Las pruebas del frontend están junto a cada archivo (`Componente.test.tsx`).
 | Moderación, reportes y suspensión | `backend/moderacion/` (`servicios.py` para la lógica, `views.py` para los endpoints) |
 | Texto de los correos | `backend/cuentas/correos.py` (recuperación) y `backend/moderacion/correos.py` (moderación) |
 | Categorías iniciales y sus colores | `backend/eventos/migrations/0002_…` y `0004_…` |
+| Catálogo de ubicaciones del campus | `backend/eventos/management/commands/seed_ubicaciones.py` (debe coincidir con `frontend/src/lib/Campusdata.ts`) |
 | Variables de configuración | `backend/.env.example` y `backend/config/settings.py` |
 | Llamadas a la API desde el frontend | `frontend/src/api/` |
 | Componentes visuales y tokens de diseño | `frontend/src/components/` y `frontend/src/index.css` |

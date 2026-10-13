@@ -12,7 +12,7 @@ def enviar_recuperacion(usuario):
     enlace = f"{settings.FRONTEND_URL_RECUPERACION}?uid={uid}&token={token}"
     # G-16 (recuperación): texto genérico aprobado el 2026-10-07.
     mensaje = (
-        "Hola:\n\n"
+        f"Hola, {usuario.nombre}:\n\n"
         "Recibimos una solicitud para restablecer la contraseña de tu cuenta de CampusConecta.\n"
         "Accede a este enlace para crear una nueva contraseña:\n\n"
         f"{enlace}\n\n"
@@ -23,4 +23,5 @@ def enviar_recuperacion(usuario):
         message=mensaje,
         from_email=None,
         recipient_list=[usuario.email],
+        fail_silently=False,
     )
