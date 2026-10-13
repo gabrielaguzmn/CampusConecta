@@ -86,17 +86,31 @@ class AccesoTests(APITestCase):
         return dict(re.findall(r"[?&](uid|token)=([^&\s]+)", mail.outbox[-1].body))
 
     def test_ACCESS_1_c3_solicitud_envia_enlace_por_correo(self):
-        Usuario.objects.create_user("olvido@example.com", CLAVE)
+        Usuario.objects.create_user("olvido@example.com", CLAVE, nombre="Olvido")
         respuesta = self.client.post("/api/auth/recuperacion/", {"email": "olvido@example.com"})
         self.assertEqual(respuesta.status_code, 204)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, ["olvido@example.com"])
+        self.assertIn("Hola, Olvido:", mail.outbox[0].body)
         self.assertIn("https://frontend.test/recuperar?uid=", mail.outbox[0].body)
         self.assertEqual(mail.outbox[0].subject, "Recupera tu contraseña de CampusConecta")
 
-    def test_ACCESS_1_c3_correo_inexistente_responde_igual_sin_enviar(self):
+    def test_ACCESS_1_c3_correo_inexistente_informa_error_sin_enviar(self):
         respuesta = self.client.post("/api/auth/recuperacion/", {"email": "nadie@example.com"})
-        self.assertEqual(respuesta.status_code, 204)
+        self.assertEqual(respuesta.status_code, 400)
+        self.assertEqual(respuesta.json()["email"], ["La cuenta no está registrada."])
+        self.assertEqual(respuesta.json()["codes"]["email"], "correo_no_registrado")
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_ACCESS_1_c3_cuenta_suspendida_no_puede_recuperar_contrasena(self):
+        Usuario.objects.create_user("suspendida@example.com", CLAVE, nombre="Suspendida", is_active=False)
+        respuesta = self.client.post("/api/auth/recuperacion/", {"email": "suspendida@example.com"})
+        self.assertEqual(respuesta.status_code, 400)
+        self.assertEqual(
+            respuesta.json()["email"],
+            ["La cuenta está suspendida. No puedes recuperar la contraseña mientras esté suspendida."],
+        )
+        self.assertEqual(respuesta.json()["codes"]["email"], "cuenta_suspendida")
         self.assertEqual(len(mail.outbox), 0)
 
     def test_ACCESS_1_c3_enlace_permite_cambiar_la_contrasena_una_sola_vez(self):
