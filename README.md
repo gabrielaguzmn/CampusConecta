@@ -233,45 +233,11 @@ Todos los correos (recuperación, ocultamiento de un evento, suspensión de una 
 
 ---
 
-## 5. Base de datos compartida del equipo (Supabase)
+## 5. Base de datos compartida del equipo (Render)
 
-Cada persona puede trabajar con su base local (secciones 2 y 3). Además, el equipo tendrá **una base común en Supabase**, para que todos vean los mismos datos (por ejemplo, para probar el frontend contra los mismos eventos o para una demo).
+Cada persona puede trabajar con su base local (secciones 2 y 3). Además, el equipo tendrá **una base común en Render**, para que todos vean los mismos datos (por ejemplo, para probar el frontend contra los mismos eventos o para una demo).
 
-### 5.1 Mientras no exista
-
-Hasta que alguien cree la base en Supabase, **cada persona trabaja con su propia base local** (secciones 2 o 3). `migrate` crea en todas las bases las mismas tablas y las 6 categorías con sus colores. Los usuarios, las ubicaciones de prueba y los eventos son propios de cada base.
-
-### 5.2 Crear la base en Supabase (una sola persona, el "administrador de la base")
-
-1. Crea una cuenta en <https://supabase.com> y un proyecto nuevo. Elige la región más cercana (por ejemplo, *South America (São Paulo)*) y **guarda la contraseña de la base**: Supabase solo la muestra al crear el proyecto.
-2. **Desactiva la API pública de datos.** Supabase publica las tablas del esquema `public` a través de su propia API REST, y CampusConecta no la usa: todo pasa por el backend de Django. En *Project Settings → Data API*, desactívala o quita `public` de los esquemas expuestos. Si no lo haces, las tablas quedan accesibles fuera del backend.
-3. Pulsa **Connect** en la parte superior del proyecto y copia la cadena del **Session pooler**. No uses la "Direct connection", que en el plan gratuito solo funciona con IPv6, ni la "Transaction pooler" (puerto 6543). La cadena tiene esta forma:
-
-   ```
-   postgresql://postgres.REFERENCIA:CONTRASEÑA@aws-0-REGION.pooler.supabase.com:5432/postgres
-   ```
-
-4. Pásala al `backend/.env` (o a un `.env.compartida`, ver 5.3):
-
-   ```
-   DB_NAME=postgres
-   DB_USER=postgres.REFERENCIA
-   DB_PASSWORD=CONTRASEÑA
-   DB_HOST=aws-0-REGION.pooler.supabase.com
-   DB_PORT=5432
-   DB_SSLMODE=require
-   ```
-
-5. Con esas variables cargadas, crea las tablas y la cuenta administradora:
-
-   ```bash
-   .venv/bin/python manage.py migrate
-   .venv/bin/python manage.py crear_admin_inicial
-   ```
-
-6. Comparte `DB_NAME`, `DB_USER`, `DB_PASSWORD` y `DB_HOST` con el equipo **por un canal privado**.
-
-### 5.3 Conectarse (el resto del equipo)
+### Conectarse (el resto del equipo)
 
 Pon en tu `backend/.env` (o en `.env.compartida`) los datos que te pasaron, con `DB_PORT=5432` y `DB_SSLMODE=require`, carga el `.env` y ejecuta `runserver` como siempre. **No ejecutes `migrate` contra la base compartida**: lo hace solo quien la administra.
 
@@ -286,7 +252,7 @@ Get-Content .env.compartida | Where-Object { $_ -match '^\s*[^#\s][^=]*=' } | Fo
 
 En PowerShell las variables se quedan cargadas en la terminal. Al cambiar de archivo, abre una terminal nueva para que no se mezclen.
 
-### 5.4 Reglas de uso
+### Reglas de uso
 
 - **Las credenciales nunca van al repositorio.** El `.gitignore` excluye `.env` y `.env.*` (salvo `.env.example`). Si se filtran, cambia la contraseña en el panel del proveedor y avisa al equipo.
 - **Solo quien administra la base ejecuta `migrate`**, cada vez que llegue al repositorio una migración nueva (archivos en `*/migrations/`). Si dos personas migran a la vez con código distinto, la base puede quedar inconsistente.

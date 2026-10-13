@@ -155,7 +155,11 @@ export function FormularioEvento({ evento, onCerrar }: { evento?: Evento; onCerr
         <div className="flex flex-col gap-4">
           <CampoTexto etiqueta="Nombre del evento" placeholder="Ej. Taller de cerámica" {...register('nombre')} />
           <CampoTexto etiqueta="Descripción" multilinea placeholder="Describe el evento y qué incluye" {...register('descripcion')} />
-          <CampoSeleccion etiqueta="Categoría" required {...register('categoria')}>
+          <CampoSeleccion
+            etiqueta="Categoría"
+            required
+            {...register('categoria')}
+          >
             <option value="" disabled>
               Selecciona una categoría
             </option>

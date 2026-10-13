@@ -39,8 +39,8 @@ export function MisEventosPage({ historial = false }: { historial?: boolean }) {
           </p>
         </div>
         {/* «Crear evento» en ambas pestañas y anchos (capturas de docs/referencias; corrige I-05) */}
-        <Boton onClick={crear} className="h-13 w-full md:h-12 md:w-[180px]">
-          Crear evento
+        <Boton onClick={crear} className="h-19 w-full text-lg md:h-12 md:w-[180px]">
+          Crear Evento
         </Boton>
       </header>
 

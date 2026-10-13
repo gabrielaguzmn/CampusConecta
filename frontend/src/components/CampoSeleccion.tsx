@@ -16,7 +16,7 @@ export function CampoSeleccion({ etiqueta, error, className = '', children, ...p
           id={id}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? `${id}-error` : undefined}
-          className={`h-12 w-full appearance-none rounded-control border bg-superficie pr-10 pl-4 text-sm text-texto focus:border-accion focus:ring-1 focus:ring-accion focus:outline-none focus:ring-inset invalid:text-metadatos ${error ? 'border-accion' : 'border-borde'}`}
+          className={`h-11 w-full appearance-none rounded-control border bg-superficie px-3 text-sm text-texto focus:border-accion ${error ? 'border-accion' : 'border-borde'}`}
           {...props}
         >
           {children}
