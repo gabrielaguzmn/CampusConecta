@@ -22,10 +22,10 @@ export function CampoUbicacionMapa({ ubicaciones, value, onChange, colorCategori
   }, {})
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor="ubicacion" className="text-[13px] font-semibold">Ubicación *</label>
+      <label htmlFor="ubicacion" className="text-sm font-semibold text-texto">Ubicación *</label>
       <div className="flex gap-2">
         <select id="ubicacion" value={value ?? ''} onChange={(e) => onChange(Number(e.target.value))} aria-invalid={!!error}
-          className="h-11 min-w-0 flex-1 rounded-control border border-borde bg-superficie px-3 text-sm">
+          className="h-11 min-w-0 flex-1 rounded-control border border-borde bg-superficie px-3 text-sm ">
           <option value="" disabled>Selecciona una ubicación</option>
           {Object.entries(porZona).map(([grupo, items]) => (
             <optgroup key={grupo} label={grupo}>

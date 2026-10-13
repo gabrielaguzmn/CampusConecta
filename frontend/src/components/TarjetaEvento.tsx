@@ -57,17 +57,16 @@ export function TarjetaEvento({ evento }: { evento: Evento }) {
             {lugar}
           </span>
           {unaFecha ? (
-            <span className="hidden items-center gap-1.5 md:flex">
+            <span className="hidden items-center gap-1.5 text-primario md:flex">
               <Clock size={16} aria-hidden className="text-metadatos" />
               {formatoHorario(unaFecha.inicio, unaFecha.fin)}
             </span>
           ) : (
-            // TODO(PENDIENTE G-45: qué horario muestra una tarjeta con varias sesiones)
             null
           )}
         </div>
         {unaFecha ? (
-          <p className="text-[13px] text-texto-secundario">{formatoDiaYHorario(unaFecha.inicio, unaFecha.fin)}</p>
+          <p className="text-[13px] text-primario">{formatoDiaYHorario(unaFecha.inicio, unaFecha.fin)}</p>
         ) : (
           <Sesiones fechas={evento.fechas} />
         )}
