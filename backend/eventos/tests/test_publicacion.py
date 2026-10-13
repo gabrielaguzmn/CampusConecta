@@ -470,3 +470,37 @@ class EliminacionTests(BaseEventosTest):
             evento = self.crear_evento((24, 26), (48, 50), oculto=True)
             respuesta = self.client.delete(f"/api/eventos/{evento.pk}/")
             self.assertEqual((respuesta.status_code, respuesta.json()["code"]), (409, "contenido_oculto"))
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class ImagenQuitarTests(BaseEventosTest):
+    """PUBLICATION-1 · criterio 4 (RF-010): la imagen es opcional, así que también se puede quitar."""
+
+    def subir(self, evento):
+        url = f"/api/eventos/{evento.pk}/imagen/"
+        self.client.put(url, {"imagen": imagen()}, format="multipart")
+        evento.refresh_from_db()
+        return url, evento.imagen.path
+
+    def test_PUBLICATION_1_c4_quitar_la_imagen_borra_el_archivo(self):
+        evento = self.crear_evento()
+        url, ruta = self.subir(evento)
+        respuesta = self.client.delete(url)
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertIsNone(respuesta.json()["imagen"])
+        self.assertFalse(os.path.exists(ruta))
+
+    def test_PUBLICATION_1_c4_quitar_la_imagen_solo_el_creador_y_no_en_historial(self):
+        evento = self.crear_evento()
+        url, _ = self.subir(evento)
+        self.como(self.otro)
+        self.assertEqual(self.client.delete(url).status_code, 403)
+        terminado = self.crear_evento((-5, -3), creador=self.creador)
+        self.como(self.creador)
+        self.assertEqual(self.client.delete(f"/api/eventos/{terminado.pk}/imagen/").status_code, 409)
+
+    def test_PUBLICATION_8_c2_eliminar_el_evento_borra_su_imagen(self):
+        evento = self.crear_evento((24, 26), (48, 50))
+        _, ruta = self.subir(evento)
+        self.assertEqual(self.client.delete(f"/api/eventos/{evento.pk}/").status_code, 204)
+        self.assertFalse(os.path.exists(ruta))

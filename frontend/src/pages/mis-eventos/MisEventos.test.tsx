@@ -87,7 +87,7 @@ describe('PUBLICATION-1: creación y publicación de eventos', () => {
     await en.findByRole('option', { name: 'Categoría de prueba' })
     await userEvent.selectOptions(en.getByLabelText('Categoría'), '2')
     await en.findByRole('option', { name: 'Ubicación de prueba' })
-    await userEvent.selectOptions(en.getByLabelText('Ubicación'), '7')
+    await userEvent.selectOptions(en.getByLabelText('Ubicación *'), '7')
     await userEvent.type(en.getByLabelText('Responsable'), 'Responsable nuevo')
     await userEvent.type(en.getAllByLabelText('Inicio')[0], '2026-11-02T16:00')
     await userEvent.type(en.getAllByLabelText('Fin')[0], '2026-11-02T18:00')
@@ -322,15 +322,15 @@ describe('PUBLICATION-8: eliminación del evento (decisión G-10)', () => {
     expect(within(dialogo).queryByRole('button', { name: /^Eliminar/ })).not.toBeInTheDocument()
   })
 
-  it('criterio 3: si la API lo impide (fechas no próximas, G-24) se muestra su mensaje', async () => {
-    iniciar([multifecha], {
-      'DELETE /api/eventos/20/': () => json({ detail: 'Solo se puede eliminar un evento cuyas fechas son todas próximas.', code: 'pendiente_g24' }, 409),
+  it('si la API lo impide (p. ej. contenido oculto por moderación) se muestra su mensaje', async () => {
+    iniciar([sencillo], {
+      'DELETE /api/eventos/21/': () => json({ detail: 'El contenido está oculto por moderación.', code: 'contenido_oculto' }, 409),
     })
     renderizarApp('/mis-eventos')
-    const dialogo = await abrirGestion('Evento multifecha')
+    const dialogo = await abrirGestion('Evento sencillo')
     await userEvent.click(within(dialogo).getByRole('button', { name: 'Eliminar' }))
     await userEvent.click(within(dialogo).getByRole('button', { name: 'Eliminar evento' }))
-    expect(await within(dialogo).findByRole('alert')).toHaveTextContent('Solo se puede eliminar un evento cuyas fechas son todas próximas.')
+    expect(await within(dialogo).findByRole('alert')).toHaveTextContent('El contenido está oculto por moderación.')
   })
 })
 

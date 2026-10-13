@@ -133,6 +133,19 @@ describe('ACCESS-1 · criterio 3: recuperación de contraseña', () => {
     expect(await peticiones[0].json()).toEqual({ email: 'persona@cualquierdominio.test' })
   })
 
+  it('si la API rechaza el correo, muestra el error en el campo', async () => {
+    simularApi({
+      'POST /api/auth/recuperacion/': () =>
+        json({ email: ['Introduzca una dirección de correo electrónico válida.'], codes: { email: ['invalid'] } }, 400),
+    })
+    renderizarApp('/recuperar')
+    await userEvent.type(await screen.findByLabelText('Correo electrónico'), 'persona@cualquierdominio.test')
+    await userEvent.click(screen.getByRole('button', { name: 'Enviar enlace de recuperación' }))
+    expect(await screen.findByLabelText('Correo electrónico')).toHaveAccessibleDescription(
+      'Introduzca una dirección de correo electrónico válida.',
+    )
+  })
+
   it('enlaza de vuelta a Login', async () => {
     simularApi({})
     renderizarApp('/recuperar')

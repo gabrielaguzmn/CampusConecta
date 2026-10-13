@@ -6,7 +6,6 @@ import type { components } from '../../api/schema'
 import { AccionModal } from '../../components/AccionModal'
 import { CampoTexto } from '../../components/CampoTexto'
 import { Modal } from '../../components/Modal'
-import { Sesiones } from '../../components/Sesiones'
 import { formatoDiaYHorario, isoALocal, localAIso } from '../../lib/formato'
 
 type Evento = components['schemas']['Evento']
@@ -15,7 +14,8 @@ type Paso = 'menu' | 'cancelar' | 'cancelar-todas' | 'finalizar' | 'extender' | 
 
 // Figma 4:29200 / 4:29792 · «Gestionar evento»: Editar, Cancelar y Eliminar.
 // Decisiones 2026-10-07: «Cancelar» cancela una fecha elegida (G-10); «Eliminar» borra el evento completo (RF-017).
-// una fecha próxima (PUBLICATION-8). Si el evento tiene fechas que no son próximas, «Eliminar» solo retira las próximas.
+// Decisión 2026-10-12 (G-24, RF-017): «Eliminar» borra el evento completo si todas sus sesiones son próximas; si tiene
+// sesiones en vivo, finalizadas o canceladas, solo retira las próximas y el evento sigue con las demás.
 // Las demás acciones (RF-014, RF-015, RF-016, añadir fecha de G-30) no tienen diseño y se añaden con el mismo estilo (G-12).
 function ElegirFecha({ fechas, elegida, onElegir }: { fechas: Fecha[]; elegida?: number; onElegir: (id: number) => void }) {
   return (
@@ -112,7 +112,7 @@ export function GestionarEvento({ evento, onEditar, onCerrar }: { evento: Evento
               Eliminar sesión
             </AccionModal>
           )}
-          {/* PUBLICATION-8 · criterio 2: el evento y sus fechas próximas; solo si hay alguna próxima (criterio 3) */}
+          {/* PUBLICATION-8 · criterio 2: el evento o sus sesiones próximas; sin próximas no hay nada que eliminar */}
           {proximas.length > 0 && (
             <AccionModal variante="destructiva" icono={<Trash2 size={20} />} onClick={() => ir('eliminar')}>
               Eliminar
@@ -208,8 +208,10 @@ export function GestionarEvento({ evento, onEditar, onCerrar }: { evento: Evento
         ),
       },
       eliminar: {
-        texto: `Se eliminará «${evento.nombre}» con todas sus sesiones. Esta acción no se puede deshacer.`,
-        boton: 'Eliminar evento',
+        texto: soloProximas
+          ? `Se eliminará «${evento.nombre}» con todas sus sesiones. Esta acción no se puede deshacer.`
+          : `Se eliminarán las sesiones próximas de «${evento.nombre}». Las sesiones en vivo, finalizadas o canceladas se conservan. Esta acción no se puede deshacer.`,
+        boton: soloProximas ? 'Eliminar evento' : 'Eliminar sesiones próximas',
         variante: 'destructiva',
         listo: true,
         hacer: () => api.DELETE('/api/eventos/{id}/', delEvento),

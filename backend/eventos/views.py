@@ -190,14 +190,14 @@ class EventoView(APIView):
     @extend_schema(responses={204: None})
     @transaction.atomic
     def delete(self, request, pk):
-        """PUBLICATION-8 · criterio 2: eliminar el evento completo."""
+        """PUBLICATION-8 · criterio 2 (RF-017: "el evento completo junto con todas sus fechas próximas").
+        Decisión 2026-10-12 (G-24): si todas sus fechas son próximas, se elimina el evento completo; si además tiene
+        fechas en vivo, finalizadas o canceladas, solo se retiran las próximas y el evento sigue con las demás."""
         evento = evento_propio(request, pk)
         rechazar_si_oculto(evento)
-        if any(fecha.estado() != PROXIMA for fecha in evento.fechas.all()):
-            raise Conflicto("Solo se puede eliminar un evento cuyas fechas son todas próximas.", code="pendiente_g24")
+        if not any(fecha.estado() == PROXIMA for fecha in evento.fechas.all()):
+            raise Conflicto("El evento no tiene fechas próximas que eliminar.", code="sin_fechas_proximas")
         servicios.eliminar_fechas_proximas(evento)
-        #borrar_o_conflicto(evento)
-        evento.imagen.delete(save=False)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -321,8 +321,8 @@ class FechaView(APIView):
         rechazar_si_oculto(fecha.evento, fecha)
         exigir_estado(fecha, PROXIMA)
         if not fecha.evento.fechas.exclude(pk=fecha.pk).exists():
-            # TODO(PENDIENTE G-24: eliminar la única fecha de un evento)
-            raise Conflicto("Es la única fecha del evento; elimina el evento completo.", code="pendiente_g24")
+            # Decisión 2026-10-12: la única fecha no se elimina sola; se usa "Eliminar evento".
+            raise Conflicto("Es la única fecha del evento; elimina el evento completo.", code="unica_fecha")
         #borrar_o_conflicto(fecha)
         servicios.eliminar_fecha(fecha)
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -148,3 +148,23 @@ class SuspensionAccesoTests(APITestCase):
         respuesta = self.client.post("/api/auth/token/", {"email": "suspendida@example.com", "password": "mala-clave-000"})
         self.assertEqual(respuesta.status_code, 401)
         self.assertEqual(respuesta.json()["code"], "no_active_account")
+
+
+class CasosLimiteAccesoTests(APITestCase):
+    """ACCESS-1 · criterio 3 y ADMIN-4 · criterio 2: casos que no cubrían las demás pruebas."""
+
+    def test_ACCESS_1_c3_enlace_con_usuario_invalido_o_inexistente(self):
+        for uid in ["no-es-base64", "OTk5OTk"]:  # "OTk5OTk" = "99999", un id que no existe
+            respuesta = self.client.post(
+                "/api/auth/recuperacion/confirmar/", {"uid": uid, "token": "x", "password": "nueva-clave-456"}
+            )
+            self.assertEqual(respuesta.status_code, 400, uid)
+            self.assertEqual(respuesta.json()["codes"]["non_field_errors"], ["enlace_invalido"])
+
+    def test_ADMIN_4_c2_no_se_asigna_un_rol_que_ya_se_tiene(self):
+        admin = Usuario.objects.create_user("admin@example.com", CLAVE, nombre="Admin", es_administrador=True)
+        otro_admin = Usuario.objects.create_user("otro@example.com", CLAVE, nombre="Otro", es_administrador=True)
+        normal = Usuario.objects.create_user("normal@example.com", CLAVE, nombre="Normal")
+        self.client.force_authenticate(admin)
+        self.assertEqual(self.client.post(f"/api/admin/usuarios/{otro_admin.pk}/asignar-admin/").status_code, 409)
+        self.assertEqual(self.client.post(f"/api/admin/usuarios/{normal.pk}/revocar-admin/").status_code, 409)

@@ -780,9 +780,9 @@ paths:
     delete:
       operationId: eventos_destroy
       description: |-
-        PUBLICATION-8 · criterio 2: eliminar el evento y sus fechas próximas. Si el evento solo tiene fechas
-        próximas, se elimina completo; si tiene también fechas en vivo, finalizadas o canceladas, estas se conservan
-        (las finalizadas siguen consultables en el historial) y solo se retiran las próximas.
+        PUBLICATION-8 · criterio 2 (RF-017: "el evento completo junto con todas sus fechas próximas").
+        Decisión 2026-10-12 (G-24): si todas sus fechas son próximas, se elimina el evento completo; si además tiene
+        fechas en vivo, finalizadas o canceladas, solo se retiran las próximas y el evento sigue con las demás.
       parameters:
       - in: path
         name: id
@@ -1054,8 +1054,9 @@ paths:
   /api/mapa/:
     get:
       operationId: mapa_list
-      description: 'INTERACTIVITY-1, INTERACTIVITY-2 · criterio 1: eventos vigentes
-        agrupados por ubicación del catálogo.'
+      description: |-
+        INTERACTIVITY-1, INTERACTIVITY-2 · criterio 1: eventos vigentes agrupados por ubicación del catálogo.
+        Cada evento aparece en la ubicación del evento, solo con sus fechas próximas o en vivo.
       tags:
       - mapa
       security:
@@ -1650,8 +1651,8 @@ components:
           type: string
     PatchedFechaEdicionRequest:
       type: object
-      description: 'PUBLICATION-3, G-30: de una fecha solo se editan el día, la hora
-        de inicio y el fin.'
+      description: 'PUBLICATION-3, G-30: de una fecha próxima se editan el día, el
+        inicio y el fin.'
       properties:
         inicio:
           type: string
@@ -1800,6 +1801,18 @@ components:
         * `suspender` - Suspender
         * `reactivar` - Reactivar
         * `eliminar` - Eliminar
+    TipoEnum:
+      enum:
+      - edificio
+      - cancha
+      - plazoleta
+      - otro
+      type: string
+      description: |-
+        * `edificio` - Edificio
+        * `cancha` - Cancha
+        * `plazoleta` - Plazoleta
+        * `otro` - Otro
     TokenRefresh:
       type: object
       properties:
@@ -1850,6 +1863,15 @@ components:
         nombre:
           type: string
           maxLength: 200
+        tipo:
+          $ref: '#/components/schemas/TipoEnum'
+        zona:
+          type: string
+          maxLength: 1
+        codigo:
+          type: string
+          nullable: true
+          maxLength: 60
       required:
       - id
       - nombre

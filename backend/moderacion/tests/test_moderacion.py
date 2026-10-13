@@ -223,12 +223,17 @@ class ModeracionContenidoTests(BaseModeracionTest):
         editar = self.client.patch(f"/api/eventos/{self.evento.pk}/", {"nombre": "Otro"}, format="json")
         self.assertEqual(editar.status_code, 200)
 
-    def test_G24_contenido_con_registro_no_se_elimina(self):
+    def test_G24_contenido_con_registro_se_elimina_y_el_registro_sigue_apuntando_a_el(self):
+        # G-24: borrado lógico. Lo que ya figura en el registro de moderación se puede eliminar; la fila se conserva.
         self.post_admin(f"/api/admin/eventos/{self.evento.pk}/ocultar/", {"norma": Norma.RESPETO})
         self.post_admin(f"/api/admin/eventos/{self.evento.pk}/restaurar/")
         self.como(self.creador)
-        respuesta = self.client.delete(f"/api/eventos/{self.evento.pk}/")
-        self.assertEqual((respuesta.status_code, respuesta.json()["code"]), (409, "pendiente_g24"))
+        self.assertEqual(self.client.delete(f"/api/eventos/{self.evento.pk}/").status_code, 204)
+        self.assertFalse(Evento.objects.filter(pk=self.evento.pk).exists())
+        self.assertTrue(Evento.con_eliminados.filter(pk=self.evento.pk, eliminado=True).exists())
+        self.assertEqual(RegistroModeracion.objects.filter(evento_id=self.evento.pk).count(), 2)
+        self.como(self.admin)
+        self.assertEqual(len(self.client.get("/api/admin/registro/").json()), 2)
 
 
 class SuspensionTests(BaseModeracionTest):
@@ -592,3 +597,54 @@ class TransicionesDeCasosTests(BaseModeracionTest):
             ).status_code,
             200,
         )
+
+
+class CasosLimiteModeracionTests(BaseModeracionTest):
+    """ADMIN-1 y ADMIN-2: casos que no cubrían las demás pruebas."""
+
+    def test_ADMIN_1_c2_restaurar_una_fecha_la_vuelve_a_mostrar(self):
+        primera, segunda = self.evento.fechas.all()
+        self.post_admin(f"/api/admin/fechas/{primera.pk}/ocultar/", {"norma": Norma.PRIVACIDAD})
+        respuesta = self.post_admin(f"/api/admin/fechas/{primera.pk}/restaurar/")
+        self.assertEqual(respuesta.status_code, 200)
+        primera.refresh_from_db()
+        self.assertEqual((primera.oculta, primera.norma_ocultamiento, primera.explicacion_ocultamiento), (False, None, ""))
+        self.como(self.otro)
+        fechas = self.client.get(f"/api/eventos/{self.evento.pk}/").json()["fechas"]
+        self.assertEqual([f["id"] for f in fechas], [primera.pk, segunda.pk])
+        registro = RegistroModeracion.objects.order_by("pk").last()
+        self.assertEqual((registro.tipo_accion, registro.fecha_id), ("restaurar", primera.pk))
+
+    def test_ADMIN_1_no_se_oculta_lo_que_ya_esta_oculto_ni_se_restaura_lo_visible(self):
+        fecha = self.evento.fechas.first()
+        self.assertEqual(self.post_admin(f"/api/admin/eventos/{self.evento.pk}/restaurar/").status_code, 409)
+        self.assertEqual(self.post_admin(f"/api/admin/fechas/{fecha.pk}/restaurar/").status_code, 409)
+        self.post_admin(f"/api/admin/eventos/{self.evento.pk}/ocultar/", {"norma": Norma.RESPETO})
+        self.post_admin(f"/api/admin/fechas/{fecha.pk}/ocultar/", {"norma": Norma.RESPETO})
+        self.assertEqual(self.post_admin(f"/api/admin/eventos/{self.evento.pk}/ocultar/", {"norma": 1}).status_code, 409)
+        self.assertEqual(self.post_admin(f"/api/admin/fechas/{fecha.pk}/ocultar/", {"norma": 1}).status_code, 409)
+
+    def test_G23_moderar_una_fecha_cancelada_queda_pendiente(self):
+        fecha = self.evento.fechas.first()
+        fecha.cancelada = True
+        fecha.save()
+        respuesta = self.post_admin(f"/api/admin/fechas/{fecha.pk}/ocultar/", {"norma": Norma.RESPETO})
+        self.assertEqual((respuesta.status_code, respuesta.json()["code"]), (409, "pendiente_g23"))
+
+    def test_ADMIN_1_filtro_oculto_invalido(self):
+        self.como(self.admin)
+        respuesta = self.client.get("/api/admin/eventos/?oculto=quizas")
+        self.assertEqual(respuesta.status_code, 400)
+        self.assertIn("oculto", respuesta.json())
+
+    def test_ADMIN_2_detalle_de_un_caso(self):
+        self.como(self.otro)
+        self.client.post(f"/api/eventos/{self.evento.pk}/reportes/", {"causa": Norma.SIN_SPAM, "detalles": "Repetido"}, format="json")
+        caso = CasoReporte.objects.get()
+        self.como(self.admin)
+        datos = self.client.get(f"/api/admin/casos/{caso.pk}/").json()
+        self.assertEqual((datos["id"], datos["estado"], datos["evento"]["id"]), (caso.pk, "pendiente", self.evento.pk))
+        self.assertEqual(datos["reportes"][0]["detalles"], "Repetido")
+        self.assertEqual(self.client.get("/api/admin/casos/99999/").status_code, 404)
+        self.como(self.creador)
+        self.assertEqual(self.client.get(f"/api/admin/casos/{caso.pk}/").status_code, 403)
