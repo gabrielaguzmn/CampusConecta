@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { CalendarPlus, CalendarX, X } from 'lucide-react'
 import { api, todosLosMensajes } from '../../api/client'
+import { AsistenteVoz, type CampoVoz } from '../../components/AsistenteVoz'
 import { useCategorias, useUbicaciones } from '../../api/queries'
 import type { components } from '../../api/schema'
 import { AccionModal } from '../../components/AccionModal'
@@ -22,16 +23,20 @@ type Evento = components['schemas']['Evento']
 // opcional (RF-010); se añaden «Responsable» y los opcionales; cada fecha pide inicio y fin (G-30, G-31);
 // «Detalles» no se incluye porque sus dos ejemplos ya los cubren las fechas y la descripción.
 const fecha = z
-  .object({ id: z.number().optional(), inicio: z.string().min(1), fin: z.string().min(1) })
+  .object({
+    id: z.number().optional(),
+    inicio: z.string().min(1, 'Indica la fecha y hora de inicio.'),
+    fin: z.string().min(1, 'Indica la fecha y hora de finalización.'),
+  })
   .refine((f) => f.fin > f.inicio, { path: ['fin'], message: 'El fin debe ser posterior al inicio.' })
 
 const esquemaBase = z.object({
-  nombre: z.string().trim().min(1),
-  descripcion: z.string().trim().min(1),
-  categoria: z.string().min(1),
-  ubicacion: z.string().min(1),
+  nombre: z.string().trim().min(1, 'Escribe el nombre del evento.'),
+  descripcion: z.string(),
+  categoria: z.string().min(1, 'Elige una categoría.'),
+  ubicacion: z.string().min(1, 'Elige una ubicación.'),
   detalle_ubicacion: z.string(),
-  responsable: z.string().trim().min(1),
+  responsable: z.string().trim().min(1, 'Escribe quién es responsable del evento.'),
   fechas: z.array(fecha),
   cupo: z.string().regex(/^([1-9]\d*)?$/, 'El cupo debe ser un número entero positivo.'),
   contacto: z.string(),
@@ -39,7 +44,8 @@ const esquemaBase = z.object({
 })
 // Al crear hace falta al menos una fecha. Al editar puede no haber ninguna próxima (todas en vivo, finalizadas o
 // canceladas) y aun así se pueden corregir los datos del evento (PUBLICATION-3).
-const crearEsquema = (editando: boolean) => (editando ? esquemaBase : esquemaBase.extend({ fechas: z.array(fecha).min(1) }))
+const crearEsquema = (editando: boolean) =>
+  editando ? esquemaBase : esquemaBase.extend({ fechas: z.array(fecha).min(1, 'Agrega al menos una fecha.') })
 type Datos = z.infer<typeof esquemaBase>
 
 const TIPOS_IMAGEN = ['image/jpeg', 'image/png']
@@ -71,13 +77,26 @@ export function FormularioEvento({ evento, onCerrar }: { evento?: Evento; onCerr
   const [imagen, setImagen] = useState<File>()
   const [errorImagen, setErrorImagen] = useState<string>()
   const [errores, setErrores] = useState<string[]>([])
-  const { register, control, watch, handleSubmit, formState } = useForm<Datos>({
+  const [camposVoz, setCamposVoz] = useState<string[]>([])
+  const { register, control, watch, setValue, trigger, handleSubmit, formState } = useForm<Datos>({
     resolver: zodResolver(useMemo(() => crearEsquema(editando), [editando])),
     mode: 'onChange',
     defaultValues: valoresIniciales(evento),
   })
   const fechas = useFieldArray({ control, name: 'fechas' })
   const { errors } = formState
+  function registrar(campo: keyof Datos) {
+    return register(campo, { onChange: () => setCamposVoz((actuales) => actuales.filter((actual) => actual !== campo)) })
+  }
+  function agregarFechaPorVoz(valor: { inicio: string; fin: string }) {
+    const indiceVacio = watch('fechas').findIndex((fecha) => !fecha.inicio && !fecha.fin)
+    if (indiceVacio >= 0) {
+      setValue(`fechas.${indiceVacio}.inicio`, valor.inicio, { shouldValidate: true, shouldDirty: true })
+      setValue(`fechas.${indiceVacio}.fin`, valor.fin, { shouldValidate: true, shouldDirty: true })
+      return
+    }
+    fechas.append(valor)
+  }
 
   function elegirImagen(archivo?: File) {
     setErrorImagen(undefined)
@@ -153,12 +172,24 @@ export function FormularioEvento({ evento, onCerrar }: { evento?: Evento; onCerr
     <Modal titulo={editando ? 'Editar evento' : 'Crear evento'} onCerrar={onCerrar} className="p-6 md:p-8">
       <form onSubmit={handleSubmit(enviar)} noValidate className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
-          <CampoTexto etiqueta="Nombre del evento" placeholder="Ej. Taller de cerámica" {...register('nombre')} />
-          <CampoTexto etiqueta="Descripción" multilinea placeholder="Describe el evento y qué incluye" {...register('descripcion')} />
+          {!editando && (
+            <AsistenteVoz
+              categorias={(categorias.data ?? []).map((item) => ({ id: item.id, nombre: item.nombre }))}
+              ubicaciones={(ubicaciones.data ?? []).map((item) => ({ id: item.id, nombre: item.nombre }))}
+              setValue={(campo, valor, opciones) => setValue(campo as CampoVoz & keyof Datos, valor, opciones)}
+              validar={() => trigger()}
+              onCreateRequested={() => void handleSubmit(enviar)()}
+              appendFecha={agregarFechaPorVoz}
+              onFieldsVoice={(campos) => setCamposVoz((actuales) => [...new Set([...actuales, ...campos])])}
+            />
+          )}
+          <CampoTexto etiqueta="Nombre del evento" placeholder="Ej. Taller de cerámica" error={errors.nombre?.message} className={camposVoz.includes('nombre') ? 'ring-2 ring-primario rounded-control' : ''} {...registrar('nombre')} />
+          <CampoTexto etiqueta="Descripción" multilinea placeholder="Describe el evento y qué incluye" error={errors.descripcion?.message} className={camposVoz.includes('descripcion') ? 'ring-2 ring-primario rounded-control' : ''} {...registrar('descripcion')} />
           <CampoSeleccion
             etiqueta="Categoría"
+            error={errors.categoria?.message}
             required
-            {...register('categoria')}
+            {...registrar('categoria')}
           >
             <option value="" disabled>
               Selecciona una categoría
@@ -184,8 +215,8 @@ export function FormularioEvento({ evento, onCerrar }: { evento?: Evento; onCerr
               />
             )}
           />
-          <CampoTexto etiqueta="Ubicación exacta (opcional)" placeholder="Ej. Sala de arte · Edificio C" {...register('detalle_ubicacion')} />
-          <CampoTexto etiqueta="Responsable" placeholder="Persona o grupo que organiza" {...register('responsable')} />
+          <CampoTexto etiqueta="Ubicación exacta (opcional)" placeholder="Ej. Sala de arte · Edificio C" className={camposVoz.includes('detalle_ubicacion') ? 'ring-2 ring-primario rounded-control' : ''} {...registrar('detalle_ubicacion')} />
+          <CampoTexto etiqueta="Responsable" placeholder="Persona o grupo que organiza" error={errors.responsable?.message} className={camposVoz.includes('responsable') ? 'ring-2 ring-primario rounded-control' : ''} {...registrar('responsable')} />
 
           <fieldset className="flex flex-col gap-3">
             <legend className="mb-2 text-sm font-semibold">{editando ? 'Sesiones próximas' : 'Fecha o fechas'}</legend>
@@ -202,7 +233,7 @@ export function FormularioEvento({ evento, onCerrar }: { evento?: Evento; onCerr
                   )}
                 </div>
                 <div className="grid gap-3 md:grid-cols-2">
-                  <CampoTexto etiqueta="Inicio" type="datetime-local" {...register(`fechas.${i}.inicio`)} />
+                  <CampoTexto etiqueta="Inicio" type="datetime-local" error={errors.fechas?.[i]?.inicio?.message} {...register(`fechas.${i}.inicio`)} />
                   <CampoTexto etiqueta="Fin" type="datetime-local" error={errors.fechas?.[i]?.fin?.message} {...register(`fechas.${i}.fin`)} />
                 </div>
               </div>
@@ -220,9 +251,9 @@ export function FormularioEvento({ evento, onCerrar }: { evento?: Evento; onCerr
             )}
           </fieldset>
 
-          <CampoTexto etiqueta="Cupo (opcional)" inputMode="numeric" placeholder="Ej. 20" error={errors.cupo?.message} {...register('cupo')} />
-          <CampoTexto etiqueta="Contacto (opcional)" placeholder="Correo, teléfono o red del organizador" {...register('contacto')} />
-          <CampoTexto etiqueta="Enlace (opcional)" type="url" placeholder="https://" error={errors.enlace_externo?.message} {...register('enlace_externo')} />
+          <CampoTexto etiqueta="Cupo (opcional)" inputMode="numeric" placeholder="Ej. 20" error={errors.cupo?.message} className={camposVoz.includes('cupo') ? 'ring-2 ring-primario rounded-control' : ''} {...registrar('cupo')} />
+          <CampoTexto etiqueta="Contacto (opcional)" placeholder="Correo, teléfono o red del organizador" className={camposVoz.includes('contacto') ? 'ring-2 ring-primario rounded-control' : ''} {...registrar('contacto')} />
+          <CampoTexto etiqueta="Enlace (opcional)" type="url" placeholder="https://" error={errors.enlace_externo?.message} className={camposVoz.includes('enlace_externo') ? 'ring-2 ring-primario rounded-control' : ''} {...registrar('enlace_externo')} />
           <CampoTexto
             etiqueta={editando && evento?.imagen ? 'Cambiar imagen (opcional)' : 'Imagen (opcional)'}
             type="file"

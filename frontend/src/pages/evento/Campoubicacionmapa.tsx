@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { MapPin } from 'lucide-react'
+import { CampoSeleccion } from '../../components/CampoSeleccion'
 import { SelectorUbicacionMapa, type UbicacionCatalogo } from './Selectorubicacionmapa'
 
 type Props = {
@@ -22,23 +23,26 @@ export function CampoUbicacionMapa({ ubicaciones, value, onChange, colorCategori
   }, {})
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor="ubicacion" className="text-sm font-semibold text-texto">Ubicación *</label>
-      <div className="flex gap-2">
-        <select id="ubicacion" value={value ?? ''} onChange={(e) => onChange(Number(e.target.value))} aria-invalid={!!error}
-          className="h-11 min-w-0 flex-1 rounded-control border border-borde bg-superficie px-3 text-sm ">
+      <div className="flex items-start gap-2">
+        <CampoSeleccion
+          etiqueta="Ubicación *"
+          value={value ?? ''}
+          onChange={(e) => onChange(Number(e.target.value))}
+          error={error}
+          className="min-w-0 flex-1"
+        >
           <option value="" disabled>Selecciona una ubicación</option>
           {Object.entries(porZona).map(([grupo, items]) => (
             <optgroup key={grupo} label={grupo}>
               {items.map((u) => <option key={u.id} value={u.id}>{u.nombre}</option>)}
             </optgroup>
           ))}
-        </select>
+        </CampoSeleccion>
         <button type="button" onClick={() => setAbierto(true)}
-          className="flex h-11 items-center gap-2 rounded-control border border-borde px-3 text-sm font-semibold text-primario">
+          className="mt-7 flex h-11 shrink-0 items-center gap-2 rounded-control border border-borde px-3 text-sm font-semibold text-primario">
           <MapPin size={16} aria-hidden /> Ver en el mapa
         </button>
       </div>
-      {error && <p role="alert" className="text-[13px] text-primario">{error}</p>}
       {abierto && <SelectorUbicacionMapa ubicaciones={ubicaciones} value={value} onChange={onChange} color={colorCategoria} onCerrar={() => setAbierto(false)} />}
     </div>
   )
