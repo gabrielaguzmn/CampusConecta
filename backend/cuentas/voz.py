@@ -51,4 +51,10 @@ class TokenDeepgramView(APIView):
                 {"detail": "El servicio de voz no entregó credenciales temporales."},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
-        return Response({"access_token": token, "expires_in": datos.get("expires_in", 60)})
+        expires_in = datos.get("expires_in", 30)
+        if not isinstance(expires_in, (int, float)) or isinstance(expires_in, bool) or expires_in <= 0:
+            return Response(
+                {"detail": "El servicio de voz entregó un tiempo de expiración inválido."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        return Response({"access_token": token, "expires_in": min(expires_in, 30)})
