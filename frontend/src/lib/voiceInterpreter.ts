@@ -99,7 +99,15 @@ function valorEtiquetado(texto: string, etiqueta: string) {
   return coincidencia?.[1]?.trim()
 }
 
+function enlaceDicho(texto: string) {
+  const coincidencia = texto.match(
+    /(?:enlace(?:\s+externo)?|link)\s*(?:es|son|:)?\s*(https?:\/\/\S+?)(?=\s*(?:[;·]|$|\.\s+(?:nombre|t[ií]tulo|descripci[oó]n|responsable|organiza|ubicaci[oó]n|categor[ií]a|fecha|cupo|contacto)\b))/i,
+  )
+  return coincidencia?.[1]?.replace(/[.,]$/, '')
+}
+
 function numeroHablado(valor: string) {
+  if (/^\s*-\s*\d/.test(valor)) return undefined
   const coincidencia = valor.match(/\b(\d+|uno|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\b/i)
   if (!coincidencia) return undefined
   const palabras: Record<string, number> = { uno: 1, una: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10 }
@@ -108,7 +116,10 @@ function numeroHablado(valor: string) {
 
 function fechaHablada(texto: string): VoiceCommand['date'] {
   const ahora = new Date()
-  const manana = /\bmanana\b/i.test(sinAcentos(texto))
+  const normalizado = sinAcentos(texto)
+  const manana = [...normalizado.matchAll(/\bmanana\b/g)].some((coincidencia) =>
+    !/\bde\s+la\s*$/.test(normalizado.slice(0, coincidencia.index)),
+  )
   const patronFecha = /\b(?:el\s+)?(\d{1,2})\s+de\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)(?:\s+del?\s+(\d{4}))?/gi
   const fechas = [...texto.matchAll(patronFecha)]
   const dia = fechas[0]
@@ -120,27 +131,34 @@ function fechaHablada(texto: string): VoiceCommand['date'] {
     fecha.setMonth(meses.indexOf(sinAcentos(coincidencia[2])), Number(coincidencia[1]))
     return fecha
   }
-  const inicio = manana ? new Date(ahora.setDate(ahora.getDate() + 1)) : convertirFecha(dia!, ahora)
+  const inicio = manana ? new Date(ahora) : convertirFecha(dia!, ahora)
+  if (manana) inicio.setDate(inicio.getDate() + 1)
   const segundaFecha = fechas[1]
   const textoHorario = texto.slice((dia?.index ?? 0) + (dia?.[0].length ?? 0))
+  const rangoConPeriodo = textoHorario.match(
+    /\bde\s+(una|uno|\d{1,2})(?::(\d{2}))?\s+a\s+(una|uno|\d{1,2})(?::(\d{2}))?\s+de\s+la\s+(mañana|tarde|noche)\b/i,
+  )
   const horasConPeriodo = [...textoHorario.matchAll(/(?:a\s+(?:las?|la)\s+|de\s+)?(una|uno|\d{1,2})(?::(\d{2}))?\s*(?:de\s+la\s+)?(mañana|tarde|noche|am|pm)\b/gi)]
   const horasSinPeriodo = [...textoHorario.matchAll(/a\s+(?:las?|la)\s+(una|uno|\d{1,2})(?::(\d{2}))?\b/gi)]
-  const horas = horasConPeriodo.length
+  const horas = rangoConPeriodo
+    ? [
+        { 1: rangoConPeriodo[1], 2: rangoConPeriodo[2], 3: rangoConPeriodo[5] },
+        { 1: rangoConPeriodo[3], 2: rangoConPeriodo[4], 3: rangoConPeriodo[5] },
+      ]
+    : horasConPeriodo.length
     ? horasConPeriodo.map((hora) => ({ 1: hora[1], 2: hora[2], 3: hora[3] }))
     : horasSinPeriodo.map((hora) => ({ 1: hora[1], 2: hora[2], 3: undefined }))
-  const horasUsadas = horas.length
-    ? horas
-    : [{ 1: '9', 2: undefined, 3: 'am' }, { 1: '11', 2: undefined, 3: 'am' }]
-  const periodoGeneral = texto.match(/de\s+la\s+(mañana|tarde|noche)/i)?.[1]
+  if (!horas.length) return undefined
+  const periodoGeneral = textoHorario.match(/de\s+la\s+(mañana|tarde|noche)/i)?.[1]
   const convertir = (coincidencia: { 1?: string; 2?: string; 3?: string }) => {
     let hora = numeroHablado(coincidencia[1] ?? '') ?? 0
     const minuto = Number(coincidencia[2] ?? 0)
     if (/tarde|noche|pm/i.test(coincidencia[3] ?? periodoGeneral ?? '') && hora < 12) hora += 12
     return { hora, minuto }
   }
-  const comienzo = convertir(horasUsadas[0])
+  const comienzo = convertir(horas[0])
   const indicaFin = /\b(?:hasta|finaliza|finaliza el|termina|terminando)\b/i.test(textoHorario)
-  let fin = horasUsadas[1] && indicaFin ? convertir(horasUsadas[1]) : { hora: comienzo.hora + 2, minuto: comienzo.minuto }
+  let fin = horas[1] && (indicaFin || rangoConPeriodo) ? convertir(horas[1]) : { hora: comienzo.hora + 2, minuto: comienzo.minuto }
   const fechaFin = segundaFecha ? convertirFecha(segundaFecha, inicio) : inicio
   const iso = (valor: Date, hora: number, minuto: number) => {
     const fecha = new Date(valor)
@@ -149,7 +167,10 @@ function fechaHablada(texto: string): VoiceCommand['date'] {
     return `${fecha.getFullYear()}-${pad(fecha.getMonth() + 1)}-${pad(fecha.getDate())}T${pad(fecha.getHours())}:${pad(fecha.getMinutes())}`
   }
   if (fin.hora >= 24) fin = { hora: fin.hora - 24, minuto: fin.minuto }
-  return { inicio: iso(inicio, comienzo.hora, comienzo.minuto), fin: iso(fechaFin, fin.hora, fin.minuto) }
+  const inicioIso = iso(inicio, comienzo.hora, comienzo.minuto)
+  const finIso = iso(fechaFin, fin.hora, fin.minuto)
+  if (new Date(finIso) <= new Date(inicioIso) || new Date(inicioIso) <= ahora) return undefined
+  return { inicio: inicioIso, fin: finIso }
 }
 
 export function interpretarVoz(texto: string, categorias: CatalogItem[], ubicaciones: CatalogItem[]): VoiceCommand {
@@ -171,6 +192,8 @@ export function interpretarVoz(texto: string, categorias: CatalogItem[], ubicaci
     const valor = valorDespuesDe(texto, nombres)
     if (valor) fields[campo] = valor
   }
+  const enlace = enlaceDicho(texto)
+  if (enlace) fields.enlace_externo = enlace
   const nombre = nombreDicho(texto)
   if (nombre) fields.nombre = nombre
   const contacto = contactoDicho(texto)
@@ -246,8 +269,8 @@ export function interpretarVoz(texto: string, categorias: CatalogItem[], ubicaci
   const fechas = texto.split(/\bsegunda\s+fecha\b/i).map(fechaHablada).filter((fecha): fecha is { inicio: string; fin: string } => Boolean(fecha))
   const date = fechas[0]
   if (fechas.length) messages.push(`${fechas.length} fecha${fechas.length === 1 ? '' : 's'} y horario${fechas.length === 1 ? '' : 's'} completados.`)
-  else if (/\bfecha(?:s)?\b/i.test(texto)) {
-    messages.push('No agregué la fecha: indica también la hora de inicio y de fin, y usa una fecha futura.')
+  else if (/\bfecha(?:s)?\b|\bmañana\b|\b\d{1,2}\s+de\s+(?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\b/i.test(texto)) {
+    messages.push('No agregué la fecha: indica también la hora de inicio y de fin, usa una fecha futura y verifica que el fin sea posterior al inicio.')
   }
   if (!Object.keys(fields).length && !categoriaDicha && !ubicacionDicha && !date) messages.push('No entendí un campo. Puedes decir nombre, descripción, responsable, ubicación, cupo, contacto, enlace o fecha.')
   return { fields, categoria, ubicacion, date, dates: fechas, crearEvento, messages }

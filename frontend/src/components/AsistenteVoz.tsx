@@ -9,15 +9,15 @@ type Props = {
   categorias: CatalogItem[]
   ubicaciones: CatalogItem[]
   setValue: (campo: CampoVoz, valor: string, opciones?: { shouldValidate?: boolean; shouldDirty?: boolean }) => void
-  validar: () => Promise<boolean>
-  onCreateRequested: () => void
   appendFecha: (fecha: { inicio: string; fin: string }) => void
   onFieldsVoice: (campos: CampoVoz[]) => void
 }
 
 type Estado = 'desconectado' | 'conectando' | 'escuchando' | 'procesando'
 
-export function AsistenteVoz({ categorias, ubicaciones, setValue, validar, onCreateRequested, appendFecha, onFieldsVoice }: Props) {
+const ejemploInstruccion = 'Ejemplo: “El nombre del evento es Feria de emprendimiento. La categoría es talleres. La ubicación es Edificio B13. El responsable es Juan. La fecha es el 16 de diciembre de 2026 a las 3 de la tarde.”'
+
+export function AsistenteVoz({ categorias, ubicaciones, setValue, appendFecha, onFieldsVoice }: Props) {
   const [estado, setEstado] = useState<Estado>('desconectado')
   const [consentimiento, setConsentimiento] = useState(false)
   const [transcripcionReconocida, setTranscripcionReconocida] = useState('')
@@ -34,12 +34,14 @@ export function AsistenteVoz({ categorias, ubicaciones, setValue, validar, onCre
   const ultimoTurnoProcesado = useRef('')
   const analizadorAudio = useRef<AnalyserNode | undefined>(undefined)
   const marcoAudio = useRef<number | undefined>(undefined)
+  const temporizadorInactividad = useRef<number | undefined>(undefined)
 
   function liberar() {
     procesadorAudio.current?.disconnect()
     fuenteAudio.current?.disconnect()
     void contextoAudio.current?.close()
     if (marcoAudio.current) cancelAnimationFrame(marcoAudio.current)
+    if (temporizadorInactividad.current) window.clearTimeout(temporizadorInactividad.current)
     stream.current?.getTracks().forEach((track) => track.stop())
     socket.current?.close()
     procesadorAudio.current = undefined
@@ -47,11 +49,20 @@ export function AsistenteVoz({ categorias, ubicaciones, setValue, validar, onCre
     contextoAudio.current = undefined
     analizadorAudio.current = undefined
     marcoAudio.current = undefined
+    temporizadorInactividad.current = undefined
     stream.current = undefined
     socket.current = undefined
     ultimoTurnoProcesado.current = ''
     setNivelAudio(0)
     setEstado('desconectado')
+  }
+
+  function programarCierrePorInactividad() {
+    if (temporizadorInactividad.current) window.clearTimeout(temporizadorInactividad.current)
+    temporizadorInactividad.current = window.setTimeout(() => {
+      liberar()
+      setMensajes(['El asistente se pausó tras 60 segundos sin voz. Puedes continuar completando el formulario manualmente.'])
+    }, 60_000)
   }
 
   useEffect(() => liberar, [])
@@ -73,11 +84,6 @@ export function AsistenteVoz({ categorias, ubicaciones, setValue, validar, onCre
       onFieldsVoice(['ubicacion'])
     }
     for (const fecha of resultado.dates ?? (resultado.date ? [resultado.date] : [])) appendFecha(fecha)
-    window.setTimeout(() => {
-      void validar().then((esValido) => {
-        if (resultado.crearEvento && esValido) onCreateRequested()
-      })
-    }, 0)
     setAmbiguedades(resultado.ambiguousUbicaciones ?? [])
     setMensajes(resultado.messages)
     setEstado('escuchando')
@@ -144,6 +150,7 @@ export function AsistenteVoz({ categorias, ubicaciones, setValue, validar, onCre
           }
           setEstado('escuchando')
           setMensajes(['Escuchando. Di una instrucción completa y haz una pausa.'])
+          programarCierrePorInactividad()
         } catch {
           setMensajes(['El navegador no pudo iniciar la captura de audio. Puedes continuar llenando el formulario a mano.'])
           liberar()
@@ -164,6 +171,7 @@ export function AsistenteVoz({ categorias, ubicaciones, setValue, validar, onCre
         const texto = respuesta.channel?.alternatives?.[0]?.transcript?.trim()
         if (!texto) return
         setTranscripcionActual(texto)
+        programarCierrePorInactividad()
         // `is_final` puede llegar varias veces durante un mismo turno. Solo
         // `speech_final` indica que la persona terminó de hablar.
         if (!respuesta.speech_final || ultimoTurnoProcesado.current === texto) return
@@ -172,16 +180,24 @@ export function AsistenteVoz({ categorias, ubicaciones, setValue, validar, onCre
           historialTranscripciones.current = [...historialTranscripciones.current, texto]
           setTranscripcionReconocida(historialTranscripciones.current.join(' '))
         }
+        if (/^(?:ayuda|ay[uú]dame)[.!?]*$/i.test(texto)) {
+          setMensajes([ejemploInstruccion])
+          setEstado('escuchando')
+          return
+        }
         procesar(texto)
       }
       ws.onerror = () => {
-        setMensajes(['Deepgram rechazó la conexión de voz. Verifica el token temporal y el permiso Member de la API key.'])
+        liberar()
+        setMensajes(['No fue posible conectar con el servicio de voz. Puedes continuar completando el formulario manualmente.'])
       }
       ws.onclose = (event) => {
         if (event.code !== 1000 && event.code !== 1005) {
-          setMensajes([`Deepgram cerró la conexión (código ${event.code}). Verifica que la API key tenga rol Member y que el token no haya expirado.`])
+          liberar()
+          setMensajes(['La conexión de voz terminó inesperadamente. Puedes continuar completando el formulario manualmente.'])
+        } else {
+          liberar()
         }
-        setEstado('desconectado')
       }
     } catch {
       liberar()
@@ -212,7 +228,7 @@ export function AsistenteVoz({ categorias, ubicaciones, setValue, validar, onCre
             {nivelAudio > 0.01 ? 'Audio detectado' : 'Esperando voz'}
           </span>
         )}
-        <button type="button" onClick={() => setMensajes(['Ejemplo: “El nombre del evento es Feria de emprendimiento. La categoría es talleres. La ubicación es Edificio B13. El responsable es Juan. La fecha es el 16 de diciembre de 2026 a las 3 de la tarde.”'])} aria-label="Ver ejemplos de instrucciones" className="ml-auto p-2 text-primario">
+        <button type="button" onClick={() => setMensajes([ejemploInstruccion])} aria-label="Ver ejemplos de instrucciones" className="ml-auto p-2 text-primario">
           <HelpCircle size={20} aria-hidden />
         </button>
       </div>

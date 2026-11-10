@@ -78,7 +78,7 @@ export function FormularioEvento({ evento, onCerrar }: { evento?: Evento; onCerr
   const [errorImagen, setErrorImagen] = useState<string>()
   const [errores, setErrores] = useState<string[]>([])
   const [camposVoz, setCamposVoz] = useState<string[]>([])
-  const { register, control, watch, setValue, trigger, handleSubmit, formState } = useForm<Datos>({
+  const { register, control, watch, setValue, handleSubmit, formState } = useForm<Datos>({
     resolver: zodResolver(useMemo(() => crearEsquema(editando), [editando])),
     mode: 'onChange',
     defaultValues: valoresIniciales(evento),
@@ -177,8 +177,6 @@ export function FormularioEvento({ evento, onCerrar }: { evento?: Evento; onCerr
               categorias={(categorias.data ?? []).map((item) => ({ id: item.id, nombre: item.nombre }))}
               ubicaciones={(ubicaciones.data ?? []).map((item) => ({ id: item.id, nombre: item.nombre }))}
               setValue={(campo, valor, opciones) => setValue(campo as CampoVoz & keyof Datos, valor, opciones)}
-              validar={() => trigger()}
-              onCreateRequested={() => void handleSubmit(enviar)()}
               appendFecha={agregarFechaPorVoz}
               onFieldsVoice={(campos) => setCamposVoz((actuales) => [...new Set([...actuales, ...campos])])}
             />

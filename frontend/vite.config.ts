@@ -11,6 +11,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
+    maxWorkers: 1,
     // Node 25 trae un localStorage experimental que tapa al de jsdom.
     execArgv: ['--no-experimental-webstorage'],
   },
