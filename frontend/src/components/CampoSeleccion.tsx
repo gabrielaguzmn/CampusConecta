@@ -23,11 +23,14 @@ export function CampoSeleccion({ etiqueta, error, className = '', children, ...p
         </select>
         <ChevronDown size={16} aria-hidden className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-metadatos" />
       </div>
-      {error && (
-        <p id={`${id}-error`} className="text-[13px] text-primario">
-          {error}
-        </p>
-      )}
+      <p
+        id={`${id}-error`}
+        role="alert"
+        aria-hidden={!error}
+        className={`min-h-[19px] text-[13px] text-primario transition-opacity duration-200 ease-out ${error ? 'opacity-100' : 'opacity-0'}`}
+      >
+        {error || '\u00a0'}
+      </p>
     </div>
   )
 }

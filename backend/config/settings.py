@@ -88,6 +88,7 @@ CORS_ALLOWED_ORIGINS = lista_env("CORS_ALLOWED_ORIGINS")
 
 # G-17: página del frontend que recibe ?uid=...&token=... del enlace de recuperación.
 FRONTEND_URL_RECUPERACION = os.environ.get("FRONTEND_URL_RECUPERACION", "")
+DEEPGRAM_API_KEY = os.environ.get("DEEPGRAM_API_KEY", "")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework_simplejwt.authentication.JWTAuthentication"],
