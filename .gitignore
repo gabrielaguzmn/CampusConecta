@@ -14,3 +14,6 @@ docs/
 
 # Caché de compilación de TypeScript
 *.tsbuildinfo
+
+.~lock.*#
+entrega_taller2/
