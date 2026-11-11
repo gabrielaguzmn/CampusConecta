@@ -6,6 +6,7 @@ export const ASSISTANT_RESPONSES = {
   unknown: 'No entendí el comando. Puedes decir: “abre el mapa”, “muéstrame los eventos” o “abre mis eventos”.',
   navigating: (page: Page) => `Abriendo ${PAGE_LABELS[page]}.`,
   alreadyThere: (page: Page) => `Ya estás en ${PAGE_LABELS[page]}.`,
+  speechStartError: 'No se pudo iniciar el reconocimiento de voz. Inténtalo de nuevo.',
   speechError: (error: SpeechError) => ({
     'not-allowed': 'No se concedió permiso para usar el micrófono. Puedes usar el campo de texto de desarrollo.',
     'no-speech': 'No se detectó voz. Inténtalo de nuevo cuando estés listo.',
