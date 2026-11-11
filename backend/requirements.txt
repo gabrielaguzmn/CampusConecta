@@ -5,3 +5,5 @@ drf-spectacular==0.30.0
 psycopg[binary]==3.3.6
 Pillow==12.3.0
 django-cors-headers==4.9.0
+numpy==2.3.5
+sentence-transformers==5.2.0

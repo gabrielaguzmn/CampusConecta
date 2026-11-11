@@ -265,6 +265,12 @@ Mantén `.env` y `.env.*` fuera del repositorio y usa siempre tu base local para
 
 Los comandos del backend se ejecutan dentro de `backend/` y los del frontend dentro de `frontend/`.
 
+### Respaldo semántico del asistente de voz
+
+El endpoint autenticado `POST /api/voice/semantic-match/` recibe `{"text":"...","page":"FEED","candidate_intents":["OPEN_FEED"]}` y devuelve una decisión `accept`, `suggest` o `none`, junto con el intent, score, margen y metadatos. Es un respaldo local: no usa un LLM ni red en producción. `GET /api/voice/semantic-health/` informa si ya se cargó el modelo.
+
+Instala PyTorch solo CPU antes de las dependencias (consulta el selector oficial de PyTorch para tu plataforma), luego ejecuta `python manage.py download_semantic_model`. El directorio `backend/semantic-model/` se ignora en Git: en despliegue debe montarse como volumen en `VOICE_SEMANTIC_MODEL_PATH`; se usa `HF_HUB_OFFLINE=1` al atender solicitudes. `VOICE_SEMANTIC_WARMUP=1` permite precargar por worker; con Gunicorn, evita `--preload` si no quieres copiar la memoria del modelo a cada worker. Evalúa con `python manage.py evaluate_intents`; la carga real del modelo y la memoria dependen del host.
+
 Con `DJANGO_DEBUG=1`, los correos no se envían: se imprimen en la terminal del backend.
 
 ---

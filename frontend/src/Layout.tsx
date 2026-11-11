@@ -1,6 +1,7 @@
 import { Outlet, useNavigate } from 'react-router'
 import { useSesion } from './auth/AuthProvider'
 import { BarraNavegacion } from './components/BarraNavegacion'
+import { VoiceAssistant } from './voice-assistant/components/VoiceAssistant'
 
 // Figma muestra "LM": iniciales del nombre del usuario (GET /api/auth/yo/).
 export function iniciales(nombre: string): string {
@@ -34,6 +35,7 @@ export function Layout() {
         }
       />
       <Outlet />
+<VoiceAssistant />
     </>
   )
 }

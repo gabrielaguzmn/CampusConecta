@@ -2,7 +2,7 @@ import createClient from 'openapi-fetch'
 import { tokens } from '../auth/tokens'
 import type { paths } from './schema'
 
-const baseUrl = import.meta.env.VITE_API_URL || window.location.origin
+export const baseUrl = import.meta.env.VITE_API_URL || window.location.origin
 
 function conToken(peticion: Request): Request {
   const access = tokens.access()
@@ -35,7 +35,7 @@ function renovar(): Promise<boolean> {
 }
 
 // Ante un 401 se renueva el access una sola vez y se repite la petición; si falla, se cierra la sesión.
-async function fetchConSesion(peticion: Request): Promise<Response> {
+export async function fetchConSesion(peticion: Request): Promise<Response> {
   const copia = peticion.clone()
   const respuesta = await fetch(conToken(peticion))
   if (respuesta.status !== 401 || !tokens.refresh() || peticion.url.includes('/api/auth/token/')) return respuesta
