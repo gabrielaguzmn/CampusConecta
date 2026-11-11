@@ -167,7 +167,7 @@ export function VoiceAssistant({
         providerRef.current?.start();
       } catch {
         cancelConfirmation();
-        setResponse(ASSISTANT_RESPONSES.speechError("start"));
+        setResponse(ASSISTANT_RESPONSES.speechError("not-supported"));
         setState("error");
         return;
       }
