@@ -32,7 +32,7 @@ const fecha = z
 
 const esquemaBase = z.object({
   nombre: z.string().trim().min(1, 'Escribe el nombre del evento.'),
-  descripcion: z.string(),
+  descripcion: z.string().trim().min(1, 'Escribe la descripción del evento.'),
   categoria: z.string().min(1, 'Elige una categoría.'),
   ubicacion: z.string().min(1, 'Elige una ubicación.'),
   detalle_ubicacion: z.string(),
@@ -89,13 +89,24 @@ export function FormularioEvento({ evento, onCerrar }: { evento?: Evento; onCerr
     return register(campo, { onChange: () => setCamposVoz((actuales) => actuales.filter((actual) => actual !== campo)) })
   }
   function agregarFechaPorVoz(valor: { inicio: string; fin: string }) {
-    const indiceVacio = watch('fechas').findIndex((fecha) => !fecha.inicio && !fecha.fin)
+    const actuales = watch('fechas')
+    const indiceVacio = actuales.findIndex((fecha) => !fecha.inicio && !fecha.fin)
     if (indiceVacio >= 0) {
       setValue(`fechas.${indiceVacio}.inicio`, valor.inicio, { shouldValidate: true, shouldDirty: true })
       setValue(`fechas.${indiceVacio}.fin`, valor.fin, { shouldValidate: true, shouldDirty: true })
-      return
+      return indiceVacio
     }
     fechas.append(valor)
+    return actuales.length
+  }
+  // «Corregir» una fecha dictada: si es la única fila, se vacía; si no, se quita.
+  function quitarFechaPorVoz(indice: number) {
+    if (watch('fechas').length <= 1) {
+      setValue(`fechas.${indice}.inicio`, '', { shouldDirty: true })
+      setValue(`fechas.${indice}.fin`, '', { shouldDirty: true })
+      return
+    }
+    fechas.remove(indice)
   }
 
   function elegirImagen(archivo?: File) {
@@ -178,6 +189,9 @@ export function FormularioEvento({ evento, onCerrar }: { evento?: Evento; onCerr
               ubicaciones={(ubicaciones.data ?? []).map((item) => ({ id: item.id, nombre: item.nombre }))}
               setValue={(campo, valor, opciones) => setValue(campo as CampoVoz & keyof Datos, valor, opciones)}
               appendFecha={agregarFechaPorVoz}
+              quitarFecha={quitarFechaPorVoz}
+              valorActual={(campo) => String(watch(campo as keyof Datos) ?? '')}
+              tieneFecha={() => watch('fechas').some((f) => f.inicio && f.fin)}
               onFieldsVoice={(campos) => setCamposVoz((actuales) => [...new Set([...actuales, ...campos])])}
             />
           )}

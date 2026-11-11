@@ -404,6 +404,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/voz/hablar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Convierte en audio las preguntas del asistente guiado con Deepgram Aura-2 (voz colombiana).
+         *
+         *     El navegador no puede llamar a la API REST de Deepgram (CORS) y la clave no debe salir del servidor, así que
+         *     el backend pide el audio y lo reenvía. Solo se envía el texto de la pregunta; no se guarda nada.
+         */
+        post: operations["auth_voz_hablar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/voz/token/": {
         parameters: {
             query?: never;
@@ -413,6 +435,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Emite un token efímero; la clave maestra nunca se entrega al navegador. */
         post: operations["auth_voz_token_create"];
         delete?: never;
         options?: never;
@@ -960,6 +983,9 @@ export interface components {
             /** Format: email */
             email: string;
         };
+        TextoVozRequest: {
+            texto: string;
+        };
         /**
          * @description * `ocultar` - Ocultar
          *     * `restaurar` - Restaurar
@@ -986,6 +1012,10 @@ export interface components {
         TokenRequest: {
             email: string;
             password: string;
+        };
+        TokenVoz: {
+            access_token: string;
+            expires_in: number;
         };
         Tokens: {
             access: string;
@@ -1024,6 +1054,12 @@ export interface components {
             nombre: string;
             /** Format: email */
             email: string;
+        };
+        VozHabladaNoDisponible: {
+            detail: string;
+        };
+        VozNoDisponible: {
+            detail: string;
         };
     };
     responses: never;
@@ -1615,6 +1651,40 @@ export interface operations {
             };
         };
     };
+    auth_voz_hablar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TextoVozRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["TextoVozRequest"];
+                "multipart/form-data": components["schemas"]["TextoVozRequest"];
+            };
+        };
+        responses: {
+            /** @description Audio MP3 de la frase. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "audio/mpeg": string;
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VozHabladaNoDisponible"];
+                };
+            };
+        };
+    };
     auth_voz_token_create: {
         parameters: {
             query?: never;
@@ -1625,18 +1695,19 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: { [name: string]: unknown };
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": {
-                        access_token: string;
-                        expires_in?: number;
-                    };
+                    "application/json": components["schemas"]["TokenVoz"];
                 };
             };
             503: {
-                headers: { [name: string]: unknown };
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": { detail: string };
+                    "application/json": components["schemas"]["VozNoDisponible"];
                 };
             };
         };

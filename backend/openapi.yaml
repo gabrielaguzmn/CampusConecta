@@ -633,6 +633,65 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenRefresh'
           description: ''
+  /api/auth/voz/hablar/:
+    post:
+      operationId: auth_voz_hablar_create
+      description: |-
+        Convierte en audio las preguntas del asistente guiado con Deepgram Aura-2 (voz colombiana).
+
+        El navegador no puede llamar a la API REST de Deepgram (CORS) y la clave no debe salir del servidor, así que
+        el backend pide el audio y lo reenvía. Solo se envía el texto de la pregunta; no se guarda nada.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TextoVozRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TextoVozRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TextoVozRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+          description: Audio MP3 de la frase.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VozHabladaNoDisponible'
+          description: ''
+  /api/auth/voz/token/:
+    post:
+      operationId: auth_voz_token_create
+      description: Emite un token efímero; la clave maestra nunca se entrega al navegador.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenVoz'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VozNoDisponible'
+          description: ''
   /api/auth/yo/:
     get:
       operationId: auth_yo_retrieve
@@ -1787,6 +1846,15 @@ components:
           minLength: 1
       required:
       - email
+    TextoVozRequest:
+      type: object
+      properties:
+        texto:
+          type: string
+          minLength: 1
+          maxLength: 400
+      required:
+      - texto
     TipoAccionEnum:
       enum:
       - ocultar
@@ -1844,6 +1912,16 @@ components:
       required:
       - email
       - password
+    TokenVoz:
+      type: object
+      properties:
+        access_token:
+          type: string
+        expires_in:
+          type: integer
+      required:
+      - access_token
+      - expires_in
     Tokens:
       type: object
       properties:
@@ -1947,6 +2025,20 @@ components:
       - email
       - id
       - nombre
+    VozHabladaNoDisponible:
+      type: object
+      properties:
+        detail:
+          type: string
+      required:
+      - detail
+    VozNoDisponible:
+      type: object
+      properties:
+        detail:
+          type: string
+      required:
+      - detail
   securitySchemes:
     jwtAuth:
       type: http

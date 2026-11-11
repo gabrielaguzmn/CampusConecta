@@ -1,0 +1,53 @@
+Actúa como ingeniero frontend senior (React + TypeScript). Sobre la etapa 1 del asistente de voz de CampusConecta (ya funcionando, con reglas deterministas), añade una capa de SIMILITUD SEMÁNTICA LOCAL como RESPALDO de las reglas, y un arnés de evaluación para comprobar si realmente mejora. Sin LLM generativo ni servicios externos en tiempo de ejecución: solo un modelo de embeddings que corre en el navegador.
+
+Historias de usuario: SEM-01 a SEM-08 y NAV-04.
+
+## 0. Antes de escribir código
+Revisa la estructura creada en la etapa 1 (intentRecognizer, actionRegistry, catalogs, VoiceAssistant) y resume en máximo 10 líneas cómo vas a integrar la capa semántica. No cambies el comportamiento de las reglas: todas las pruebas de la etapa 1 deben seguir en verde.
+
+## 1. Modelo local
+- Modelo: Xenova/paraphrase-multilingual-MiniLM-L12-v2 (ONNX, versión de sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2). Librería: @huggingface/transformers. Usa la variante cuantizada (dtype "q8", archivo onnx/model_quantized.onnx).
+- Debe ser LOCAL: copia los archivos a public/models/Xenova/paraphrase-multilingual-MiniLM-L12-v2/ (config.json, tokenizer.json, tokenizer_config.json, special_tokens_map.json y onnx/model_quantized.onnx). Crea scripts/download-model.mjs que los descargue desde Hugging Face una sola vez, y añade la carpeta al .gitignore (documenta en el README cómo obtenerlos).
+- Configura env.allowRemoteModels = false, env.allowLocalModels = true y env.localModelPath = "/models/". Para que sea realmente local, sirve también los archivos .wasm de onnxruntime-web desde el proyecto (por ejemplo public/ort/) y apunta env.backends.onnx.wasm.wasmPaths a esa ruta; verifica los nombres de archivo contra la versión instalada.
+- El identificador del modelo debe ser configurable (para comparar después con Xenova/paraphrase-multilingual-mpnet-base-v2).
+- Embeddings: pipeline("feature-extraction"), pooling "mean" y normalize true, de modo que la similitud coseno sea el producto punto.
+
+## 2. Arquitectura (src/voice-assistant/semantic/)
+- SemanticMatcher.ts: interfaz { init(): Promise<void>; isReady(): boolean; match(text, candidateIntents): Promise<SemanticResult> }.
+- embedder.ts: interfaz Embedder { embed(texts: string[]): Promise<number[][]> } con la implementación real (Transformers.js) y una implementación falsa determinista para pruebas.
+- semanticMatcher.ts: lógica PURA de comparación (cosine.ts, agregación, umbrales) que recibe un Embedder. No debe depender del navegador.
+- semanticWorker.ts y workerEmbedder.ts: ejecuta el modelo en un Web Worker (con Vite: new Worker(new URL("./semanticWorker.ts", import.meta.url), { type: "module" }); adáptalo si el bundler es otro). Protocolo de mensajes: init, embed, ready, error. La carga es diferida y NO bloquea la interfaz.
+- catalogs/semanticExamples.ts: DATOS, no lógica. Por cada intent (OPEN_MAP, OPEN_FEED, OPEN_MY_EVENTS, CREATE_EVENT) mínimo 12 frases de ejemplo variadas, en español coloquial colombiano y con otras formas de decir lo mismo, sin limitarse a copiar las frases de las reglas. Además, mínimo 15 frases ancla FUERA de dominio ("¿qué hora es?", "cuéntame un chiste", "¿va a llover?", "pon música", "llama a mi mamá").
+  Ejemplos semilla: OPEN_MAP: "quiero ver en qué parte del campus se hacen los eventos", "ubica las actividades en el campus", "dónde queda cada evento"; OPEN_FEED: "qué está pasando en la universidad", "muéstrame todo lo que hay disponible", "quiero ver las actividades"; OPEN_MY_EVENTS: "quiero revisar lo que organicé", "ver los eventos que yo publiqué"; CREATE_EVENT: "quiero organizar una actividad", "voy a hacer un evento".
+- hybridInterpreter.ts: interpretAsync(text, context) que orquesta rules → semántica y devuelve { intent, entities, source: "rules" | "semantic" | "none", score?, margin?, suggestion?, candidates }.
+- Al iniciar, calcula una sola vez los embeddings de los ejemplos y guárdalos en memoria (el cálculo está detrás del Embedder para poder probarlo).
+
+## 3. Lógica de decisión (configurable en semanticConfig.ts)
+semanticConfig = { enabled: true, modelId, acceptThreshold: 0.70, suggestThreshold: 0.55, minMargin: 0.08, aggregation: "max" }.
+1. Ejecuta las reglas primero. Si devuelven un intent distinto de UNKNOWN y sin empate, úsalo (source "rules") y NO consultes el modelo (SEM-02).
+2. Si devuelven UNKNOWN o empate, y la capa está lista y habilitada: calcula la similitud con los ejemplos de los intents válidos para la página actual (SEM-08), agregando por intent con el máximo. Incluye las frases ancla como un pseudo-intent OUT_OF_DOMAIN.
+3. Si el mejor intent no es OUT_OF_DOMAIN, supera acceptThreshold y la diferencia con el segundo es ≥ minMargin: acepta (source "semantic") (SEM-01).
+4. Si está entre suggestThreshold y acceptThreshold: NO ejecutes nada y responde "¿Quisiste decir <acción>?" (SEM-03).
+5. En cualquier otro caso: UNKNOWN con sugerencias de comandos (SEM-04).
+6. Si el modelo aún no cargó o falló, el asistente funciona solo con reglas, sin errores visibles (SEM-05). Define un hook semanticAllowed(context) que hoy devuelve true pero que en etapas futuras deberá devolver false cuando se esté dictando texto libre en un formulario.
+7. Nunca extraigas entidades con el modelo; solo clasifica el intent. CREATE_EVENT sigue respondiendo "La creación de eventos por voz estará disponible pronto".
+
+## 4. Integración en la interfaz
+- VoiceAssistant pasa a usar interpretAsync. Muestra un estado discreto "Cargando modelo de comprensión…" mientras inicializa, sin bloquear el botón de voz.
+- En modo desarrollo, muestra junto a la respuesta el origen y el score (por ejemplo "similitud 0.78"). En producción solo muestra la respuesta.
+- Bandera de activación (SEM-07): variable de entorno o semanticConfig.enabled para apagar la capa sin cambiar código.
+
+## 5. Evaluación comparativa (SEM-06)
+- eval/intentDataset.json con al menos 150 frases etiquetadas: (a) frases del diseño que ya cubren las reglas; (b) paráfrasis nuevas, mínimo 15 por intent y que NO estén en los ejemplos del modelo (usa el campo "split" para separar ejemplos de evaluación); (c) fuera de dominio, mínimo 30; (d) confusables ("mis eventos" frente a "los eventos", "crear" frente a "ver"); (e) ruido de transcripción: sin tildes, sin signos y errores típicos del reconocedor (por ejemplo "feed" transcrito como "fid" o "fit").
+- scripts/evaluate-intents.ts (ejecutable en Node con el modelo local) que corra el dataset con DOS configuraciones: solo reglas y reglas + semántica. Reporta: exactitud en dominio, cobertura (porcentaje distinto de UNKNOWN), precisión por intent, tasa de falsos positivos fuera de dominio, matriz de confusión, latencia por consulta (p50 y p95), tiempo de inicialización y peso del modelo.
+- Barrido de umbrales: acceptThreshold de 0.55 a 0.85 (paso 0.05) y minMargin de 0.04 a 0.12 (paso 0.02). Imprime una tabla y recomienda la combinación que maximice la exactitud en dominio con falsos positivos fuera de dominio ≤ 2 %.
+- Genera eval/report.md con los resultados.
+
+## 6. Pruebas (Vitest)
+- Con el Embedder falso: aceptación por umbral y margen, banda de sugerencia, rechazo por frases ancla, filtro por contexto, y que cuando las reglas aciertan el Embedder NO se invoca.
+- Que las pruebas de la etapa 1 sigan en verde con la capa activada y desactivada.
+- Prueba de integración con el modelo real, omitida por defecto y habilitada con RUN_MODEL_TESTS=1.
+
+## 7. Criterio de éxito y entrega
+Propuesto: al menos 20 puntos más de cobertura en paráfrasis que las reglas solas, con falsos positivos fuera de dominio por debajo del 2 %. Si no se cumple, no lo maquilles: reporta los números reales y propón ajustes (más ejemplos, otros umbrales, el modelo mpnet como comparación).
+Entrega: resumen de archivos, instrucciones para obtener el modelo, resultados reales de la evaluación con los umbrales recomendados, limitaciones (peso, tiempo de la primera carga, consumo de CPU) y qué ajustar antes de la etapa Whisper.

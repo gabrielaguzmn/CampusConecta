@@ -1,16 +1,27 @@
+// Convierte el audio del micrófono a PCM de 16 bits y lo envía en bloques de unos 100 ms.
+// El navegador llama a process() cada 128 muestras (unos 3 ms); enviar cada llamada saturaba el WebSocket
+// con cientos de mensajes por segundo.
 class DeepgramAudioProcessor extends AudioWorkletProcessor {
+  constructor() {
+    super()
+    this.tamano = Math.round(sampleRate / 10)
+    this.bloque = new Int16Array(this.tamano)
+    this.posicion = 0
+  }
+
   process(inputs, outputs) {
     const entrada = inputs[0]?.[0]
     if (entrada) {
-      const pcm = new Int16Array(entrada.length)
-      let energia = 0
       for (let i = 0; i < entrada.length; i += 1) {
         const muestra = Math.max(-1, Math.min(1, entrada[i]))
-        energia += muestra * muestra
-        pcm[i] = muestra < 0 ? muestra * 0x8000 : muestra * 0x7fff
+        this.bloque[this.posicion] = muestra < 0 ? muestra * 0x8000 : muestra * 0x7fff
+        this.posicion += 1
+        if (this.posicion === this.tamano) {
+          this.port.postMessage({ audio: this.bloque.buffer }, [this.bloque.buffer])
+          this.bloque = new Int16Array(this.tamano)
+          this.posicion = 0
+        }
       }
-      const nivel = Math.sqrt(energia / entrada.length)
-      this.port.postMessage({ audio: pcm.buffer, nivel }, [pcm.buffer])
     }
 
     for (const canal of outputs[0] ?? []) canal.fill(0)
