@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 import { useMisEventos } from '../../api/queries'
 import type { components } from '../../api/schema'
 import { Boton } from '../../components/Boton'
@@ -16,9 +17,10 @@ const PESTANAS = [
 ]
 
 // PUBLICATION-2 · Figma 4:29036 / 4:29636 (Activos) y 4:29131 / 4:29726 (Historial)
-export function MisEventosPage({ historial = false }: { historial?: boolean }) {
+export function MisEventosPage({ historial = false, abrirCrear = false }: { historial?: boolean; abrirCrear?: boolean }) {
+  const navigate = useNavigate()
   const consulta = useMisEventos(historial ? 'historial' : 'vigentes')
-  const [modal, setModal] = useState<Modal>()
+  const [modal, setModal] = useState<Modal | undefined>(abrirCrear ? { tipo: 'crear' } : undefined)
   const eventos = consulta.data
   const crear = () => setModal({ tipo: 'crear' })
 
@@ -83,7 +85,10 @@ export function MisEventosPage({ historial = false }: { historial?: boolean }) {
         </>
       )}
 
-      {modal?.tipo === 'crear' && <FormularioEvento onCerrar={() => setModal(undefined)} />}
+      {modal?.tipo === 'crear' && <FormularioEvento onCerrar={() => {
+        setModal(undefined)
+        if (abrirCrear) navigate('/mis-eventos', { replace: true })
+      }} />}
       {modal?.tipo === 'editar' && <FormularioEvento evento={modal.evento} onCerrar={() => setModal(undefined)} />}
       {modal?.tipo === 'gestionar' && (
         <GestionarEvento

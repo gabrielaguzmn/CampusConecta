@@ -39,6 +39,7 @@ export const rutas: RouteObject[] = [
           { path: 'mapa', element: <MapaPage /> },
           { path: 'eventos/:id', element: <EventoPage /> },
           { path: 'mis-eventos', element: <MisEventosPage /> },
+{ path: 'mis-eventos/nuevo', element: <MisEventosPage abrirCrear key="crear" /> },
           { path: 'mis-eventos/historial', element: <MisEventosPage historial key="historial" /> },
           {
             path: 'admin',

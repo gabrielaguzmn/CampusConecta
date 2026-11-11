@@ -68,11 +68,12 @@ describe('executeIntent', () => {
     expect(goTo).toHaveBeenCalledWith('MY_EVENTS')
   })
 
-  it('does not navigate for reserved creation or unknown commands', () => {
+  it('navigates to creation and ignores unknown commands', () => {
     const goTo = vi.fn()
     const adapter: NavigationAdapter = { getCurrentPage: () => 'FEED', goTo }
-    expect(executeIntent('CREATE_EVENT', adapter).response).toBe('La creación de eventos por voz estará disponible pronto.')
+    expect(executeIntent('CREATE_EVENT', adapter).navigated).toBe(true)
+    expect(goTo).toHaveBeenCalledWith('CREATE_EVENT')
     expect(executeIntent('UNKNOWN', adapter).navigated).toBe(false)
-    expect(goTo).not.toHaveBeenCalled()
+    expect(goTo).toHaveBeenCalledTimes(1)
   })
 })

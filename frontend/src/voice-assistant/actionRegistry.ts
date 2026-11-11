@@ -10,7 +10,6 @@ export interface NavigationAdapter {
 export type ActionResult = { response: string; navigated: boolean }
 
 export function executeIntent(intent: Intent, navigation: NavigationAdapter): ActionResult {
-  if (intent === 'CREATE_EVENT') return { response: ASSISTANT_RESPONSES.createEventSoon, navigated: false }
   if (intent === 'UNKNOWN') return { response: ASSISTANT_RESPONSES.unknown, navigated: false }
 
   const target = PAGE_BY_INTENT[intent]

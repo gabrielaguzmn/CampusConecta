@@ -54,4 +54,5 @@ export const PAGE_BY_INTENT: Partial<Record<Intent, Page>> = {
   OPEN_MAP: 'MAP',
   OPEN_FEED: 'FEED',
   OPEN_MY_EVENTS: 'MY_EVENTS',
+  CREATE_EVENT: 'CREATE_EVENT',
 }
