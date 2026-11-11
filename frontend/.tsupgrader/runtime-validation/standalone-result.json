@@ -1,0 +1,18 @@
+{
+  "planHash": "fde054466272c468953ea9e39ca6ff3da573206a748a73f1e15019cfea352e96",
+  "phase": "standalone",
+  "recordedAtUtc": "2026-11-11T15:01:53.8675154Z",
+  "retryCount": 1,
+  "resetBaseline": false,
+  "complete": false,
+  "runningStep": "tests-pass",
+  "partialOutput": "\r\n\u003E campusconecta-frontend@0.0.0 test\r\n\u003E vitest run\r\n\r\n\r\n RUN  v4.1.11 C:/Users/Juan Sebastian/Desktop/CampusConecta/frontend\r\n\r\n",
+  "cleanupCompleted": true,
+  "result": {
+    "setupSucceeded": false,
+    "setupDurationMs": 0,
+    "setupFailureOutput": null,
+    "assertions": [],
+    "executions": []
+  }
+}

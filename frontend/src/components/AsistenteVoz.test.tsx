@@ -21,7 +21,10 @@ function renderAsistente(override: Partial<Parameters<typeof AsistenteVoz>[0]> =
       ubicaciones={ubicaciones}
       setValue={setValue}
       appendFecha={appendFecha}
+      quitarFecha={vi.fn()}
       onFieldsVoice={onFieldsVoice}
+      valorActual={() => ''}
+      tieneFecha={() => false}
       {...override}
     />,
   )
@@ -39,6 +42,12 @@ async function conectar() {
   await screen.findByText('Estado: conectando')
   await waitFor(() => expect(WebSocketFalso.instancias).toHaveLength(1))
   act(() => WebSocketFalso.instancias[0].abrir())
+  await screen.findByText('Estado: escuchando')
+}
+
+async function responderVoz(texto: string) {
+  await emitirTranscripcion(texto)
+  await screen.findByText('Estado: escuchando')
 }
 
 describe('VOICE-7: asistente de voz en navegador', () => {
@@ -118,15 +127,14 @@ describe('VOICE-7: asistente de voz en navegador', () => {
     expect(socket.protocols).toEqual(['bearer', 'jwt-temporal'])
   })
 
-  it('criterio 4: solo procesa speech_final y descarta el mismo turno repetido', async () => {
+  it('criterio 4: solo procesa speech_final', async () => {
     instalarAPIsDeVoz()
     simularApi({ 'POST /api/auth/voz/token/': () => json({ access_token: 'jwt-temporal', expires_in: 30 }) })
     const callbacks = renderAsistente()
     await conectar()
-    await emitirTranscripcion('Nombre: Feria', false)
+    await emitirTranscripcion('Nombre: Feria', false, false)
     expect(callbacks.setValue).not.toHaveBeenCalled()
-    await emitirTranscripcion('Nombre: Feria')
-    await emitirTranscripcion('Nombre: Feria')
+    await responderVoz('Nombre: Feria')
     expect(callbacks.setValue).toHaveBeenCalledTimes(1)
     expect(callbacks.setValue).toHaveBeenCalledWith('nombre', 'Feria', { shouldValidate: true, shouldDirty: true })
   })
@@ -136,8 +144,8 @@ describe('VOICE-7: asistente de voz en navegador', () => {
     simularApi({ 'POST /api/auth/voz/token/': () => json({ access_token: 'jwt-temporal', expires_in: 30 }) })
     renderAsistente()
     await conectar()
-    await emitirTranscripcion('Nombre: Feria')
-    await emitirTranscripcion('Responsable: Club de ciencia')
+    await responderVoz('Nombre: Feria')
+    await responderVoz('Responsable: Club de ciencia')
     const panel = within(screen.getByRole('region', { name: 'Asistente de voz' }))
       .getAllByRole('status')
       .find((status) => status.textContent?.includes('Lo reconocido:'))
@@ -150,7 +158,7 @@ describe('VOICE-7: asistente de voz en navegador', () => {
     const callbacks = renderAsistente()
     await conectar()
     const valor = 'á&<>"'.repeat(2_000)
-    await emitirTranscripcion(`Nombre: ${valor}`)
+    await responderVoz(`Nombre: ${valor}`)
     await waitFor(() => expect(callbacks.setValue).toHaveBeenCalledWith(
       'nombre',
       valor,
@@ -166,12 +174,14 @@ describe('VOICE-7: asistente de voz en navegador', () => {
   it('criterio 6: presenta mensajes y permite elegir entre ubicaciones ambiguas', async () => {
     instalarAPIsDeVoz()
     simularApi({ 'POST /api/auth/voz/token/': () => json({ access_token: 'jwt-temporal', expires_in: 30 }) })
-    const callbacks = renderAsistente()
+    const callbacks = renderAsistente({
+      valorActual: (campo) => ['nombre', 'descripcion', 'categoria'].includes(campo) ? 'prellenado' : '',
+    })
     await conectar()
-    await emitirTranscripcion('Ubicación: Biblioteca')
+    await responderVoz('Ubicación: Biblioteca')
     const opciones = screen.getByRole('group', { name: 'Opciones de ubicación' })
     expect(within(opciones).getByRole('button', { name: 'Biblioteca Central' })).toBeInTheDocument()
-    expect(screen.getByText(/Encontré varias ubicaciones/)).toBeInTheDocument()
+    expect(screen.getByText(/Encontré varias:/)).toBeInTheDocument()
     await userEvent.click(within(opciones).getByRole('button', { name: 'Biblioteca Central' }))
     expect(callbacks.setValue).toHaveBeenCalledWith('ubicacion', '7', { shouldValidate: true, shouldDirty: true })
     expect(screen.queryByRole('group', { name: 'Opciones de ubicación' })).not.toBeInTheDocument()
@@ -190,7 +200,7 @@ describe('VOICE-7: asistente de voz en navegador', () => {
     simularApi({ 'POST /api/auth/voz/token/': () => json({ access_token: 'jwt-temporal', expires_in: 30 }) })
     renderAsistente()
     await conectar()
-    await emitirTranscripcion('Ayuda')
+    await responderVoz('Ayuda')
     expect(await screen.findByText(/Ejemplo:/)).toBeInTheDocument()
   })
 
@@ -228,7 +238,10 @@ describe('VOICE-7: asistente de voz en navegador', () => {
       ubicaciones={ubicaciones}
       setValue={vi.fn()}
       appendFecha={vi.fn()}
+      quitarFecha={vi.fn()}
       onFieldsVoice={vi.fn()}
+      valorActual={() => ''}
+      tieneFecha={() => false}
     />)
     await conectar()
     unmount()
@@ -244,9 +257,23 @@ describe('VOICE-7: asistente de voz en navegador', () => {
     await conectar()
     act(() => WebSocketFalso.instancias[0].mensaje({ type: 'Error', description: 'fallo de prueba' }))
     expect(screen.getByText(/Deepgram no pudo procesar el audio/)).toBeInTheDocument()
+  })
+
+  it('VOICE-7 DoD: informa errores de conexión sin revelar detalles de credenciales', async () => {
+    instalarAPIsDeVoz()
+    simularApi({ 'POST /api/auth/voz/token/': () => json({ access_token: 'jwt-temporal', expires_in: 30 }) })
+    renderAsistente()
+    await conectar()
     act(() => WebSocketFalso.instancias[0].error())
     expect(screen.getByText(/No fue posible conectar con el servicio de voz/)).toBeInTheDocument()
     expect(screen.queryByText(/API key|rol Member/i)).not.toBeInTheDocument()
+  })
+
+  it('VOICE-7 DoD: informa cierres inesperados de conexión', async () => {
+    instalarAPIsDeVoz()
+    simularApi({ 'POST /api/auth/voz/token/': () => json({ access_token: 'jwt-temporal', expires_in: 30 }) })
+    renderAsistente()
+    await conectar()
     act(() => WebSocketFalso.instancias[0].cerrar(1011))
     expect(screen.getByText(/La conexión de voz terminó inesperadamente/)).toBeInTheDocument()
     expect(screen.queryByText(/código 1011|API key|rol Member/i)).not.toBeInTheDocument()

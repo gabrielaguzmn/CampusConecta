@@ -46,6 +46,16 @@ async function iniciarAsistente(dentro: ReturnType<typeof within>, apiVoz: Retur
   return apiVoz
 }
 
+async function responderVoz(texto: string) {
+  await emitirTranscripcion(texto)
+  const region = screen.getAllByRole('region', { name: 'Asistente de voz' })
+    .find((candidate) => within(candidate).queryByText(/Estado:/))
+  if (!region) throw new Error('No se encontró el estado del asistente del formulario.')
+  const estado = within(region).getAllByRole('status').find((status) => status.textContent?.includes('Estado:'))
+  if (!estado) throw new Error('No se encontró el indicador de estado del asistente del formulario.')
+  await waitFor(() => expect(estado).toHaveTextContent(/Estado: (escuchando|desconectado)/))
+}
+
 describe('VOICE: integración del asistente con el formulario de eventos', () => {
   afterEach(() => {
     WebSocketFalso.instancias = []
@@ -62,12 +72,17 @@ describe('VOICE: integración del asistente con el formulario de eventos', () =>
     const dentro = await abrirCreacion()
     await iniciarAsistente(dentro, apiVoz)
 
-    await emitirTranscripcion('Nombre: Feria de emprendimiento')
-    await emitirTranscripcion('Descripción: Actividad para estudiantes')
-    await emitirTranscripcion('Categoría: Talleres')
-    await emitirTranscripcion('Ubicación: Edificio B 13')
-    await emitirTranscripcion('Organiza Club de ciencia')
-    await emitirTranscripcion('El 16 de diciembre de 2026 a las 3 de la tarde hasta las 5 de la tarde')
+    await responderVoz('Nombre: Feria de emprendimiento')
+    await responderVoz('Descripción: Actividad para estudiantes')
+    await responderVoz('Categoría: Talleres')
+    await responderVoz('Ubicación: Edificio B 13')
+    await responderVoz('Omitir')
+    await responderVoz('Organiza Club de ciencia')
+    await responderVoz('El 16 de diciembre de 2026 a las 3 de la tarde hasta las 5 de la tarde')
+    await responderVoz('No')
+    await responderVoz('Omitir')
+    await responderVoz('Omitir')
+    await responderVoz('Omitir')
 
     const nombre = dentro.getByLabelText('Nombre del evento')
     await waitFor(() => expect(nombre).toHaveValue('Feria de emprendimiento'))
@@ -97,15 +112,16 @@ describe('VOICE: integración del asistente con el formulario de eventos', () =>
       responsable: 'Club de ciencia',
       fechas: [{ inicio: '2026-12-16T15:00:00-05:00', fin: '2026-12-16T17:00:00-05:00' }],
     })
-  })
+  }, 15_000)
 
   it('VOICE: el asistente no aparece al editar un evento', async () => {
     iniciar()
     renderizarApp('/mis-eventos')
     await userEvent.click(await screen.findByRole('button', { name: 'Gestionar Evento existente' }))
     await userEvent.click(screen.getByRole('button', { name: 'Editar' }))
-    expect(screen.getByRole('dialog', { name: 'Editar evento' })).toBeInTheDocument()
-    expect(screen.queryByRole('region', { name: 'Asistente de voz' })).not.toBeInTheDocument()
+    const dialog = screen.getByRole('dialog', { name: 'Editar evento' })
+    expect(dialog).toBeInTheDocument()
+    expect(within(dialog).queryByRole('region', { name: 'Asistente de voz' })).not.toBeInTheDocument()
   })
 
   it('VOICE-5: la API rechaza una fecha dictada que se solapa con una ya agregada', async () => {
@@ -117,13 +133,15 @@ describe('VOICE: integración del asistente con el formulario de eventos', () =>
     renderizarApp('/mis-eventos')
     const dentro = await abrirCreacion()
     await userEvent.type(dentro.getByLabelText('Nombre del evento'), 'Feria de prueba')
+    await userEvent.type(dentro.getByLabelText('Descripción'), 'Actividad para estudiantes')
     await userEvent.selectOptions(dentro.getByLabelText('Categoría'), '2')
     await userEvent.selectOptions(dentro.getByLabelText('Ubicación *'), '7')
+    await userEvent.type(dentro.getByLabelText('Ubicación exacta (opcional)'), 'Sala norte')
     await userEvent.type(dentro.getByLabelText('Responsable'), 'Club de ciencia')
     await userEvent.type(dentro.getAllByLabelText('Inicio')[0], '2027-12-16T15:00')
     await userEvent.type(dentro.getAllByLabelText('Fin')[0], '2027-12-16T17:00')
     await iniciarAsistente(dentro, apiVoz)
-    await emitirTranscripcion('El 16 de diciembre de 2027 a las 3 pm hasta las 5 pm')
+    await responderVoz('El 16 de diciembre de 2027 a las 3 pm hasta las 5 pm')
     await waitFor(() => expect(dentro.getAllByLabelText('Inicio')).toHaveLength(2))
     expect(dentro.getAllByLabelText('Inicio')[1]).toHaveValue('2027-12-16T15:00')
     expect(dentro.getAllByLabelText('Fin')[1]).toHaveValue('2027-12-16T17:00')
@@ -164,13 +182,16 @@ describe('VOICE: integración del asistente con el formulario de eventos', () =>
     renderizarApp('/mis-eventos')
     const dentro = await abrirCreacion()
     await iniciarAsistente(dentro, apiVoz)
-    await emitirTranscripcion(textoPrivado)
+    await responderVoz(textoPrivado)
     const transcripcion = await waitFor(() => {
-      const panel = within(screen.getByRole('region', { name: 'Asistente de voz' }))
-        .getAllByRole('status')
+      const panel = screen.getAllByRole('region', { name: 'Asistente de voz' })
+        .map((region) => within(region))
+        .find((region) => region.queryByText(/Lo reconocido:/))
+      const transcripcion = panel
+        ?.getAllByRole('status')
         .find((status) => status.textContent?.includes('Lo reconocido:'))
-      expect(panel).toBeDefined()
-      return panel
+      expect(transcripcion).toBeDefined()
+      return transcripcion
     })
     expect(transcripcion).toHaveTextContent(textoPrivado)
     expect(peticiones.every((p) => !p.url.includes(encodeURIComponent(textoPrivado)))).toBe(true)
@@ -193,10 +214,11 @@ describe('VOICE: integración del asistente con el formulario de eventos', () =>
     const dentro = await abrirCreacion()
     await iniciarAsistente(dentro, apiVoz)
     const maliciosoComoTexto = '<script>alert("prueba")</script> & "'
-    await emitirTranscripcion(`Nombre: ${maliciosoComoTexto}`)
+    await responderVoz(`Nombre: ${maliciosoComoTexto}`)
     const transcripcion = await waitFor(() => {
-      const panel = within(screen.getByRole('region', { name: 'Asistente de voz' }))
-        .getAllByRole('status')
+      const region = screen.getAllByRole('region', { name: 'Asistente de voz' })
+        .find((candidate) => within(candidate).queryByText(/Lo reconocido:/))
+      const panel = region && within(region).getAllByRole('status')
         .find((status) => status.textContent?.includes('Lo reconocido:'))
       expect(panel).toBeDefined()
       return panel
@@ -205,6 +227,7 @@ describe('VOICE: integración del asistente con el formulario de eventos', () =>
     expect(document.querySelector('script:not([src])')).toBeNull()
     const nombre = dentro.getByLabelText('Nombre del evento')
     await waitFor(() => expect(nombre).toHaveValue(maliciosoComoTexto))
+    await userEvent.type(dentro.getByLabelText('Descripción'), 'Actividad para estudiantes')
     await userEvent.type(dentro.getByLabelText('Responsable'), 'Club')
     await userEvent.selectOptions(dentro.getByLabelText('Categoría'), '2')
     await userEvent.selectOptions(dentro.getByLabelText('Ubicación *'), '7')

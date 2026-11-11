@@ -101,10 +101,10 @@ export function instalarAPIsDeVoz() {
   }
 }
 
-export async function emitirTranscripcion(texto: string, speechFinal = true) {
+export async function emitirTranscripcion(texto: string, speechFinal = true, isFinal = true) {
   await act(async () => {
     WebSocketFalso.instancias.at(-1)?.mensaje({
-      is_final: true,
+      is_final: isFinal,
       speech_final: speechFinal,
       channel: { alternatives: [{ transcript: texto }] },
     })

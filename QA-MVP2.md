@@ -17,14 +17,12 @@ No se agrega herramienta ni dependencia. Todas las pruebas automáticas son offl
 
 | Prueba | Componente | Entrada | Resultado esperado |
 |---|---|---|---|
-| Cada uno de los siete campos | `interpretarVoz` | Una etiqueta/sinónimo por campo | Valor literal normalizado asignado al campo correspondiente |
-| Sinónimos, múltiples campos y corrección | `interpretarVoz` | Título, organiza, capacidad, enlace; varias etiquetas; “cambia el título a…” | Todos los valores se extraen; la corrección cambia el nombre |
-| Cupo | `interpretarVoz` | Cero, negativo y “tres” | Cero y negativos se rechazan con mensaje; palabras numéricas se convierten |
-| Sin campo | `interpretarVoz` | Frase no relacionada | Campos vacíos y mensaje de ayuda |
-| Categoría | `interpretarVoz` | Exacta, sin tilde/capitalización, inactiva fuera del catálogo activo | ID único o sin asignar |
-| Ubicación | `interpretarVoz` | Coincidencia exacta, “B 13”, dos bibliotecas o ubicación ausente | ID, opciones ambiguas sin ID, o mensaje de catálogo |
-| Fecha | `interpretarVoz` | Día/mes/año, mañana, horas, am/pm, hasta, segunda fecha, sin hora, pasado y fin anterior | Fechas locales `AAAA-MM-DDTHH:MM`; fechas inválidas/pasadas no se agregan |
-| Orden de publicación | `interpretarVoz` | Crear/publicar evento y frase sin orden | Detecta la orden; no envía una petición desde la función pura |
+| Siete campos de texto | `interpretarRespuesta` | Nombre, descripción, responsable, detalle, cupo, contacto y enlace | Valor asignado al paso actual |
+| Contacto | `interpretarRespuesta` | Teléfono, número en dos partes y correo dictado | Número combinado o correo normalizado |
+| Enlace y cupo | `interpretarRespuesta` | URL pronunciada con “punto”/“barra”; cero y negativos | URL reconstruida; cupos inválidos rechazados |
+| Categoría y ubicación | `interpretarRespuesta` | Categoría sin tilde, ubicación ambigua y selección ordinal | ID único o petición de desambiguación |
+| Comandos | `comandoDicho` | Omitir, ayuda, publicar y frase no exacta | Reconoce solo comandos de respuesta completa |
+| Fecha | `interpretarRespuesta` | Rango de tarde, fecha sin horario, pasado, fin anterior y otra fecha | Fecha local `AAAA-MM-DDTHH:MM`; entradas inválidas no se agregan |
 
 El archivo de pruebas ejecutable es [voiceInterpreter.test.ts](../frontend/src/lib/voiceInterpreter.test.ts).
 
@@ -36,7 +34,7 @@ El archivo de pruebas ejecutable es [voiceInterpreter.test.ts](../frontend/src/l
 | Token y autenticación | Sin sesión, JWT real vencido, JWT real alterado; GET/PUT/DELETE | 401 para credenciales inválidas; 405 para métodos no permitidos autenticados |
 | Fallos de Deepgram | Clave ausente, `HTTPError`, `URLError`, timeout, JSON inválido y token ausente | 503 sin secreto en respuesta o logs |
 | Captura de voz | Estados, consentimiento, permiso, APIs faltantes y 503 del token | Flujo visible y recuperación manual |
-| WebSocket | Protocolo bearer, `speech_final`, duplicados, orden de transcripción, errores/cierre | Token solo en subprotocolo; procesa un turno final una vez |
+| WebSocket | Protocolo bearer, `speech_final`, orden de transcripción, errores/cierre | Token solo en subprotocolo; descarta resultados parciales |
 | Formulario | Datos dictados, corrección manual, fechas, publicación por botón y edición | `POST /api/eventos/` solo al clic, con cuerpo esperado |
 | Privacidad y recursos | Historial de requests, storage, desmontaje/cierre/desactivación | Sin transcripción en API/storage; pistas detenidas, socket/audio cerrados |
 | Catálogos y entradas | Ambigüedad, HTML y contenido largo | Opción elegible; contenido literal seguro |
@@ -63,7 +61,7 @@ Los nombres VOICE-1 a VOICE-8 se conservan en descripciones de tests cuando el e
 | HU | Criterio / escenario | Prueba |
 |---|---|---|
 | VOICE-1 | Obtener token autenticado y manejar éxito/error | `TokenDeepgramTests` en `test_voz.py` |
-| VOICE-2 | Interpretar los siete campos, sinónimos y varias instrucciones | `interpretarVoz` unitarios; flujo del formulario |
+| VOICE-2 | Interpretar respuestas para los siete campos | `interpretarRespuesta` unitarios; flujo del formulario |
 | VOICE-3 | Resolver categoría/ubicación y ofrecer selección en ambigüedad | Unitarios y `VOICE-7` de componente |
 | VOICE-4 | Llenar y corregir campos en el formulario de creación | Integración del formulario |
 | VOICE-5 | Interpretar y anexar fechas | Unitarios y prueba de formulario |
@@ -115,9 +113,11 @@ Remove-Item Env:TZ
 
 La suite debe correr con la base PostgreSQL de CI o una base de pruebas equivalente. Los nuevos tests que formalizan desviaciones conocidas pueden fallar intencionalmente hasta que producto apruebe corregir el código; esos fallos no deben ocultarse ni marcarse como omitidos.
 
-Resultado tras las correcciones: `npm test -- --pool=threads --maxWorkers=1` pasó con 211 pruebas en 26 archivos. `npm run build` pasó (Vite muestra únicamente una advertencia de tamaño de bundle). `voiceInterpreter.test.ts` pasó con 35 pruebas bajo `TZ=UTC`. No se modificaron pruebas existentes del MVP1. La primera ejecución paralela de Vitest no inició sus workers por timeout; al ejecutar las suites en serie, las pruebas completaron correctamente.
+Validación actualizada el 11 de noviembre de 2026: la suite completa del frontend pasó con 428 pruebas en 29 archivos; las 46 pruebas de voz (unidad, componente e integración) también pasaron. Se añadieron pruebas unitarias para contacto telefónico/email, teléfono en partes, enlace hablado, selección ordinal, rango de tarde, horario inválido y fecha adicional. No se modificaron pruebas existentes del MVP1. Para la suite completa se usó `--maxWorkers=1` y `--testTimeout=15000` por la duración del entorno.
 
-La suite Django no se pudo validar localmente. Sin variables de entorno, el arranque se detiene por falta de `DJANGO_SECRET_KEY`; con las variables de CI y valores ficticios, PostgreSQL local rechaza el password del usuario `campus` antes de crear la base de pruebas. No se considera un fallo de prueba de aplicación: ejecutar `python manage.py test` en CI con su servicio PostgreSQL 16.
+La comprobación actual de TypeScript/build detectó un error de tipos ajeno a los archivos de MVP2 modificados: `frontend/src/voice-assistant/components/VoiceAssistant.tsx` pasa `"start"` a `speechError`, cuyo tipo no acepta ese valor. Por eso, el build no queda certificado en esta ejecución.
+
+Se ejecutaron también 21 pruebas backend de las suites de voz (`cuentas.tests.test_voz`, `voice_assistant.tests.test_api` y `voice_assistant.tests.test_engine`): todas las pruebas reportaron `OK`, pero Django terminó con error al destruir la base temporal porque Supavisor mantenía una conexión inactiva a ella. Se limpió la base temporal aislada creada para esa ejecución; la suite backend completa no se ejecutó. Las pruebas de navegador real, micrófono, latencia y precisión siguen pendientes: las pruebas automáticas usan WebSocket, audio y API simulados, y no sustituyen enviar audio a Deepgram desde cada navegador.
 
 Efecto de cambios colaterales MVP1:
 
@@ -146,8 +146,8 @@ Las búsquedas usan una variable de secreto del entorno y solo imprimen un resul
 
 | Requisito | HU y criterio | Pruebas | Resultado esperado / inicial |
 |---|---|---|---|
-| Token temporal, autenticación y errores | VOICE-1; criterio exacto pendiente | `backend/cuentas/tests/test_voz.py` | No verificado: PostgreSQL local rechaza credenciales; no hay fallo funcional confirmado |
-| Siete campos y sinónimos | VOICE-2; criterios fuente pendientes | `voiceInterpreter.test.ts`, flujo de formulario | Pasa en frontend; parser conserva URL completa |
+| Token temporal, autenticación y errores | VOICE-1; criterio exacto pendiente | `backend/cuentas/tests/test_voz.py` | 21 pruebas backend seleccionadas pasan; teardown bloqueado por conexión inactiva de Supavisor; suite backend completa pendiente |
+| Siete campos y respuestas de voz | VOICE-2; criterios fuente pendientes | `voiceInterpreter.test.ts`, flujo de formulario | Pasa en frontend; contacto y URL hablada tienen pruebas unitarias |
 | Catálogos, inactivos y ambigüedad | VOICE-3; criterio fuente pendiente | Unitarios y `AsistenteVoz.test.tsx` | Pasa con los catálogos activos dados |
 | Formulario, corrección, fechas destacadas | VOICE-4; criterio fuente pendiente | `AsistenteVoz.integracion.test.tsx` | Pasa en suite frontend |
 | Fechas y horarios | VOICE-5 c1/c4/c5 según desviaciones recibidas | `voiceInterpreter.test.ts` | Pasa; incluye rango de tarde, fecha sin hora, fecha pasada y fin inválido |
@@ -158,10 +158,10 @@ Las búsquedas usan una variable de secreto del entorno y solo imprimen un resul
 | RF-035 a RF-039 | HU/criterio exacto no provisto | Entradas/campos de interpretación e integración | No verificable hasta recibir texto de requisitos |
 | RF-040 | VOICE-6 c4 | Test de publicación explícita | Pasa en suite frontend |
 | RF-041 a RF-043 | HU/criterio exacto no provisto | Tests generales de flujo/privacidad | No verificable hasta recibir texto de requisitos |
-| RNF-008 | Privacidad de transcripción | Test frontend de requests/storage; conteos backend | Pasa frontend; conteo backend no verificado localmente por PostgreSQL |
+| RNF-008 | Privacidad de transcripción | Test frontend de requests/storage; conteos backend | Pasa frontend; test backend incluido en las 21 pruebas seleccionadas |
 | RNF-009 | Latencia <= 5 s | Guion manual | Manual; Vitest no mide experiencia real de voz/red |
 | RNF-010 | Seguridad de contenido (interpretación por confirmar) | Test de HTML/cadena larga | Pasa como texto seguro; confirmar definición del RNF |
-| RNF-011 | Protección de credenciales/TTL | Tests backend y WebSocket frontend | Pasa frontend; suite backend pendiente de PostgreSQL CI |
+| RNF-011 | Protección de credenciales/TTL | Tests backend y WebSocket frontend | Pruebas seleccionadas pasan; falta suite backend completa en CI |
 | RNF-012 | Texto no provisto | — | No verificable; requiere texto del requisito |
 
 ## Hallazgos
