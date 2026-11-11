@@ -10,6 +10,7 @@ urlpatterns = [
     path("api/auth/", include("cuentas.urls")),
     path("api/", include("eventos.urls")),
     path("api/", include("moderacion.urls")),
+path("api/voice/", include("voice_assistant.urls")),
     path("api/admin/usuarios/", include(urlpatterns_admin)),
     path("api/schema/", SpectacularAPIView.as_view(permission_classes=[AllowAny]), name="schema"),
 ]

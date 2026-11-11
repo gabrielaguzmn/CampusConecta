@@ -9,6 +9,7 @@ venv/
 .env.*
 !.env.example
 backend/media/
+backend/semantic-model/
 docs/
 
 # Caché de compilación de TypeScript

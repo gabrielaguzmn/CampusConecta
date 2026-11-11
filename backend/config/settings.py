@@ -2,9 +2,11 @@
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv(BASE_DIR / ".env")
 
 def lista_env(nombre):
     return [v.strip() for v in os.environ.get(nombre, "").split(",") if v.strip()]
@@ -23,6 +25,7 @@ INSTALLED_APPS = [
     "cuentas",
     "eventos",
     "moderacion",
+    "voice_assistant",
 ]
 
 MIDDLEWARE = [
@@ -96,6 +99,17 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "config.excepciones.manejador_excepciones",
+}
+VOICE_SEMANTIC = {
+    "ENABLED": os.environ.get("VOICE_SEMANTIC_ENABLED", "1") == "1",
+    "MODEL_PATH": os.environ.get("VOICE_SEMANTIC_MODEL_PATH", str(BASE_DIR / "semantic-model")),
+    "ACCEPT_THRESHOLD": float(os.environ.get("VOICE_SEMANTIC_ACCEPT_THRESHOLD", "0.70")),
+    "SUGGEST_THRESHOLD": float(os.environ.get("VOICE_SEMANTIC_SUGGEST_THRESHOLD", "0.55")),
+    "MIN_MARGIN": float(os.environ.get("VOICE_SEMANTIC_MIN_MARGIN", "0.08")),
+    "MAX_TEXT_LENGTH": int(os.environ.get("VOICE_SEMANTIC_MAX_TEXT_LENGTH", "200")),
+    "WARMUP": os.environ.get("VOICE_SEMANTIC_WARMUP", "0") == "1",
+    "LOG_PHRASES": os.environ.get("VOICE_SEMANTIC_LOG_PHRASES", "0") == "1",
+    "THROTTLE_RATE": os.environ.get("VOICE_SEMANTIC_THROTTLE_RATE", "30/min"),
 }
 
 SPECTACULAR_SETTINGS = {
